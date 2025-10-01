@@ -1,0 +1,337 @@
+{
+  "timezones": [
+    {
+      "value": "America/New_York",
+      "label": "Eastern Time (ET)",
+      "offset": "-05:00",
+      "offsetDST": "-04:00",
+      "region": "North America",
+      "cities": ["New York", "Washington DC", "Miami", "Atlanta", "Boston"],
+      "abbreviation": "EST/EDT"
+    },
+    {
+      "value": "America/Chicago",
+      "label": "Central Time (CT)",
+      "offset": "-06:00",
+      "offsetDST": "-05:00",
+      "region": "North America",
+      "cities": ["Chicago", "Dallas", "Houston", "New Orleans", "St. Louis"],
+      "abbreviation": "CST/CDT"
+    },
+    {
+      "value": "America/Denver",
+      "label": "Mountain Time (MT)",
+      "offset": "-07:00",
+      "offsetDST": "-06:00",
+      "region": "North America",
+      "cities": ["Denver", "Phoenix", "Salt Lake City", "Albuquerque"],
+      "abbreviation": "MST/MDT"
+    },
+    {
+      "value": "America/Los_Angeles",
+      "label": "Pacific Time (PT)",
+      "offset": "-08:00",
+      "offsetDST": "-07:00",
+      "region": "North America",
+      "cities": ["Los Angeles", "San Francisco", "Seattle", "Portland", "San Diego"],
+      "abbreviation": "PST/PDT"
+    },
+    {
+      "value": "America/Anchorage",
+      "label": "Alaska Time (AKT)",
+      "offset": "-09:00",
+      "offsetDST": "-08:00",
+      "region": "North America",
+      "cities": ["Anchorage", "Fairbanks", "Juneau"],
+      "abbreviation": "AKST/AKDT"
+    },
+    {
+      "value": "Pacific/Honolulu",
+      "label": "Hawaii Standard Time (HST)",
+      "offset": "-10:00",
+      "offsetDST": "-10:00",
+      "region": "North America",
+      "cities": ["Honolulu", "Hilo"],
+      "abbreviation": "HST"
+    },
+    {
+      "value": "UTC",
+      "label": "Coordinated Universal Time (UTC)",
+      "offset": "+00:00",
+      "offsetDST": "+00:00",
+      "region": "Universal",
+      "cities": ["Greenwich"],
+      "abbreviation": "UTC"
+    },
+    {
+      "value": "Europe/London",
+      "label": "Greenwich Mean Time (GMT)",
+      "offset": "+00:00",
+      "offsetDST": "+01:00",
+      "region": "Europe",
+      "cities": ["London", "Edinburgh", "Cardiff", "Belfast"],
+      "abbreviation": "GMT/BST"
+    },
+    {
+      "value": "Europe/Paris",
+      "label": "Central European Time (CET)",
+      "offset": "+01:00",
+      "offsetDST": "+02:00",
+      "region": "Europe",
+      "cities": ["Paris", "Berlin", "Rome", "Madrid", "Amsterdam"],
+      "abbreviation": "CET/CEST"
+    },
+    {
+      "value": "Europe/Moscow",
+      "label": "Moscow Standard Time (MSK)",
+      "offset": "+03:00",
+      "offsetDST": "+03:00",
+      "region": "Europe",
+      "cities": ["Moscow", "St. Petersburg"],
+      "abbreviation": "MSK"
+    },
+    {
+      "value": "Asia/Dubai",
+      "label": "Gulf Standard Time (GST)",
+      "offset": "+04:00",
+      "offsetDST": "+04:00",
+      "region": "Asia",
+      "cities": ["Dubai", "Abu Dhabi"],
+      "abbreviation": "GST"
+    },
+    {
+      "value": "Asia/Kolkata",
+      "label": "India Standard Time (IST)",
+      "offset": "+05:30",
+      "offsetDST": "+05:30",
+      "region": "Asia",
+      "cities": ["Mumbai", "Delhi", "Bangalore", "Chennai"],
+      "abbreviation": "IST"
+    },
+    {
+      "value": "Asia/Shanghai",
+      "label": "China Standard Time (CST)",
+      "offset": "+08:00",
+      "offsetDST": "+08:00",
+      "region": "Asia",
+      "cities": ["Shanghai", "Beijing", "Guangzhou", "Shenzhen"],
+      "abbreviation": "CST"
+    },
+    {
+      "value": "Asia/Tokyo",
+      "label": "Japan Standard Time (JST)",
+      "offset": "+09:00",
+      "offsetDST": "+09:00",
+      "region": "Asia",
+      "cities": ["Tokyo", "Osaka", "Kyoto"],
+      "abbreviation": "JST"
+    },
+    {
+      "value": "Australia/Sydney",
+      "label": "Australian Eastern Time (AET)",
+      "offset": "+10:00",
+      "offsetDST": "+11:00",
+      "region": "Australia",
+      "cities": ["Sydney", "Melbourne", "Brisbane"],
+      "abbreviation": "AEST/AEDT"
+    },
+    {
+      "value": "Pacific/Auckland",
+      "label": "New Zealand Standard Time (NZST)",
+      "offset": "+12:00",
+      "offsetDST": "+13:00",
+      "region": "Pacific",
+      "cities": ["Auckland", "Wellington", "Christchurch"],
+      "abbreviation": "NZST/NZDT"
+    },
+    {
+      "value": "America/Sao_Paulo",
+      "label": "Brasilia Time (BRT)",
+      "offset": "-03:00",
+      "offsetDST": "-02:00",
+      "region": "South America",
+      "cities": ["São Paulo", "Rio de Janeiro", "Brasília"],
+      "abbreviation": "BRT/BRST"
+    },
+    {
+      "value": "America/Argentina/Buenos_Aires",
+      "label": "Argentina Time (ART)",
+      "offset": "-03:00",
+      "offsetDST": "-03:00",
+      "region": "South America",
+      "cities": ["Buenos Aires", "Córdoba"],
+      "abbreviation": "ART"
+    },
+    {
+      "value": "America/Mexico_City",
+      "label": "Central Standard Time (Mexico)",
+      "offset": "-06:00",
+      "offsetDST": "-05:00",
+      "region": "North America",
+      "cities": ["Mexico City", "Guadalajara"],
+      "abbreviation": "CST/CDT"
+    },
+    {
+      "value": "America/Toronto",
+      "label": "Eastern Time (Canada)",
+      "offset": "-05:00",
+      "offsetDST": "-04:00",
+      "region": "North America",
+      "cities": ["Toronto", "Ottawa", "Montreal"],
+      "abbreviation": "EST/EDT"
+    },
+    {
+      "value": "America/Vancouver",
+      "label": "Pacific Time (Canada)",
+      "offset": "-08:00",
+      "offsetDST": "-07:00",
+      "region": "North America",
+      "cities": ["Vancouver", "Victoria"],
+      "abbreviation": "PST/PDT"
+    },
+    {
+      "value": "Africa/Cairo",
+      "label": "Eastern European Time (EET)",
+      "offset": "+02:00",
+      "offsetDST": "+03:00",
+      "region": "Africa",
+      "cities": ["Cairo", "Alexandria"],
+      "abbreviation": "EET/EEST"
+    },
+    {
+      "value": "Africa/Johannesburg",
+      "label": "South Africa Standard Time (SAST)",
+      "offset": "+02:00",
+      "offsetDST": "+02:00",
+      "region": "Africa",
+      "cities": ["Johannesburg", "Cape Town", "Durban"],
+      "abbreviation": "SAST"
+    },
+    {
+      "value": "Asia/Singapore",
+      "label": "Singapore Standard Time (SGT)",
+      "offset": "+08:00",
+      "offsetDST": "+08:00",
+      "region": "Asia",
+      "cities": ["Singapore"],
+      "abbreviation": "SGT"
+    },
+    {
+      "value": "Asia/Hong_Kong",
+      "label": "Hong Kong Time (HKT)",
+      "offset": "+08:00",
+      "offsetDST": "+08:00",
+      "region": "Asia",
+      "cities": ["Hong Kong"],
+      "abbreviation": "HKT"
+    },
+    {
+      "value": "Asia/Seoul",
+      "label": "Korea Standard Time (KST)",
+      "offset": "+09:00",
+      "offsetDST": "+09:00",
+      "region": "Asia",
+      "cities": ["Seoul", "Busan"],
+      "abbreviation": "KST"
+    },
+    {
+      "value": "Asia/Bangkok",
+      "label": "Indochina Time (ICT)",
+      "offset": "+07:00",
+      "offsetDST": "+07:00",
+      "region": "Asia",
+      "cities": ["Bangkok", "Ho Chi Minh City"],
+      "abbreviation": "ICT"
+    },
+    {
+      "value": "Asia/Jakarta",
+      "label": "Western Indonesia Time (WIB)",
+      "offset": "+07:00",
+      "offsetDST": "+07:00",
+      "region": "Asia",
+      "cities": ["Jakarta", "Bandung"],
+      "abbreviation": "WIB"
+    },
+    {
+      "value": "Europe/Berlin",
+      "label": "Central European Time (Germany)",
+      "offset": "+01:00",
+      "offsetDST": "+02:00",
+      "region": "Europe",
+      "cities": ["Berlin", "Munich", "Hamburg"],
+      "abbreviation": "CET/CEST"
+    },
+    {
+      "value": "Europe/Zurich",
+      "label": "Central European Time (Switzerland)",
+      "offset": "+01:00",
+      "offsetDST": "+02:00",
+      "region": "Europe",
+      "cities": ["Zurich", "Geneva", "Bern"],
+      "abbreviation": "CET/CEST"
+    },
+    {
+      "value": "Europe/Stockholm",
+      "label": "Central European Time (Sweden)",
+      "offset": "+01:00",
+      "offsetDST": "+02:00",
+      "region": "Europe",
+      "cities": ["Stockholm", "Gothenburg"],
+      "abbreviation": "CET/CEST"
+    },
+    {
+      "value": "Europe/Helsinki",
+      "label": "Eastern European Time (Finland)",
+      "offset": "+02:00",
+      "offsetDST": "+03:00",
+      "region": "Europe",
+      "cities": ["Helsinki", "Tampere"],
+      "abbreviation": "EET/EEST"
+    },
+    {
+      "value": "Australia/Perth",
+      "label": "Australian Western Time (AWT)",
+      "offset": "+08:00",
+      "offsetDST": "+08:00",
+      "region": "Australia",
+      "cities": ["Perth"],
+      "abbreviation": "AWST"
+    },
+    {
+      "value": "Australia/Adelaide",
+      "label": "Australian Central Time (ACT)",
+      "offset": "+09:30",
+      "offsetDST": "+10:30",
+      "region": "Australia",
+      "cities": ["Adelaide"],
+      "abbreviation": "ACST/ACDT"
+    },
+    {
+      "value": "Pacific/Fiji",
+      "label": "Fiji Time (FJT)",
+      "offset": "+12:00",
+      "offsetDST": "+13:00",
+      "region": "Pacific",
+      "cities": ["Suva"],
+      "abbreviation": "FJT/FJST"
+    },
+    {
+      "value": "America/Phoenix",
+      "label": "Mountain Standard Time (No DST)",
+      "offset": "-07:00",
+      "offsetDST": "-07:00",
+      "region": "North America",
+      "cities": ["Phoenix", "Tucson"],
+      "abbreviation": "MST"
+    },
+    {
+      "value": "America/Regina",
+      "label": "Central Standard Time (Saskatchewan)",
+      "offset": "-06:00",
+      "offsetDST": "-06:00",
+      "region": "North America",
+      "cities": ["Regina", "Saskatoon"],
+      "abbreviation": "CST"
+    }
+  ]
+}

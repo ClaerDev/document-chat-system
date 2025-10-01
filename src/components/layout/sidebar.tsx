@@ -1,0 +1,335 @@
+'use client'
+
+import React from 'react'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import {
+  Home,
+  Search,
+  Target,
+  FileText,
+  BarChart3,
+  Settings,
+  Users,
+  Building,
+  MessageSquare,
+  Calendar,
+  Folder,
+  Star,
+  TrendingUp,
+  X,
+  Palette,
+  Book,
+  CreditCard,
+  Shield,
+  Contact,
+  Brain,
+  Activity,
+} from 'lucide-react'
+
+interface SidebarProps {
+  isOpen?: boolean
+  onClose?: () => void
+  showNavigation?: boolean
+}
+
+const navigation = [
+  {
+    name: 'Dashboard',
+    href: '/dashboard',
+    icon: Home,
+  },
+  {
+    name: 'AI Chat',
+    href: '/chat',
+    icon: MessageSquare,
+  },
+  {
+    name: 'Opportunities',
+    href: '/opportunities',
+    icon: Search,
+    badge: '124',
+  },
+  {
+    name: 'Match Scores',
+    href: '/match-scores',
+    icon: Target,
+    badge: '12',
+  },
+  {
+    name: 'LLM Scoring Test',
+    href: '/test-llm-scoring',
+    icon: Brain,
+    badge: 'NEW',
+  },
+  {
+    name: 'Activity Logs',
+    href: '/logs',
+    icon: Activity,
+  },
+  {
+    name: 'Proposals',
+    href: '/proposals',
+    icon: FileText,
+  },
+  {
+    name: 'Analytics',
+    href: '/analytics',
+    icon: BarChart3,
+  },
+  {
+    name: 'Contacts',
+    href: '/contacts',
+    icon: Contact,
+    badge: '12',
+  },
+  {
+    name: 'Components',
+    href: '/components-showcase',
+    icon: Palette,
+  },
+]
+
+const secondaryNavigation = [
+  {
+    name: 'Profile',
+    href: '/profile',
+    icon: Building,
+  },
+  {
+    name: 'Billing',
+    href: '/billing',
+    icon: CreditCard,
+  },
+  {
+    name: 'Team',
+    href: '/team',
+    icon: Users,
+  },
+  {
+    name: 'Competitors',
+    href: '/competitors',
+    icon: Shield,
+  },
+  {
+    name: 'API Docs',
+    href: '/api-docs',
+    icon: Book,
+  },
+  {
+    name: 'Documents',
+    href: '/documents',
+    icon: Folder,
+  },
+  {
+    name: 'Document Details',
+    href: '/document-details',
+    icon: FileText,
+  },
+  {
+    name: 'Calendar',
+    href: '/calendar',
+    icon: Calendar,
+  },
+]
+
+const quickAccess = [
+  {
+    name: 'Saved Searches',
+    href: '/saved-searches',
+    icon: Star,
+    count: 5,
+  },
+  {
+    name: 'Recent Activity',
+    href: '/activity',
+    icon: TrendingUp,
+    count: 8,
+  },
+  {
+    name: 'Messages',
+    href: '/messages',
+    icon: MessageSquare,
+    count: 3,
+  },
+]
+
+export function Sidebar({
+  isOpen = true,
+  onClose,
+  showNavigation = true,
+}: SidebarProps) {
+  const pathname = usePathname()
+  const [isClient, setIsClient] = React.useState(false)
+
+  // Ensure client-side hydration
+  React.useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  const isCurrentPath = React.useCallback(
+    (href: string) => {
+      // During SSR, don't highlight any paths to prevent hydration mismatch
+      if (!isClient) return false
+      
+      if (href === '/dashboard') {
+        return pathname === '/dashboard'
+      }
+      return pathname.startsWith(href)
+    },
+    [pathname, isClient]
+  )
+
+  // Don't render sidebar if showNavigation is false
+  if (!showNavigation) {
+    return null
+  }
+
+  return (
+    <>
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={cn(
+          'fixed inset-y-0 left-0 z-50 w-64 bg-background border-r transform transition-transform duration-200 ease-in-out md:translate-x-0 md:static',
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="flex h-16 items-center border-b px-6">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <span className="text-sm font-semibold">DC</span>
+              </div>
+              <span className="font-semibold">Document Chat</span>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="ml-auto md:hidden"
+              onClick={onClose}
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close sidebar</span>
+            </Button>
+          </div>
+
+          {/* Navigation */}
+          <div className="flex-1 px-3 overflow-y-auto">
+            <div className="space-y-4 py-4">
+              {/* Primary Navigation */}
+              <div className="px-3 py-2">
+                <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+                  Main
+                </h2>
+                <div className="space-y-1">
+                  {navigation.map((item) => {
+                    const isCurrent = isCurrentPath(item.href)
+                    return (
+                      <Button
+                        key={item.name}
+                        asChild
+                        variant={isCurrent ? 'secondary' : 'ghost'}
+                        className={cn(
+                          'w-full justify-start',
+                          isCurrent && 'bg-muted'
+                        )}
+                      >
+                        <Link href={item.href} prefetch={true}>
+                          <item.icon className="mr-2 h-4 w-4" />
+                          {item.name}
+                          {item.badge && (
+                            <Badge variant="secondary" className="ml-auto">
+                              {item.badge}
+                            </Badge>
+                          )}
+                        </Link>
+                      </Button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Secondary Navigation */}
+              <div className="px-3 py-2">
+                <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+                  Workspace
+                </h2>
+                <div className="space-y-1">
+                  {secondaryNavigation.map((item) => {
+                    const isCurrent = isCurrentPath(item.href)
+                    return (
+                      <Button
+                        key={item.name}
+                        asChild
+                        variant={isCurrent ? 'secondary' : 'ghost'}
+                        className="w-full justify-start"
+                      >
+                        <Link href={item.href} prefetch={true}>
+                          <item.icon className="mr-2 h-4 w-4" />
+                          {item.name}
+                        </Link>
+                      </Button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Quick Access */}
+              <div className="px-3 py-2">
+                <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+                  Quick Access
+                </h2>
+                <div className="space-y-1">
+                  {quickAccess.map((item) => {
+                    const isCurrent = isCurrentPath(item.href)
+                    return (
+                      <Button
+                        key={item.name}
+                        asChild
+                        variant={isCurrent ? 'secondary' : 'ghost'}
+                        size="sm"
+                        className="w-full justify-start"
+                      >
+                        <Link href={item.href} prefetch={true}>
+                          <item.icon className="mr-2 h-4 w-4" />
+                          {item.name}
+                          {item.count > 0 && (
+                            <Badge variant="outline" className="ml-auto">
+                              {item.count}
+                            </Badge>
+                          )}
+                        </Link>
+                      </Button>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="p-4 border-t">
+            <Button asChild variant="ghost" className="w-full justify-start">
+              <Link href="/settings" prefetch={true}>
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </aside>
+    </>
+  )
+}

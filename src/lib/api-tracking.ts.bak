@@ -1,0 +1,205 @@
+/**
+ * API Request Tracking Middleware
+ * Tracks all API requests to the UsageEvent table
+ */
+
+import { NextRequest } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
+import { prisma } from '@/lib/db';
+
+export interface ApiTrackingData {
+  method: string;
+  endpoint: string;
+  statusCode: number;
+  responseTime: number;
+  userId?: string;
+  organizationId?: string;
+  userAgent?: string;
+  ipAddress?: string;
+}
+
+/**
+ * Track an API request to the database
+ */
+export async function trackApiRequest(data: ApiTrackingData) {
+  try {
+    // Only track if we have organization context
+    if (!data.organizationId) {
+      return;
+    }
+
+    await prisma.usageEvent.create({
+      data: {
+        organizationId: data.organizationId,
+        userId: data.userId,
+        type: 'api_request',
+        endpoint: data.endpoint,
+        method: data.method,
+        statusCode: data.statusCode,
+        responseTime: data.responseTime,
+        ipAddress: data.ipAddress,
+        userAgent: data.userAgent,
+        metadata: {
+          tracked: true,
+          timestamp: new Date().toISOString(),
+        },
+      },
+    });
+  } catch (error) {
+    // Don't fail the request if tracking fails
+    console.error('Failed to track API request:', error);
+  }
+}
+
+/**
+ * Extract tracking data from request and response
+ */
+export function extractTrackingData(
+  request: NextRequest,
+  statusCode: number,
+  responseTime: number,
+  userContext?: { userId: string; organizationId: string }
+): ApiTrackingData {
+  return {
+    method: request.method,
+    endpoint: request.nextUrl.pathname,
+    statusCode,
+    responseTime,
+    userId: userContext?.userId,
+    organizationId: userContext?.organizationId,
+    userAgent: request.headers.get('user-agent') || undefined,
+    ipAddress: getClientIP(request),
+  };
+}
+
+/**
+ * Get client IP address from request
+ */
+function getClientIP(request: NextRequest): string | undefined {
+  // Check various headers for IP address
+  const forwarded = request.headers.get('x-forwarded-for');
+  if (forwarded) {
+    return forwarded.split(',')[0].trim();
+  }
+
+  const realIP = request.headers.get('x-real-ip');
+  if (realIP) {
+    return realIP;
+  }
+
+  const cfConnectingIP = request.headers.get('cf-connecting-ip');
+  if (cfConnectingIP) {
+    return cfConnectingIP;
+  }
+
+  return undefined;
+}
+
+/**
+ * Wrapper function to add tracking to API routes
+ */
+export function withApiTracking<T extends any[]>(
+  handler: (...args: T) => Promise<Response>
+) {
+  return async (...args: T): Promise<Response> => {
+    const startTime = Date.now();
+    const request = args[0] as NextRequest;
+    
+    let response: Response;
+    let userContext: { userId: string; organizationId: string } | undefined;
+
+    try {
+      // Get user context for tracking
+      try {
+        const { userId } = auth();
+        if (userId) {
+          // Get user's organization
+          const user = await prisma.user.findUnique({
+            where: { clerkId: userId },
+            select: { id: true, organizationId: true },
+          });
+          
+          if (user) {
+            userContext = {
+              userId: user.id,
+              organizationId: user.organizationId,
+            };
+          }
+        }
+      } catch (authError) {
+        // Auth might fail for public routes, that's OK
+      }
+
+      // Execute the original handler
+      response = await handler(...args);
+      
+      // Track the request
+      const responseTime = Date.now() - startTime;
+      const trackingData = extractTrackingData(
+        request,
+        response.status,
+        responseTime,
+        userContext
+      );
+      
+      // Track asynchronously to not block response
+      setImmediate(() => trackApiRequest(trackingData));
+      
+      return response;
+    } catch (error) {
+      // Track failed requests too
+      const responseTime = Date.now() - startTime;
+      const trackingData = extractTrackingData(
+        request,
+        500,
+        responseTime,
+        userContext
+      );
+      
+      setImmediate(() => trackApiRequest(trackingData));
+      
+      throw error;
+    }
+  };
+}
+
+/**
+ * Simple tracking function for manual use in route handlers
+ */
+export async function logApiCall(
+  request: NextRequest,
+  response: Response,
+  startTime: number
+) {
+  const responseTime = Date.now() - startTime;
+  
+  try {
+    const { userId } = auth();
+    let userContext: { userId: string; organizationId: string } | undefined;
+    
+    if (userId) {
+      const user = await prisma.user.findUnique({
+        where: { clerkId: userId },
+        select: { id: true, organizationId: true },
+      });
+      
+      if (user) {
+        userContext = {
+          userId: user.id,
+          organizationId: user.organizationId,
+        };
+      }
+    }
+    
+    const trackingData = extractTrackingData(
+      request,
+      response.status,
+      responseTime,
+      userContext
+    );
+    
+    await trackApiRequest(trackingData);
+  } catch (error) {
+    console.error('Failed to log API call:', error);
+  }
+}

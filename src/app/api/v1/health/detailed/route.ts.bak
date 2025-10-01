@@ -1,0 +1,611 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/db'
+import { auth } from '@clerk/nextjs/server'
+
+export const dynamic = 'force-dynamic'
+
+interface DetailedHealthMetrics {
+  status: 'healthy' | 'degraded' | 'unhealthy'
+  timestamp: string
+  environment: {
+    nodeVersion: string
+    platform: string
+    uptime: number
+    memoryUsage: NodeJS.MemoryUsage
+  }
+  database: {
+    version: string
+    size: string
+    tableStats: Array<{
+      tableName: string
+      rowCount: number
+      tableSize: string
+      indexSize: string
+    }>
+    slowQueries: Array<{
+      query: string
+      avgTime: number
+      calls: number
+    }>
+    connections: {
+      current: number
+      max: number
+      utilization: number
+    }
+  }
+  performance: {
+    responseTime: number
+    queryStats: {
+      fastest: number
+      slowest: number
+      average: number
+    }
+    cacheHitRatio?: number
+  }
+  security: {
+    rlsStatus: {
+      enabled: boolean
+      tablesCovered: number
+      totalTables: number
+      missingRls: string[]
+    }
+    permissions: {
+      anonymousAccess: boolean
+      authenticationRequired: boolean
+    }
+  }
+  dataQuality: {
+    completenessScore: number
+    consistencyIssues: Array<{
+      table: string
+      issue: string
+      count: number
+    }>
+    duplicateRecords: number
+  }
+  recommendations: Array<{
+    category: 'performance' | 'security' | 'data' | 'infrastructure'
+    priority: 'high' | 'medium' | 'low'
+    message: string
+    action?: string
+  }>
+}
+
+/**
+ * @swagger
+ * /api/health/detailed:
+ *   get:
+ *     summary: Detailed system health check
+ *     description: |
+ *       Comprehensive system health check with detailed metrics including:
+ *       - Environment information (Node version, platform, memory usage)
+ *       - Database version, size, and table statistics
+ *       - Performance metrics and query statistics
+ *       - Security assessment (RLS status, permissions)
+ *       - Data quality metrics
+ *       - Actionable recommendations
+ *       
+ *       **Note**: This endpoint requires authentication.
+ *     tags:
+ *       - Health
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Detailed health status (healthy or degraded)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   enum: [healthy, degraded, unhealthy]
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ *                 environment:
+ *                   type: object
+ *                   properties:
+ *                     nodeVersion:
+ *                       type: string
+ *                     platform:
+ *                       type: string
+ *                     uptime:
+ *                       type: number
+ *                       description: Process uptime in seconds
+ *                     memoryUsage:
+ *                       type: object
+ *                       properties:
+ *                         rss:
+ *                           type: number
+ *                         heapTotal:
+ *                           type: number
+ *                         heapUsed:
+ *                           type: number
+ *                         external:
+ *                           type: number
+ *                         arrayBuffers:
+ *                           type: number
+ *                 database:
+ *                   type: object
+ *                   properties:
+ *                     version:
+ *                       type: string
+ *                     size:
+ *                       type: string
+ *                     tableStats:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           tableName:
+ *                             type: string
+ *                           rowCount:
+ *                             type: number
+ *                           tableSize:
+ *                             type: string
+ *                           indexSize:
+ *                             type: string
+ *                     slowQueries:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           query:
+ *                             type: string
+ *                           avgTime:
+ *                             type: number
+ *                           calls:
+ *                             type: number
+ *                     connections:
+ *                       type: object
+ *                       properties:
+ *                         current:
+ *                           type: number
+ *                         max:
+ *                           type: number
+ *                         utilization:
+ *                           type: number
+ *                           description: Percentage of max connections in use
+ *                 performance:
+ *                   type: object
+ *                   properties:
+ *                     responseTime:
+ *                       type: number
+ *                       description: Health check response time in milliseconds
+ *                     queryStats:
+ *                       type: object
+ *                       properties:
+ *                         fastest:
+ *                           type: number
+ *                         slowest:
+ *                           type: number
+ *                         average:
+ *                           type: number
+ *                     cacheHitRatio:
+ *                       type: number
+ *                       nullable: true
+ *                 security:
+ *                   type: object
+ *                   properties:
+ *                     rlsStatus:
+ *                       type: object
+ *                       properties:
+ *                         enabled:
+ *                           type: boolean
+ *                         tablesCovered:
+ *                           type: number
+ *                         totalTables:
+ *                           type: number
+ *                         missingRls:
+ *                           type: array
+ *                           items:
+ *                             type: string
+ *                     permissions:
+ *                       type: object
+ *                       properties:
+ *                         anonymousAccess:
+ *                           type: boolean
+ *                         authenticationRequired:
+ *                           type: boolean
+ *                 dataQuality:
+ *                   type: object
+ *                   properties:
+ *                     completenessScore:
+ *                       type: number
+ *                       description: Average profile completeness percentage
+ *                     consistencyIssues:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           table:
+ *                             type: string
+ *                           issue:
+ *                             type: string
+ *                           count:
+ *                             type: number
+ *                     duplicateRecords:
+ *                       type: number
+ *                 recommendations:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       category:
+ *                         type: string
+ *                         enum: [performance, security, data, infrastructure]
+ *                       priority:
+ *                         type: string
+ *                         enum: [high, medium, low]
+ *                       message:
+ *                         type: string
+ *                       action:
+ *                         type: string
+ *                         nullable: true
+ *             example:
+ *               status: healthy
+ *               timestamp: "2024-01-20T10:30:00Z"
+ *               environment:
+ *                 nodeVersion: "v18.17.0"
+ *                 platform: "darwin"
+ *                 uptime: 3600
+ *                 memoryUsage:
+ *                   rss: 134217728
+ *                   heapTotal: 67108864
+ *                   heapUsed: 45678901
+ *               database:
+ *                 version: "PostgreSQL 15.2"
+ *                 size: "142 MB"
+ *                 tableStats:
+ *                   - tableName: "public.opportunities"
+ *                     rowCount: 5892
+ *                     tableSize: "45 MB"
+ *                     indexSize: "12 MB"
+ *                 connections:
+ *                   current: 12
+ *                   max: 100
+ *                   utilization: 12
+ *               performance:
+ *                 responseTime: 234
+ *                 queryStats:
+ *                   fastest: 12
+ *                   slowest: 189
+ *                   average: 67
+ *               security:
+ *                 rlsStatus:
+ *                   enabled: true
+ *                   tablesCovered: 10
+ *                   totalTables: 10
+ *                   missingRls: []
+ *               dataQuality:
+ *                 completenessScore: 78.5
+ *                 consistencyIssues: []
+ *                 duplicateRecords: 0
+ *               recommendations: []
+ *       401:
+ *         description: Authentication required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthenticationError'
+ *       503:
+ *         description: Service unavailable - System is unhealthy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   enum: [unhealthy]
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ *                 error:
+ *                   type: string
+ *                 responseTime:
+ *                   type: number
+ */
+export async function GET() {
+  const startTime = Date.now()
+  
+  try {
+    // Require authentication for detailed health info
+    const { userId } = auth()
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'Authentication required for detailed health metrics' },
+        { status: 401 }
+      )
+    }
+
+    const healthMetrics: DetailedHealthMetrics = {
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      environment: {
+        nodeVersion: process.version,
+        platform: process.platform,
+        uptime: process.uptime(),
+        memoryUsage: process.memoryUsage()
+      },
+      database: {
+        version: '',
+        size: '',
+        tableStats: [],
+        slowQueries: [],
+        connections: { current: 0, max: 0, utilization: 0 }
+      },
+      performance: {
+        responseTime: 0,
+        queryStats: { fastest: 0, slowest: 0, average: 0 }
+      },
+      security: {
+        rlsStatus: {
+          enabled: false,
+          tablesCovered: 0,
+          totalTables: 0,
+          missingRls: []
+        },
+        permissions: {
+          anonymousAccess: false,
+          authenticationRequired: true
+        }
+      },
+      dataQuality: {
+        completenessScore: 0,
+        consistencyIssues: [],
+        duplicateRecords: 0
+      },
+      recommendations: []
+    }
+
+    // 1. Database version and size
+    try {
+      const versionResult = await prisma.$queryRaw<Array<{ version: string }>>`SELECT version()`
+      healthMetrics.database.version = versionResult[0]?.version || 'Unknown'
+
+      const sizeResult = await prisma.$queryRaw<Array<{ 
+        database_size: string 
+      }>>`
+        SELECT pg_size_pretty(pg_database_size(current_database())) as database_size
+      `
+      healthMetrics.database.size = sizeResult[0]?.database_size || 'Unknown'
+    } catch {
+      healthMetrics.recommendations.push({
+        category: 'infrastructure',
+        priority: 'medium',
+        message: 'Unable to retrieve database version and size information'
+      })
+    }
+
+    // 2. Table statistics
+    try {
+      const tableStats = await prisma.$queryRaw<Array<{
+        table_name: string
+        row_count: bigint
+        table_size: string
+        index_size: string
+      }>>`
+        SELECT 
+          schemaname||'.'||tablename as table_name,
+          n_tup_ins + n_tup_upd + n_tup_del as row_count,
+          pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as table_size,
+          pg_size_pretty(pg_indexes_size(schemaname||'.'||tablename)) as index_size
+        FROM pg_stat_user_tables 
+        WHERE schemaname = 'public'
+        ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC
+        LIMIT 10
+      `
+
+      healthMetrics.database.tableStats = tableStats.map(stat => ({
+        tableName: stat.table_name,
+        rowCount: Number(stat.row_count),
+        tableSize: stat.table_size,
+        indexSize: stat.index_size
+      }))
+    } catch {
+      console.warn('Failed to get table statistics')
+    }
+
+    // 3. Connection statistics
+    try {
+      const connectionStats = await prisma.$queryRaw<Array<{
+        current_connections: bigint
+        max_connections: bigint
+      }>>`
+        SELECT 
+          (SELECT count(*) FROM pg_stat_activity WHERE datname = current_database()) as current_connections,
+          setting::int as max_connections
+        FROM pg_settings 
+        WHERE name = 'max_connections'
+      `
+
+      if (connectionStats.length > 0) {
+        const current = Number(connectionStats[0].current_connections)
+        const max = Number(connectionStats[0].max_connections)
+        
+        healthMetrics.database.connections = {
+          current,
+          max,
+          utilization: (current / max) * 100
+        }
+
+        if (healthMetrics.database.connections.utilization > 80) {
+          healthMetrics.recommendations.push({
+            category: 'performance',
+            priority: 'high',
+            message: 'Database connection utilization is high (>80%)',
+            action: 'Consider implementing connection pooling or increasing max connections'
+          })
+        }
+      }
+    } catch {
+      console.warn('Failed to get connection statistics')
+    }
+
+    // 4. Performance metrics
+    const queryTimes: number[] = []
+    
+    // Test various query types
+    const queries = [
+      { name: 'Simple Count', fn: () => prisma.organization.count() },
+      { name: 'User Query', fn: () => prisma.user.findMany({ take: 10 }) },
+      { name: 'Complex Join', fn: () => prisma.matchScore.findMany({ 
+        take: 5, 
+        include: { profile: true, opportunity: true } 
+      }) }
+    ]
+
+    for (const query of queries) {
+      const queryStart = Date.now()
+      try {
+        await query.fn()
+        const queryTime = Date.now() - queryStart
+        queryTimes.push(queryTime)
+      } catch {
+        queryTimes.push(5000) // Penalty for failed queries
+        healthMetrics.recommendations.push({
+          category: 'performance',
+          priority: 'high',
+          message: `Query "${query.name}" failed during health check`
+        })
+      }
+    }
+
+    healthMetrics.performance.queryStats = {
+      fastest: Math.min(...queryTimes),
+      slowest: Math.max(...queryTimes),
+      average: queryTimes.reduce((a, b) => a + b, 0) / queryTimes.length
+    }
+
+    if (healthMetrics.performance.queryStats.average > 1000) {
+      healthMetrics.recommendations.push({
+        category: 'performance',
+        priority: 'high',
+        message: 'Average query time is slow (>1s)',
+        action: 'Consider adding database indexes or optimizing queries'
+      })
+    }
+
+    // 5. Security assessment
+    try {
+      const rlsTables = await prisma.$queryRaw<Array<{
+        tablename: string
+        rowsecurity: boolean
+      }>>`
+        SELECT tablename, rowsecurity 
+        FROM pg_tables 
+        WHERE schemaname = 'public'
+        AND tablename IN ('organizations', 'users', 'profiles', 'opportunities', 'match_scores')
+      `
+
+      const totalTables = rlsTables.length
+      const tablesWithRls = rlsTables.filter(t => t.rowsecurity).length
+      const missingRls = rlsTables.filter(t => !t.rowsecurity).map(t => t.tablename)
+
+      healthMetrics.security.rlsStatus = {
+        enabled: tablesWithRls === totalTables,
+        tablesCovered: tablesWithRls,
+        totalTables,
+        missingRls
+      }
+
+      if (missingRls.length > 0) {
+        healthMetrics.recommendations.push({
+          category: 'security',
+          priority: 'high',
+          message: 'Some tables are missing Row-Level Security policies',
+          action: `Enable RLS on: ${missingRls.join(', ')}`
+        })
+      }
+    } catch {
+      healthMetrics.recommendations.push({
+        category: 'security',
+        priority: 'medium',
+        message: 'Unable to verify RLS status'
+      })
+    }
+
+    // 6. Data quality assessment
+    try {
+      // Check for duplicate emails
+      const duplicateEmails = await prisma.$queryRaw<Array<{ count: bigint }>>`
+        SELECT COUNT(*) as count FROM (
+          SELECT email FROM users GROUP BY email HAVING COUNT(*) > 1
+        ) duplicates
+      `
+
+      // Check profile completeness
+      const profileCompleteness = await prisma.$queryRaw<Array<{ 
+        avg_completeness: number 
+      }>>`
+        SELECT AVG(profile_completeness) as avg_completeness FROM profiles
+      `
+
+      // Check for missing required data
+      const incompleteProfiles = await prisma.$queryRaw<Array<{ count: bigint }>>`
+        SELECT COUNT(*) as count FROM profiles 
+        WHERE company_name IS NULL OR company_name = ''
+      `
+
+      healthMetrics.dataQuality.duplicateRecords = Number(duplicateEmails[0]?.count || 0)
+      healthMetrics.dataQuality.completenessScore = profileCompleteness[0]?.avg_completeness || 0
+
+      if (Number(incompleteProfiles[0]?.count || 0) > 0) {
+        healthMetrics.dataQuality.consistencyIssues.push({
+          table: 'profiles',
+          issue: 'Missing company names',
+          count: Number(incompleteProfiles[0].count)
+        })
+      }
+
+      if (healthMetrics.dataQuality.duplicateRecords > 0) {
+        healthMetrics.recommendations.push({
+          category: 'data',
+          priority: 'medium',
+          message: 'Duplicate email addresses found in users table',
+          action: 'Run data deduplication process'
+        })
+      }
+
+      if (healthMetrics.dataQuality.completenessScore < 70) {
+        healthMetrics.recommendations.push({
+          category: 'data',
+          priority: 'low',
+          message: 'Average profile completeness is low (<70%)',
+          action: 'Encourage users to complete their profiles'
+        })
+      }
+    } catch {
+      console.warn('Failed to assess data quality')
+    }
+
+    // 7. Overall health assessment
+    healthMetrics.performance.responseTime = Date.now() - startTime
+
+    const hasHighPriorityIssues = healthMetrics.recommendations.some(r => r.priority === 'high')
+    const hasMediumPriorityIssues = healthMetrics.recommendations.some(r => r.priority === 'medium')
+
+    if (hasHighPriorityIssues) {
+      healthMetrics.status = 'unhealthy'
+    } else if (hasMediumPriorityIssues || healthMetrics.performance.queryStats.average > 500) {
+      healthMetrics.status = 'degraded'
+    }
+
+    return NextResponse.json(healthMetrics, {
+      status: healthMetrics.status === 'unhealthy' ? 503 : 200
+    })
+
+  } catch (error) {
+    console.error('Detailed health check failed:', error)
+    
+    return NextResponse.json({
+      status: 'unhealthy',
+      timestamp: new Date().toISOString(),
+      error: error instanceof Error ? error.message : 'Unknown error',
+      responseTime: Date.now() - startTime
+    }, { status: 503 })
+  }
+}

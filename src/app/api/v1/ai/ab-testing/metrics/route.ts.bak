@@ -1,0 +1,93 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
+import { ABTestManager } from '@/lib/ai/ab-testing/ab-test-manager';
+
+/**
+ * @swagger
+ * /api/ai/ab-testing/metrics:
+ *   get:
+ *     summary: Get A/B test metrics
+ *     description: Retrieves performance metrics for all variants in an A/B test
+ *     tags: [AI Services]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: testId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The A/B test ID
+ *     responses:
+ *       200:
+ *         description: Metrics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 metrics:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       variantId:
+ *                         type: string
+ *                       totalRequests:
+ *                         type: number
+ *                       successfulRequests:
+ *                         type: number
+ *                       failedRequests:
+ *                         type: number
+ *                       averageLatency:
+ *                         type: number
+ *                         description: Average latency in milliseconds
+ *                       averageCost:
+ *                         type: number
+ *                         description: Average cost per request
+ *                       totalCost:
+ *                         type: number
+ *                         description: Total cost across all requests
+ *                       averageTokensPerSecond:
+ *                         type: number
+ *                         description: Average tokens generated per second
+ *                       userSatisfaction:
+ *                         type: number
+ *                         nullable: true
+ *                         description: Percentage of satisfied users
+ *       401:
+ *         description: Unauthorized
+ *       400:
+ *         description: Missing testId parameter
+ *       500:
+ *         description: Internal server error
+ */
+export async function GET(request: NextRequest) {
+  try {
+    const { userId } = auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const testId = searchParams.get('testId');
+
+    if (!testId) {
+      return NextResponse.json(
+        { error: 'Missing testId parameter' },
+        { status: 400 }
+      );
+    }
+
+    const abTestManager = ABTestManager.getInstance();
+    const metrics = await abTestManager.getTestMetrics(testId);
+
+    return NextResponse.json({ metrics });
+  } catch (error) {
+    console.error('Failed to fetch A/B test metrics:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

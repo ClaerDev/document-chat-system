@@ -1,0 +1,78 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
+import { usageTracker } from '@/lib/cache/usage-tracker';
+
+export async function GET(request: NextRequest) {
+  try {
+    const { userId } = await auth();
+    
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const searchParams = request.nextUrl.searchParams;
+    const startDate = searchParams.get('startDate') 
+      ? new Date(searchParams.get('startDate')!) 
+      : undefined;
+    const endDate = searchParams.get('endDate') 
+      ? new Date(searchParams.get('endDate')!) 
+      : undefined;
+
+    // Get usage statistics
+    const stats = await usageTracker.getUserUsageStats(userId, startDate, endDate);
+    
+    // Get top resources by usage
+    const topResources = await usageTracker.getTopResourcesByUsage(userId, 10);
+
+    return NextResponse.json({
+      stats,
+      topResources,
+      period: {
+        startDate: startDate?.toISOString() || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        endDate: endDate?.toISOString() || new Date().toISOString(),
+      },
+    });
+  } catch (error) {
+    console.error('Usage stats API error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const { userId } = await auth();
+    
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { type, resource, cost, metadata } = body;
+
+    // Track usage event
+    switch (type) {
+      case 'cache_hit':
+        await usageTracker.trackCacheHit(userId, resource);
+        break;
+      case 'cache_miss':
+        await usageTracker.trackCacheMiss(userId, resource);
+        break;
+      case 'api_call':
+        await usageTracker.trackApiCall(userId, resource, cost, undefined, metadata);
+        break;
+      default:
+        return NextResponse.json({ error: 'Invalid usage type' }, { status: 400 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Usage tracking API error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

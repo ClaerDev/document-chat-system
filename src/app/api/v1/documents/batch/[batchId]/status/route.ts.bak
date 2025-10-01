@@ -1,0 +1,148 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
+import { prisma } from '@/lib/db'
+
+/**
+ * @swagger
+ * /api/v1/documents/batch/{batchId}/status:
+ *   get:
+ *     summary: Get batch processing status
+ *     description: |
+ *       Check the status of a batch document processing job.
+ *       Returns detailed progress information and results when available.
+ *     tags:
+ *       - Documents
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: batchId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The batch processing ID
+ *     responses:
+ *       200:
+ *         description: Batch status retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 batchId:
+ *                   type: string
+ *                 status:
+ *                   type: string
+ *                   enum: [queued, processing, completed, failed]
+ *                 totalDocuments:
+ *                   type: number
+ *                 processedDocuments:
+ *                   type: number
+ *                 failedDocuments:
+ *                   type: number
+ *                 progress:
+ *                   type: number
+ *                   description: Progress percentage (0-100)
+ *                 startedAt:
+ *                   type: string
+ *                   format: date-time
+ *                 completedAt:
+ *                   type: string
+ *                   format: date-time
+ *                 error:
+ *                   type: string
+ *                 results:
+ *                   type: array
+ *                   description: Available when completed
+ *                   items:
+ *                     type: object
+ *       404:
+ *         description: Batch not found
+ *       401:
+ *         description: Unauthorized
+ */
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { batchId: string } }
+) {
+  try {
+    const { userId } = auth()
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { batchId } = params
+
+    // Fetch batch processing record
+    const batch = await prisma.batchProcessing.findUnique({
+      where: { 
+        id: batchId,
+        userId: userId, // Ensure user owns this batch
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+          }
+        },
+        organization: {
+          select: {
+            id: true,
+            name: true,
+          }
+        }
+      }
+    })
+
+    if (!batch) {
+      return NextResponse.json(
+        { error: 'Batch not found' },
+        { status: 404 }
+      )
+    }
+
+    // Calculate progress
+    const progress = batch.totalDocuments > 0
+      ? Math.round((batch.processedDocuments / batch.totalDocuments) * 100)
+      : 0
+
+    // Get processed documents if completed
+    let results = null
+    if (batch.status === 'completed' && batch.metadata) {
+      const metadata = batch.metadata as any
+      if (metadata.results) {
+        results = metadata.results
+      }
+    }
+
+    return NextResponse.json({
+      batchId: batch.id,
+      status: batch.status,
+      totalDocuments: batch.totalDocuments,
+      processedDocuments: batch.processedDocuments,
+      failedDocuments: batch.failedDocuments,
+      progress,
+      startedAt: batch.createdAt,
+      completedAt: batch.completedAt,
+      error: batch.error,
+      results,
+      metadata: {
+        organizationId: batch.organizationId,
+        organizationName: batch.organization.name,
+        userId: batch.userId,
+        userEmail: batch.user.email,
+      }
+    })
+
+  } catch (error) {
+    console.error('Batch status error:', error)
+    return NextResponse.json(
+      { 
+        error: 'Failed to fetch batch status', 
+        details: error instanceof Error ? error.message : 'Unknown error' 
+      },
+      { status: 500 }
+    )
+  }
+}

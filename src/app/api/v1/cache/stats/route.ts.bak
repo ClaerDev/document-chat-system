@@ -1,0 +1,79 @@
+import { NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
+import cacheService from '@/lib/cache/redis';
+
+export async function GET() {
+  try {
+    const { userId } = auth();
+    
+    // Basic auth check for admin endpoints
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    
+    // Get cache statistics (simplified version)
+    // In production, you'd collect these metrics over time
+    const stats = {
+      connection: cacheService.getStatus(),
+      metrics: {
+        // These would be collected from Redis INFO command
+        // or from a metrics collection system
+        totalKeys: 0,
+        memoryUsage: '0 MB',
+        hitRate: '0%',
+        missRate: '0%',
+        evictions: 0,
+        connections: 1,
+      },
+      performance: {
+        averageLatency: '0ms',
+        p95Latency: '0ms',
+        p99Latency: '0ms',
+        throughput: '0 ops/sec',
+      },
+      health: {
+        uptime: '0s',
+        lastHealthCheck: new Date().toISOString(),
+        errors: 0,
+      },
+    };
+    
+    // If we have a real Redis connection, we could get actual stats
+    // const info = await redis.info('memory');
+    // const keyspace = await redis.info('keyspace');
+    
+    return NextResponse.json(stats);
+  } catch (error) {
+    console.error('Cache stats error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE() {
+  try {
+    const { userId } = auth();
+    
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    
+    // Admin operation to flush cache
+    // In production, you'd want additional auth checks
+    const flushed = await cacheService.flush();
+    
+    return NextResponse.json({
+      success: flushed,
+      message: flushed ? 'Cache flushed successfully' : 'Failed to flush cache',
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('Cache flush error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

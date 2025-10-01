@@ -1,0 +1,2094 @@
+'use client'
+
+import { useState, useEffect, useRef, useCallback, memo } from 'react'
+import { useAuth, useUser } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation'
+import { useOpportunitiesStore } from '@/stores/opportunities-store'
+import { AppLayout } from '@/components/layout'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  Building2,
+  MapPin,
+  Award,
+  FileText,
+  Settings,
+  Plus,
+  Edit,
+  UserX,
+  AlertTriangle,
+  User,
+  Users,
+  BarChart3,
+  Volume2,
+  VolumeX,
+  Target,
+  TrendingUp,
+  ExternalLink,
+  CheckCircle,
+} from 'lucide-react'
+import { useSoundEffects, SoundEffect } from '@/lib/sound-effects'
+import { ProfileBasicForm } from '@/components/profile/ProfileBasicForm'
+import { ProfileNaicsForm } from '@/components/profile/ProfileNaicsForm'
+import { ProfileCertificationForm } from '@/components/profile/ProfileCertificationForm'
+import { ProfileCapabilitiesForm } from '@/components/profile/ProfileCapabilitiesForm'
+import { SaveIndicator } from '@/components/ui/component-loader'
+import {
+  usePageLoading,
+  useComponentLoading,
+} from '@/components/providers/loading-provider'
+import { ProfileSkeleton } from '@/components/ui/page-skeleton'
+import { useCSRF } from '@/hooks/useCSRF'
+import { useNotify } from '@/contexts/notification-context'
+import { useProfileBreadcrumbs } from '@/hooks/useBreadcrumbs'
+import { Breadcrumbs } from '@/components/ui/breadcrumbs'
+import { Profile } from '@/types'
+import { 
+  BRAND_VOICE_DISPLAY,
+  BRAND_TONE_DISPLAY,
+  BRAND_VOICE_OPTIONS,
+  BRAND_TONE_OPTIONS,
+  GOVERNMENT_LEVEL_DISPLAY,
+  TRAVEL_WILLINGNESS_DISPLAY,
+  BrandVoice,
+  BrandTone,
+  getBrandVoiceDisplay,
+  getBrandToneDisplay,
+  getGovernmentLevelDisplay,
+  getTravelWillingnessDisplay
+} from '@/types/profile'
+import { AccountDeletionStatus } from '@/components/account/account-deletion-status'
+import { DeleteAccountDialog } from '@/components/account/delete-account-dialog'
+
+// Enhanced imports for new functionality
+import { useInitializeStore, useFetchProfile } from '@/stores/profile-store'
+import { useProfileScoring } from '@/hooks/useProfileScoring'
+import ProfileScoreCard from '@/components/scoring/ProfileScoreCard'
+import ScoringAnalytics from '@/components/scoring/ScoringAnalytics'
+import { SamGovIntegrationModal } from '@/components/profile/sam-gov-integration-modal'
+
+export default function ProfilePage() {
+  const { isLoaded, isSignedIn } = useAuth()
+  const router = useRouter()
+  const { stopLoading } = usePageLoading()
+  const { startLoading, stopLoading: stopProfileLoading } =
+    useComponentLoading()
+  const notify = useNotify()
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Enhanced state management with profile store
+  const storeInitialize = useInitializeStore()
+  const storeFetchProfile = useFetchProfile()
+  
+  // Opportunities store for cache invalidation
+  const { invalidateCache } = useOpportunitiesStore()
+
+  // Legacy state (gradually being replaced by store)
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [error, setErrorState] = useState('')
+  const [activeTab, setActiveTab] = useState('overview')
+  const [saveStatus, setSaveStatus] = useState<
+    'idle' | 'saving' | 'saved' | 'error'
+  >('idle')
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showSamGovModal, setShowSamGovModal] = useState(false)
+  const [isInitializing, setIsInitializing] = useState(true)
+  const initialLoadRef = useRef(false)
+
+  // Initialize mounted state to prevent hydration mismatches
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+
+  // Enhanced scoring using unified system
+  const scoring = useProfileScoring({
+    autoCalculate: false, // Disable auto-calculate to control when scoring happens
+  })
+
+  // Track if we've calculated score for current profile to prevent infinite loops
+  const lastScoredProfileId = useRef<string | null>(null)
+  
+  // Trigger scoring calculation when profile changes
+  useEffect(() => {
+    if (profile && profile.id && profile.id !== lastScoredProfileId.current) {
+      console.log('Profile page: Triggering score calculation for profile:', {
+        id: profile.id,
+        companyName: profile.companyName,
+        profileCompleteness: profile.profileCompleteness,
+      })
+      lastScoredProfileId.current = profile.id
+      scoring.calculateScore(profile).catch((err) => {
+        console.error('Failed to calculate score:', err)
+      })
+    }
+  }, [profile?.id, scoring]) // Include scoring in dependencies
+
+  // Breadcrumbs for navigation
+  const breadcrumbs = useProfileBreadcrumbs(activeTab)
+
+  const handleBreadcrumbClick = (itemId: string) => {
+    if (itemId === '/dashboard') {
+      router.push('/dashboard')
+    } else if (itemId === '/') {
+      router.push('/')
+    } else if (itemId.includes('/profile')) {
+      // Handle tab navigation within profile
+      const tabMatch = itemId.match(/\/profile-(.+)/)
+      if (tabMatch) {
+        setActiveTab(tabMatch[1])
+      } else {
+        setActiveTab('overview')
+      }
+    }
+  }
+
+  const fetchProfile = useCallback(
+    async (bustCache = false) => {
+      startLoading()
+      try {
+        const url = bustCache
+          ? `/api/v1/profile?_cb=${Date.now()}`
+          : '/api/v1/profile'
+        const headers = bustCache ? { 'Cache-Control': 'no-cache' } : {}
+        const response = await fetch(url, { headers })
+        const data = await response.json()
+
+        if (data.success) {
+          setProfile(data.data)
+          // Update profile store for scoring and enhanced features
+          storeInitialize({ profile: data.data })
+        } else if (data.needsUserCreation) {
+          // User doesn't exist, try to sync from Clerk
+          console.log('User needs creation, syncing from Clerk...')
+          const syncResponse = await fetch('/api/v1/user/sync', {
+            method: 'POST',
+          })
+          const syncData = await syncResponse.json()
+
+          if (syncData.success) {
+            console.log('User synced successfully, retrying profile fetch...')
+            // Retry fetching profile after user creation
+            const retryResponse = await fetch('/api/v1/profile')
+            const retryData = await retryResponse.json()
+
+            if (retryData.success) {
+              setProfile(retryData.data)
+              // Update profile store for scoring and enhanced features
+              storeInitialize({ profile: retryData.data })
+            } else {
+              setErrorState(
+                retryData.error || 'Failed to load profile after sync'
+              )
+            }
+          } else {
+            setErrorState(`Failed to sync user: ${syncData.error}`)
+          }
+        } else {
+          setErrorState(data.error || 'Failed to load profile')
+        }
+      } catch (err) {
+        console.error('Profile fetch error:', err)
+        setErrorState('Failed to load profile')
+      } finally {
+        stopProfileLoading()
+        setIsInitializing(false)
+      }
+    },
+    [startLoading, stopProfileLoading, storeInitialize]
+  )
+
+  // SAM.gov integration handlers (defined after fetchProfile)
+  const handleSamGovSuccess = useCallback((samGovData: any) => {
+    // Refresh profile data after successful SAM.gov import
+    fetchProfile(true) // Force cache bust
+    setShowSamGovModal(false)
+    notify.success('Profile successfully updated with SAM.gov data!')
+  }, [fetchProfile, notify])
+
+  const handleSamGovManualFlow = useCallback(() => {
+    // User chose to go back to manual entry
+    setShowSamGovModal(false)
+  }, [])
+
+  const handleInitialLoad = useCallback(async () => {
+    if (isLoaded && !initialLoadRef.current) {
+      initialLoadRef.current = true
+      if (!isSignedIn) {
+        setIsInitializing(false)
+        stopLoading() // Stop page-level loading
+        return
+      }
+      
+      // First try to load profile into store
+      try {
+        await storeFetchProfile()
+        // If store load was successful, sync with local state
+        // Note: currentProfile will be updated by the store after the fetch
+      } catch (error) {
+        console.error('Store profile fetch failed, falling back to legacy method:', error)
+      }
+      
+      // Also load with legacy method for backward compatibility
+      await fetchProfile()
+      setIsInitializing(false)
+      stopLoading() // Stop page-level loading
+    }
+  }, [isLoaded, isSignedIn, stopLoading, fetchProfile, storeFetchProfile])
+
+  useEffect(() => {
+    // Only run when Clerk is fully loaded and we have stable auth state
+    if (isLoaded) {
+      handleInitialLoad()
+    }
+  }, [isLoaded, handleInitialLoad])
+
+  const handleProfileUpdate = (updatedProfile: Profile) => {
+    console.log('handleProfileUpdate called with:', {
+      id: updatedProfile.id,
+      companyName: updatedProfile.companyName,
+      addressLine1: updatedProfile.addressLine1,
+      addressLine2: updatedProfile.addressLine2,
+      city: updatedProfile.city,
+      state: updatedProfile.state,
+      zipCode: updatedProfile.zipCode,
+      primaryContactName: updatedProfile.primaryContactName,
+      primaryContactEmail: updatedProfile.primaryContactEmail,
+      profileCompleteness: updatedProfile.profileCompleteness,
+    })
+
+    setProfile(updatedProfile)
+    // Update profile store for scoring and enhanced features
+    if (updatedProfile) {
+      storeInitialize({ profile: updatedProfile })
+    }
+    setSaveStatus('saved')
+    
+    // Invalidate opportunities cache so match scores recalculate
+    console.log('🔄 Profile updated - invalidating opportunities cache for score recalculation')
+    invalidateCache()
+
+    // Only show notifications for actual user-initiated updates, not initial loads
+    if (profile) {
+      // Show success notification
+      notify.success(
+        'Profile Updated',
+        'Your company profile has been saved successfully.'
+      )
+
+      // Check if profile completeness improved
+      if (updatedProfile.profileCompleteness > profile.profileCompleteness) {
+        const improvement =
+          updatedProfile.profileCompleteness - profile.profileCompleteness
+        notify.info(
+          'Profile Improved',
+          `Your profile is now ${updatedProfile.profileCompleteness}% complete (+${improvement.toFixed(0)}%)`
+        )
+      }
+    }
+
+    setTimeout(() => setSaveStatus('idle'), 2000)
+  }
+
+  // Show navigation for all cases except brand new users in setup mode
+  // (authenticated users who haven't created any profile yet)
+  const shouldShowNavigation = !isSignedIn || isInitializing || !!profile
+
+  // Tab completion status helper function
+  const getTabCompletion = (tabKey: string): boolean => {
+    if (!profile) return false
+    
+    switch (tabKey) {
+      case 'basic':
+        return !!(profile.companyName && profile.addressLine1 && profile.primaryContactEmail)
+      case 'naics':
+        return !!profile.primaryNaics
+      case 'certifications':
+        return !!(
+          profile.certifications &&
+          ((profile.certifications as any).certifications?.length > 0 ||
+           (profile.certifications as any).setAsides?.length > 0 ||
+           // Legacy check
+           Object.keys(profile.certifications as Record<string, unknown>).some(
+             key => key.startsWith('has') && (profile.certifications as any)[key] === true
+           ))
+        )
+      case 'capabilities':
+        return !!(profile.coreCompetencies && profile.coreCompetencies.length > 0)
+      default:
+        return false
+    }
+  }
+
+  return (
+    <AppLayout showNavigation={shouldShowNavigation}>
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        {/* Breadcrumb Navigation */}
+        <div className="mb-6">
+          <Breadcrumbs
+            items={breadcrumbs}
+            onItemClick={handleBreadcrumbClick}
+            maxItems={4}
+            className="text-sm"
+          />
+        </div>
+
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Company Profile</h1>
+              <p className="text-muted-foreground mt-2">
+                Manage your company information and capabilities
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              {profile && (
+                <div className="text-right">
+                  <div className="text-sm text-muted-foreground">
+                    Profile Completeness
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Progress
+                      value={profile.profileCompleteness}
+                      className="w-32"
+                    />
+                    <span className="text-sm font-medium">
+                      {profile.profileCompleteness}%
+                    </span>
+                    <SaveIndicator status={saveStatus} />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {error && (
+          <Alert className="mb-6" variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {!isMounted || !isLoaded ? (
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="animate-pulse">Loading...</div>
+          </div>
+        ) : !isSignedIn ? (
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <Card>
+              <CardHeader>
+                <CardTitle>Authentication Required</CardTitle>
+                <CardDescription>
+                  Please sign in to access your profile
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button
+                  onClick={() =>
+                    router.push(
+                      '/sign-in?redirect_url=' + encodeURIComponent('/profile')
+                    )
+                  }
+                >
+                  Sign In
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        ) : isInitializing ? (
+          <ProfileSkeleton />
+        ) : profile ? (
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <TabsList className="h-14 w-full grid grid-cols-8 p-0 bg-background justify-start rounded-none">
+              <TabsTrigger
+                value="overview"
+                className="flex flex-col rounded-none bg-background h-full data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary [&>svg]:h-5 [&>svg]:w-5 [&>svg]:shrink-0"
+              >
+                <BarChart3 className="shrink-0" />
+                <code className="mt-1.5 text-[13px]">Overview</code>
+              </TabsTrigger>
+              <TabsTrigger
+                value="scoring"
+                className="flex flex-col rounded-none bg-background h-full data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary [&>svg]:h-5 [&>svg]:w-5 [&>svg]:shrink-0"
+              >
+                <Target className="shrink-0" />
+                <code className="mt-1.5 text-[13px]">Score</code>
+              </TabsTrigger>
+              <TabsTrigger
+                value="analytics"
+                className="flex flex-col rounded-none bg-background h-full data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary [&>svg]:h-5 [&>svg]:w-5 [&>svg]:shrink-0"
+              >
+                <TrendingUp className="shrink-0" />
+                <code className="mt-1.5 text-[13px]">Analytics</code>
+              </TabsTrigger>
+              <TabsTrigger
+                value="basic"
+                className="flex flex-col rounded-none bg-background h-full data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary [&>svg]:h-5 [&>svg]:w-5 [&>svg]:shrink-0"
+              >
+                <div className="relative">
+                  <User className="shrink-0" />
+                  {getTabCompletion('basic') && (
+                    <CheckCircle className="absolute -top-1 -right-1 h-3 w-3 text-green-500" />
+                  )}
+                </div>
+                <code className="mt-1.5 text-[13px]">Basic Info</code>
+              </TabsTrigger>
+              <TabsTrigger
+                value="naics"
+                className="flex flex-col rounded-none bg-background h-full data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary [&>svg]:h-5 [&>svg]:w-5 [&>svg]:shrink-0"
+              >
+                <div className="relative">
+                  <Building2 className="shrink-0" />
+                  {getTabCompletion('naics') && (
+                    <CheckCircle className="absolute -top-1 -right-1 h-3 w-3 text-green-500" />
+                  )}
+                </div>
+                <code className="mt-1.5 text-[13px]">NAICS Codes</code>
+              </TabsTrigger>
+              <TabsTrigger
+                value="certifications"
+                className="flex flex-col rounded-none bg-background h-full data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary [&>svg]:h-5 [&>svg]:w-5 [&>svg]:shrink-0"
+              >
+                <div className="relative">
+                  <Award className="shrink-0" />
+                  {getTabCompletion('certifications') && (
+                    <CheckCircle className="absolute -top-1 -right-1 h-3 w-3 text-green-500" />
+                  )}
+                </div>
+                <code className="mt-1.5 text-[13px]">Certifications</code>
+              </TabsTrigger>
+              <TabsTrigger
+                value="capabilities"
+                className="flex flex-col rounded-none bg-background h-full data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary [&>svg]:h-5 [&>svg]:w-5 [&>svg]:shrink-0"
+              >
+                <div className="relative">
+                  <FileText className="shrink-0" />
+                  {getTabCompletion('capabilities') && (
+                    <CheckCircle className="absolute -top-1 -right-1 h-3 w-3 text-green-500" />
+                  )}
+                </div>
+                <code className="mt-1.5 text-[13px]">Capabilities</code>
+              </TabsTrigger>
+              <TabsTrigger
+                value="settings"
+                className="flex flex-col rounded-none bg-background h-full data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary [&>svg]:h-5 [&>svg]:w-5 [&>svg]:shrink-0"
+              >
+                <Settings className="shrink-0" />
+                <code className="mt-1.5 text-[13px]">Settings</code>
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview" className="space-y-6">
+              <ProfileOverview
+                key={`${profile.id}-${profile.profileCompleteness}`}
+                profile={profile}
+                onEdit={setActiveTab}
+              />
+            </TabsContent>
+
+            <TabsContent value="scoring" className="space-y-6">
+              {scoring.score ? (
+                <ProfileScoreCard
+                  score={scoring.score}
+                  loading={scoring.isCalculating}
+                  onRecommendationClick={(rec) => {
+                    // Handle recommendation click - could navigate to relevant form
+                    if (rec.category === 'basic') setActiveTab('basic')
+                    else if (rec.category === 'naics') setActiveTab('naics')
+                    else if (rec.category === 'certifications')
+                      setActiveTab('certifications')
+                    else if (rec.category === 'capabilities')
+                      setActiveTab('capabilities')
+                  }}
+                  onFieldClick={(field) => {
+                    // Navigate to the appropriate tab based on field
+                    if (
+                      [
+                        'companyName',
+                        'addressLine1',
+                        'city',
+                        'state',
+                        'zipCode',
+                      ].includes(field)
+                    ) {
+                      setActiveTab('basic')
+                    } else if (
+                      ['primaryNaics', 'secondaryNaics'].includes(field)
+                    ) {
+                      setActiveTab('naics')
+                    } else if (field === 'certifications') {
+                      setActiveTab('certifications')
+                    } else if (
+                      [
+                        'coreCompetencies',
+                        'securityClearance',
+                        'pastPerformance',
+                      ].includes(field)
+                    ) {
+                      setActiveTab('capabilities')
+                    }
+                  }}
+                  showDetailedBreakdown={true}
+                  showRecommendations={true}
+                  interactive={true}
+                />
+              ) : (
+                <Alert>
+                  <Target className="h-4 w-4" />
+                  <AlertDescription>
+                    Complete your profile information to see your completeness
+                    score and recommendations.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </TabsContent>
+
+            <TabsContent value="analytics" className="space-y-6">
+              {scoring.score ? (
+                <ScoringAnalytics
+                  score={scoring.score}
+                  history={null}
+                  matchingPotential={null}
+                  onRecommendationClick={(rec) => {
+                    // Handle recommendation click
+                    if (rec.category === 'basic') setActiveTab('basic')
+                    else if (rec.category === 'naics') setActiveTab('naics')
+                    else if (rec.category === 'certifications')
+                      setActiveTab('certifications')
+                    else if (rec.category === 'capabilities')
+                      setActiveTab('capabilities')
+                  }}
+                />
+              ) : (
+                <Alert>
+                  <TrendingUp className="h-4 w-4" />
+                  <AlertDescription>
+                    Analytics and insights will be available once your profile
+                    is more complete.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </TabsContent>
+
+            <TabsContent value="basic" className="space-y-6" style={{ overflow: 'visible' }}>
+              <ProfileBasicForm
+                profile={profile}
+                onUpdate={handleProfileUpdate}
+                onComplete={() => setActiveTab('overview')}
+              />
+            </TabsContent>
+
+            <TabsContent value="naics" className="space-y-6">
+              <ProfileNaicsForm
+                profile={profile}
+                onUpdate={handleProfileUpdate}
+                onComplete={() => setActiveTab('overview')}
+              />
+            </TabsContent>
+
+            <TabsContent value="certifications" className="space-y-6">
+              <ProfileCertificationForm
+                profile={profile}
+                onUpdate={handleProfileUpdate}
+                onComplete={() => setActiveTab('overview')}
+              />
+            </TabsContent>
+
+            <TabsContent value="capabilities" className="space-y-6" style={{ overflow: 'visible' }}>
+              <ProfileCapabilitiesForm
+                profile={profile}
+                onUpdate={handleProfileUpdate}
+                onComplete={() => setActiveTab('overview')}
+              />
+            </TabsContent>
+
+            <TabsContent value="settings" className="space-y-6">
+              {/* Account Settings */}
+              <AccountSettings
+                onShowDeleteDialog={() => setShowDeleteDialog(true)}
+                profile={profile}
+                onUpdate={handleProfileUpdate}
+              />
+            </TabsContent>
+          </Tabs>
+        ) : (
+          <CreateProfilePrompt onCreate={handleProfileUpdate} />
+        )}
+
+        {/* Account Deletion Dialog */}
+        <DeleteAccountDialog
+          open={showDeleteDialog}
+          onOpenChange={setShowDeleteDialog}
+        />
+
+        {/* SAM.gov Integration Modal */}
+        <SamGovIntegrationModal
+          isOpen={showSamGovModal}
+          onClose={() => setShowSamGovModal(false)}
+          onManualFlow={handleSamGovManualFlow}
+          onSamGovSuccess={handleSamGovSuccess}
+        />
+      </div>
+    </AppLayout>
+  )
+}
+
+const ProfileOverview = memo(function ProfileOverview({
+  profile,
+  onEdit,
+}: {
+  profile: Profile
+  onEdit: (tab: string) => void
+}) {
+  console.log('ProfileOverview rendering with profile:', {
+    id: profile.id,
+    companyName: profile.companyName,
+    addressLine1: profile.addressLine1,
+    city: profile.city,
+    state: profile.state,
+    zipCode: profile.zipCode,
+    primaryContactName: profile.primaryContactName,
+    primaryContactEmail: profile.primaryContactEmail,
+    profileCompleteness: profile.profileCompleteness,
+  })
+  // Tab completion status
+  const getTabCompletion = (tabKey: string): boolean => {
+    switch (tabKey) {
+      case 'basic':
+        return !!(profile.companyName && profile.addressLine1 && profile.primaryContactEmail)
+      case 'naics':
+        return !!profile.primaryNaics
+      case 'certifications':
+        return !!(
+          profile.certifications &&
+          ((profile.certifications as any).certifications?.length > 0 ||
+           (profile.certifications as any).setAsides?.length > 0 ||
+           // Legacy check
+           Object.keys(profile.certifications as Record<string, unknown>).some(
+             key => key.startsWith('has') && (profile.certifications as any)[key] === true
+           ))
+        )
+      case 'capabilities':
+        return !!(profile.coreCompetencies && profile.coreCompetencies.length > 0)
+      default:
+        return false
+    }
+  }
+
+  const completionItems = [
+    {
+      key: 'basic',
+      label: 'Basic Information',
+      completed: getTabCompletion('basic'),
+    },
+    { key: 'naics', label: 'NAICS Codes', completed: getTabCompletion('naics') },
+    {
+      key: 'samGov',
+      label: 'SAM.gov Integration', 
+      completed: !!(
+        (profile as any).samGovData || 
+        (profile as any).samGovSyncedAt ||
+        (profile.uei && profile.cageCode)
+      ),
+    },
+    {
+      key: 'certifications',
+      label: 'Certifications',
+      completed: getTabCompletion('certifications'),
+    },
+    {
+      key: 'capabilities',
+      label: 'Core Capabilities',
+      completed: getTabCompletion('capabilities'),
+    },
+  ]
+
+  return (
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {/* Company Summary */}
+      <Card className="lg:col-span-2">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                {profile.companyName || 'Company Name Not Set'}
+              </CardTitle>
+              <CardDescription>
+                {profile.dbaName && `DBA: ${profile.dbaName}`}
+              </CardDescription>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => onEdit('basic')}>
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Address */}
+          <div className="flex items-start gap-2">
+            <MapPin className="h-4 w-4 mt-1 text-muted-foreground" />
+            <div className="text-sm">
+              {profile.addressLine1 ? (
+                <>
+                  <div>{profile.addressLine1}</div>
+                  {profile.addressLine2 && <div>{profile.addressLine2}</div>}
+                  <div>
+                    {profile.city && `${profile.city}`}
+                    {profile.state && profile.city && `, `}
+                    {profile.state && `${profile.state}`}
+                    {profile.zipCode && ` ${profile.zipCode}`}
+                  </div>
+                </>
+              ) : (
+                <span className="text-muted-foreground">
+                  Address not provided
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Key Identifiers */}
+          <div className="grid grid-cols-2 gap-4 pt-2">
+            <div>
+              <div className="text-xs text-muted-foreground">UEI</div>
+              <div className="text-sm font-mono">
+                {profile.uei || 'Not provided'}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">CAGE Code</div>
+              <div className="text-sm font-mono">
+                {profile.cageCode || 'Not provided'}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Quick Stats */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Quick Stats</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <div className="text-2xl font-bold">
+              {profile.profileCompleteness}%
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Profile Complete
+            </div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold">
+              {profile.coreCompetencies?.length || 0}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Core Competencies
+            </div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold">
+              {profile.secondaryNaics
+                ? profile.secondaryNaics.length + 1
+                : profile.primaryNaics
+                  ? 1
+                  : 0}
+            </div>
+            <div className="text-xs text-muted-foreground">NAICS Codes</div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* NAICS Codes */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              NAICS Codes
+            </CardTitle>
+            <Button variant="outline" size="sm" onClick={() => onEdit('naics')}>
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {profile.primaryNaics ? (
+            <div className="space-y-2">
+              <Badge variant="default">{profile.primaryNaics} (Primary)</Badge>
+              {profile.secondaryNaics?.map((code, index) => (
+                <Badge key={index} variant="secondary">
+                  {code}
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No NAICS codes added yet
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Certifications */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Award className="h-5 w-5" />
+              Certifications
+            </CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onEdit('certifications')}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {profile.certifications ? (
+            <div className="space-y-2">
+              {(() => {
+                const certs = profile.certifications as any
+                
+                // Handle new structure: { certifications: [...], setAsides: [...] }
+                if ('certifications' in certs && 'setAsides' in certs) {
+                  const activeCerts = certs.certifications.filter((cert: any) => 
+                    cert.status === 'active' && cert.isActivated
+                  )
+                  const setAsides = certs.setAsides || []
+                  
+                  if (activeCerts.length === 0 && setAsides.length === 0) {
+                    return (
+                      <p className="text-sm text-muted-foreground">
+                        No certifications or set-asides added yet
+                      </p>
+                    )
+                  }
+                  
+                  const maxDisplay = 3
+                  const displayCerts = activeCerts.slice(0, maxDisplay)
+                  const remainingCerts = activeCerts.length - maxDisplay
+                  const displaySetAsides = setAsides.slice(0, Math.max(0, maxDisplay - displayCerts.length))
+                  const remainingSetAsides = setAsides.length - displaySetAsides.length
+                  
+                  return (
+                    <div className="space-y-2">
+                      {activeCerts.length > 0 && (
+                        <div>
+                          <div className="text-xs text-muted-foreground mb-1">
+                            Certifications
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {displayCerts.map((cert: any) => (
+                              <Badge key={cert.id} variant="secondary" className="text-xs">
+                                {cert.name || cert.certificationId}
+                              </Badge>
+                            ))}
+                            {remainingCerts > 0 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{remainingCerts} more
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      {setAsides.length > 0 && (
+                        <div>
+                          <div className="text-xs text-muted-foreground mb-1">
+                            Set-Asides
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {displaySetAsides.map((setAside: string) => (
+                              <Badge key={setAside} variant="outline" className="text-xs">
+                                {setAside}
+                              </Badge>
+                            ))}
+                            {remainingSetAsides > 0 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{remainingSetAsides} more
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                }
+                
+                // Handle legacy structure (backward compatibility)
+                const activeCerts = Object.entries(certs)
+                  .filter(
+                    ([key, value]) => key.startsWith('has') && value === true
+                  )
+                  .map(([key]) => {
+                    const certName = key
+                      .replace('has', '')
+                      .replace(/([A-Z])/g, ' $1')
+                      .trim()
+                      .replace('8 a', '8(a)')
+                      .replace('Hub Zone', 'HUBZone')
+                      .replace('Sdvosb', 'SDVOSB')
+                      .replace('Wosb', 'WOSB')
+                      .replace('Edwosb', 'EDWOSB')
+                      .replace('Vosb', 'VOSB')
+                      .replace('Sdb', 'SDB')
+                      .replace('G S A Schedule', 'GSA Schedule')
+                      .replace('I S O9001', 'ISO 9001')
+                      .replace('C M M I', 'CMMI')
+                    return { key, name: certName }
+                  })
+
+                if (activeCerts.length === 0) {
+                  return (
+                    <p className="text-sm text-muted-foreground">
+                      No certifications added yet
+                    </p>
+                  )
+                }
+
+                const maxDisplay = 3
+                const displayCerts = activeCerts.slice(0, maxDisplay)
+                const remainingCount = activeCerts.length - maxDisplay
+
+                return (
+                  <div className="flex flex-wrap gap-1">
+                    {displayCerts.map(({ key, name }) => (
+                      <Badge key={key} variant="secondary" className="text-xs">
+                        {name}
+                      </Badge>
+                    ))}
+                    {remainingCount > 0 && (
+                      <Badge variant="outline" className="text-xs">
+                        +{remainingCount} more
+                      </Badge>
+                    )}
+                  </div>
+                )
+              })()}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No certifications added yet
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* SAM.gov Integration */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              SAM.gov Integration
+            </CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                // Open SAM.gov integration modal
+                const event = new CustomEvent('openSamGovModal')
+                window.dispatchEvent(event)
+              }}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              {(profile as any).samGovData || (profile as any).samGovSyncedAt ? 'Update' : 'Setup'}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {(() => {
+            const samGovData = (profile as any).samGovData
+            const samGovSyncedAt = (profile as any).samGovSyncedAt
+            const hasUeiCage = profile.uei && profile.cageCode
+            
+            if (samGovData || samGovSyncedAt) {
+              // Full SAM.gov integration
+              return (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+                    <CheckCircle className="h-4 w-4" />
+                    <span className="text-sm font-medium">Synced with SAM.gov</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    {profile.uei && (
+                      <div>
+                        <span className="text-muted-foreground">UEI:</span>
+                        <div className="font-mono">{profile.uei}</div>
+                      </div>
+                    )}
+                    {profile.cageCode && (
+                      <div>
+                        <span className="text-muted-foreground">CAGE Code:</span>
+                        <div className="font-mono">{profile.cageCode}</div>
+                      </div>
+                    )}
+                    {samGovData?.registrationStatus && (
+                      <div>
+                        <span className="text-muted-foreground">Status:</span>
+                        <div>
+                          <Badge variant={samGovData.registrationStatus === 'Active' ? 'success' : 'secondary'}>
+                            {samGovData.registrationStatus}
+                          </Badge>
+                        </div>
+                      </div>
+                    )}
+                    {samGovSyncedAt && (
+                      <div>
+                        <span className="text-muted-foreground">Last Sync:</span>
+                        <div>{new Date(samGovSyncedAt).toLocaleDateString()}</div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {samGovData?.naicsCodes && samGovData.naicsCodes.length > 0 && (
+                    <div>
+                      <div className="text-xs text-muted-foreground mb-1">
+                        NAICS from SAM.gov ({samGovData.naicsCodes.length})
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {samGovData.naicsCodes.slice(0, 2).map((naics: any, index: number) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {naics.naicsCode}
+                            {naics.isPrimary && ' (Primary)'}
+                          </Badge>
+                        ))}
+                        {samGovData.naicsCodes.length > 2 && (
+                          <Badge variant="secondary" className="text-xs">
+                            +{samGovData.naicsCodes.length - 2} more
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            } else if (hasUeiCage) {
+              // Partial integration (manual entry)
+              return (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+                    <AlertTriangle className="h-4 w-4" />
+                    <span className="text-sm font-medium">Manual entry - consider SAM.gov sync</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">UEI:</span>
+                      <div className="font-mono">{profile.uei}</div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">CAGE Code:</span>
+                      <div className="font-mono">{profile.cageCode}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="text-xs text-muted-foreground">
+                    Connect to SAM.gov to automatically sync your business information and certifications.
+                  </div>
+                </div>
+              )
+            } else {
+              // No integration
+              return (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <AlertTriangle className="h-4 w-4" />
+                    <span className="text-sm">SAM.gov integration not set up</span>
+                  </div>
+                  
+                  <div className="text-sm text-muted-foreground">
+                    Connect your SAM.gov registration to automatically import your business information, 
+                    NAICS codes, and certifications.
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="outline" className="text-xs">
+                      ⚡ Instant setup
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      🔄 Auto-sync
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      ✅ Verified data
+                    </Badge>
+                  </div>
+                </div>
+              )
+            }
+          })()}
+        </CardContent>
+      </Card>
+
+      {/* Core Competencies */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Core Competencies
+            </CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onEdit('capabilities')}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {profile.coreCompetencies && profile.coreCompetencies.length > 0 ? (
+            <div className="space-y-2">
+              {(() => {
+                // Check if we have detailed competency information with skill levels
+                const competencyDetails = (profile as any).competencyDetails
+                const maxDisplay = 4
+                
+                if (competencyDetails && Array.isArray(competencyDetails)) {
+                  // Display with skill level colors
+                  const displayCompetencies = competencyDetails.slice(0, maxDisplay)
+                  const remainingCount = competencyDetails.length - maxDisplay
+                  
+                  const levelColors = {
+                    beginner: 'bg-blue-100 text-blue-800 border-blue-200',
+                    intermediate: 'bg-green-100 text-green-800 border-green-200', 
+                    advanced: 'bg-purple-100 text-purple-800 border-purple-200',
+                    expert: 'bg-orange-100 text-orange-800 border-orange-200'
+                  }
+
+                  return (
+                    <div className="flex flex-wrap gap-1">
+                      {displayCompetencies.map((competency: any, index: number) => (
+                        <Badge 
+                          key={index} 
+                          className={`text-xs border ${levelColors[competency.level as keyof typeof levelColors] || levelColors.intermediate}`}
+                          title={`${competency.competencyName} - ${competency.level}`}
+                        >
+                          {competency.competencyName}
+                        </Badge>
+                      ))}
+                      {remainingCount > 0 && (
+                        <Badge variant="secondary" className="text-xs">
+                          +{remainingCount} more
+                        </Badge>
+                      )}
+                    </div>
+                  )
+                } else {
+                  // Fallback to legacy display without skill levels
+                  const displayCompetencies = profile.coreCompetencies.slice(0, maxDisplay)
+                  const remainingCount = profile.coreCompetencies.length - maxDisplay
+
+                  return (
+                    <div className="flex flex-wrap gap-1">
+                      {displayCompetencies.map((competency, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {competency}
+                        </Badge>
+                      ))}
+                      {remainingCount > 0 && (
+                        <Badge variant="secondary" className="text-xs">
+                          +{remainingCount} more
+                        </Badge>
+                      )}
+                    </div>
+                  )
+                }
+              })()}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No core competencies added yet
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Past Performance */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Past Performance
+            </CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onEdit('capabilities')}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {profile.pastPerformance ? (
+            <div className="space-y-3">
+              {(() => {
+                const performance = profile.pastPerformance as any
+                const hasInfo =
+                  performance.totalContractValue ||
+                  performance.yearsInBusiness ||
+                  performance.description
+
+                if (!hasInfo) {
+                  return (
+                    <p className="text-sm text-muted-foreground">
+                      No past performance information added yet
+                    </p>
+                  )
+                }
+
+                return (
+                  <>
+                    {performance.description && (
+                      <div className="mb-3">
+                        <div className="text-xs text-muted-foreground mb-1">
+                          Company Experience Summary
+                        </div>
+                        <div className="text-sm text-foreground">
+                          {(() => {
+                            // Strip HTML tags and limit display length
+                            const plainText = performance.description
+                              .replace(/<[^>]*>/g, '')
+                              .replace(/&nbsp;/g, ' ')
+                              .trim();
+                            const maxLength = 150;
+                            return plainText.length > maxLength
+                              ? `${plainText.substring(0, maxLength)}...`
+                              : plainText;
+                          })()}
+                        </div>
+                      </div>
+                    )}
+                    <div className="grid grid-cols-2 gap-4">
+                      {performance.totalContractValue && (
+                        <div>
+                          <div className="text-xs text-muted-foreground">
+                            Total Contract Value
+                          </div>
+                          <div className="text-sm font-medium">
+                            {performance.totalContractValue}
+                          </div>
+                        </div>
+                      )}
+                      {performance.yearsInBusiness && (
+                        <div>
+                          <div className="text-xs text-muted-foreground">
+                            Years in Business
+                          </div>
+                          <div className="text-sm font-medium">
+                            {performance.yearsInBusiness} years
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    {performance.keyProjects &&
+                      performance.keyProjects.length > 0 && (
+                        <div>
+                          <div className="text-xs text-muted-foreground mb-1">
+                            Key Projects
+                          </div>
+                          <Badge variant="secondary" className="text-xs">
+                            {performance.keyProjects.length} projects documented
+                          </Badge>
+                          {/* Show first project title as a preview */}
+                          {performance.keyProjects[0] && (
+                            <div className="mt-1">
+                              <span className="text-xs text-muted-foreground">
+                                Latest: {performance.keyProjects[0].title || performance.keyProjects[0].name || 'Untitled Project'}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                  </>
+                )
+              })()}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No past performance information added yet
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Brand Voice & Communication moved to Settings tab */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Volume2 className="h-5 w-5" />
+              Brand Voice & Communication
+            </CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onEdit('settings')}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Configure
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <Alert>
+              <Volume2 className="h-4 w-4" />
+              <AlertDescription>
+                Brand voice and communication preferences are now configured in the <strong>Settings</strong> tab. 
+                These preferences help customize AI-generated content but don't affect your profile completeness score.
+              </AlertDescription>
+            </Alert>
+            
+            {((profile as any).brandVoice || (profile as any).brandTone) && (
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Brand Voice</label>
+                  {(profile as any).brandVoice ? (
+                    <div className="mt-1">
+                      <Badge variant="secondary" className="text-sm">
+                        {(() => {
+                          const display = getBrandVoiceDisplay((profile as any).brandVoice)
+                          return `${display.emoji} ${display.label}`
+                        })()}
+                      </Badge>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground mt-1">Not configured</p>
+                  )}
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Communication Tone</label>
+                  {(profile as any).brandTone ? (
+                    <div className="mt-1">
+                      <Badge variant="secondary" className="text-sm">
+                        {(() => {
+                          const display = getBrandToneDisplay((profile as any).brandTone)
+                          return `${display.emoji} ${display.label}`
+                        })()}
+                      </Badge>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground mt-1">Not configured</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Government Levels & Geographic Preferences */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5" />
+              Target Markets & Preferences
+            </CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onEdit('capabilities')}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {/* Government Levels */}
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Target Government Levels</label>
+              {(profile as any).governmentLevels && (profile as any).governmentLevels.length > 0 ? (
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {(profile as any).governmentLevels.map((level: string, index: number) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {(() => {
+                        const display = getGovernmentLevelDisplay(level)
+                        return `${display.emoji} ${display.label}`
+                      })()}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground mt-1">No government levels selected</p>
+              )}
+            </div>
+
+            {/* Travel Preferences */}
+            {(profile as any).geographicPreferences && (
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Travel & Work Preferences</label>
+                <div className="mt-1 space-y-2">
+                  {(profile as any).geographicPreferences.travelWillingness && (
+                    <div>
+                      <Badge variant="secondary" className="text-sm">
+                        {(() => {
+                          const display = getTravelWillingnessDisplay((profile as any).geographicPreferences.travelWillingness)
+                          return `${display.emoji} ${display.label}`
+                        })()}
+                      </Badge>
+                      {(profile as any).geographicPreferences.maxTravelPercentage && (
+                        <span className="text-sm text-muted-foreground ml-2">
+                          (Max {(profile as any).geographicPreferences.maxTravelPercentage}% travel time)
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {(profile as any).geographicPreferences.workFromHome && (
+                    <div>
+                      <Badge variant="success" className="text-xs">
+                        🏠 Remote Work Capable
+                      </Badge>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Profile Completion Checklist */}
+      <Card className="lg:col-span-3">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="h-5 w-5" />
+            Profile Completion Checklist
+          </CardTitle>
+          <CardDescription>
+            Complete these sections to improve your match scores and visibility
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {completionItems.map((item) => (
+              <div
+                key={item.key}
+                className={`p-4 rounded-lg border-2 cursor-pointer transition-colors ${
+                  item.completed
+                    ? 'border-green-200 bg-green-50 dark:border-green-500/30 dark:bg-green-500/10'
+                    : 'border-border bg-muted/30 hover:border-muted-foreground/50'
+                }`}
+                onClick={() => onEdit(item.key)}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium text-sm">{item.label}</span>
+                  {item.completed ? (
+                    <Badge variant="success" size="sm">
+                      Complete
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" size="sm">
+                      Incomplete
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Click to {item.completed ? 'edit' : 'complete'}
+                </p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+})
+
+function CreateProfilePrompt({
+  onCreate,
+}: {
+  onCreate: (profile: Profile) => void
+}) {
+  const { user } = useUser()
+  const [loading, setLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    companyName: '',
+    city: '',
+    state: '',
+  })
+  const {
+    token: csrfToken,
+    loading: csrfLoading,
+    error: csrfError,
+    addToHeaders,
+  } = useCSRF()
+
+  const handleCreateProfile = async () => {
+    if (!csrfToken) {
+      alert(
+        'Security token not available. Please refresh the page and try again.'
+      )
+      return
+    }
+
+    if (!formData.companyName.trim()) {
+      alert('Please enter your company name')
+      return
+    }
+
+    setLoading(true)
+    try {
+      // First, get or create profile (GET endpoint handles creation automatically)
+      const checkResponse = await fetch('/api/v1/profile')
+      const checkData = await checkResponse.json()
+
+      if (!checkData.success) {
+        console.error('Failed to get/create profile:', checkData.error)
+        alert('Failed to initialize profile. Please try again.')
+        return
+      }
+
+      // Now update the profile with user's input
+      const response = await fetch('/api/v1/profile', {
+        method: 'PATCH',
+        headers: addToHeaders({
+          'Content-Type': 'application/json',
+        }),
+        body: JSON.stringify({
+          companyName: formData.companyName.trim(),
+          city: formData.city.trim() || undefined,
+          state: formData.state.trim() || undefined,
+          primaryContactEmail: user?.emailAddresses[0]?.emailAddress || '',
+        }),
+      })
+
+      const data = await response.json()
+      console.log('Profile creation response:', data)
+
+      if (data.success) {
+        onCreate(data.data)
+      } else {
+        console.error('Profile update failed:', data.error)
+        alert(`Failed to update profile: ${data.error}`)
+      }
+    } catch (err) {
+      console.error('Failed to create profile:', err)
+      alert('Failed to create profile. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <Card className="max-w-lg mx-auto">
+      <CardHeader className="text-center">
+        <CardTitle>Welcome to GovMatch AI!</CardTitle>
+        <CardDescription>
+          Let&apos;s set up your company profile to start discovering relevant
+          government opportunities
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {csrfError && (
+          <Alert className="mb-4" variant="destructive">
+            <AlertDescription>
+              Security error: {csrfError}. Please refresh the page.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <div className="space-y-4">
+          <div>
+            <label
+              htmlFor="companyName"
+              className="block text-sm font-medium mb-2"
+            >
+              Company Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="companyName"
+              type="text"
+              value={formData.companyName}
+              onChange={(e) =>
+                setFormData({ ...formData, companyName: e.target.value })
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your company name"
+              disabled={loading || csrfLoading}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="city" className="block text-sm font-medium mb-2">
+                City
+              </label>
+              <input
+                id="city"
+                type="text"
+                value={formData.city}
+                onChange={(e) =>
+                  setFormData({ ...formData, city: e.target.value })
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="City"
+                disabled={loading || csrfLoading}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="state" className="block text-sm font-medium mb-2">
+                State
+              </label>
+              <input
+                id="state"
+                type="text"
+                value={formData.state}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    state: e.target.value.toUpperCase(),
+                  })
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="State (e.g., CA)"
+                maxLength={2}
+                disabled={loading || csrfLoading}
+              />
+            </div>
+          </div>
+
+          <div className="pt-4">
+            <Button
+              onClick={handleCreateProfile}
+              disabled={
+                loading ||
+                csrfLoading ||
+                !csrfToken ||
+                !formData.companyName.trim()
+              }
+              className="w-full"
+              size="lg"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              {loading
+                ? 'Setting up your profile...'
+                : csrfLoading
+                  ? 'Loading...'
+                  : 'Get Started'}
+            </Button>
+          </div>
+
+          <p className="text-xs text-gray-500 text-center">
+            You can complete your full profile after this initial setup
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function AccountSettings({
+  onShowDeleteDialog,
+  profile,
+  onUpdate,
+}: {
+  onShowDeleteDialog: () => void
+  profile: Profile
+  onUpdate: (profile: Profile) => void
+}) {
+  const { user } = useUser()
+  const { play: playSound, setEnabled: setSoundEnabled } = useSoundEffects()
+  const [soundEffectsEnabled, setSoundEffectsEnabled] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
+  const [brandVoice, setBrandVoice] = useState<string>('')
+  const [brandTone, setBrandTone] = useState<string>('')
+  const [brandLoading, setBrandLoading] = useState(false)
+  const [brandError, setBrandError] = useState('')
+  const [brandSuccess, setBrandSuccess] = useState('')
+  const { token: csrfToken, addToHeaders } = useCSRF()
+
+  useEffect(() => {
+    // Load sound effects preference from localStorage on component mount
+    if (typeof window !== 'undefined') {
+      const loadPreference = () => {
+        const stored = localStorage.getItem('soundEffectsEnabled')
+        const enabled = stored === null ? true : stored === 'true' // Default to true if not set
+        console.log('Loading sound effects preference:', { stored, enabled })
+        setSoundEffectsEnabled(enabled)
+        setIsLoading(false)
+      }
+
+      loadPreference()
+    }
+  }, [])
+
+  // Load brand settings from profile - use profile.id to prevent infinite loops
+  useEffect(() => {
+    if (profile) {
+      setBrandVoice((profile as any).brandVoice || '')
+      setBrandTone((profile as any).brandTone || '')
+    }
+  }, [profile?.id]) // Only depend on profile ID, not the entire object
+
+  // Listen for SAM.gov modal open events  
+  useEffect(() => {
+    const handleOpenSamGovModal = () => {
+      console.log('openSamGovModal event received - opening modal')
+      setShowSamGovModal(true)
+    }
+
+    console.log('Setting up openSamGovModal event listener')
+    window.addEventListener('openSamGovModal', handleOpenSamGovModal)
+    
+    return () => {
+      console.log('Cleaning up openSamGovModal event listener')
+      window.removeEventListener('openSamGovModal', handleOpenSamGovModal)
+    }
+  }, [])
+
+
+  const handleSoundToggle = (enabled: boolean) => {
+    console.log('Sound toggle changed to:', enabled)
+    setSoundEnabled(enabled)
+    setSoundEffectsEnabled(enabled)
+
+    // Save to localStorage immediately
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('soundEffectsEnabled', String(enabled))
+      console.log(
+        'Saved to localStorage:',
+        localStorage.getItem('soundEffectsEnabled')
+      )
+    }
+
+    if (enabled) {
+      playSound(SoundEffect.SUCCESS)
+    }
+  }
+
+
+  const handleBrandSave = async () => {
+    if (!csrfToken) {
+      setBrandError('Security token not available. Please refresh the page and try again.')
+      return
+    }
+
+    setBrandLoading(true)
+    setBrandError('')
+    setBrandSuccess('')
+
+    try {
+      const updates: any = {}
+      
+      if (brandVoice) {
+        updates.brandVoice = brandVoice
+      }
+      
+      if (brandTone) {
+        updates.brandTone = brandTone
+      }
+
+      const response = await fetch('/api/v1/profile', {
+        method: 'PATCH',
+        headers: addToHeaders({
+          'Content-Type': 'application/json',
+        }),
+        body: JSON.stringify(updates),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        onUpdate(data.data)
+        setBrandSuccess('Brand preferences saved successfully!')
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => setBrandSuccess(''), 3000)
+      } else {
+        setBrandError('Failed to save brand preferences. Please try again.')
+      }
+      
+    } catch (err) {
+      console.error('Brand settings update error:', err)
+      setBrandError('Failed to save brand preferences. Please try again.')
+    } finally {
+      setBrandLoading(false)
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Account Deletion Status */}
+      <AccountDeletionStatus />
+
+      {/* SAM.gov Profile Information */}
+      {(profile.uei || profile.cageCode) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              SAM.gov Registration
+            </CardTitle>
+            <CardDescription>
+              Your current SAM.gov registration information
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2">
+              {profile.uei && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">UEI Number</label>
+                  <div className="font-mono text-lg">{profile.uei}</div>
+                </div>
+              )}
+              {profile.cageCode && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">CAGE Code</label>
+                  <div className="font-mono text-lg">{profile.cageCode}</div>
+                </div>
+              )}
+            </div>
+            <div className="mt-4">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => window.open('https://sam.gov/content/entity-registration', '_blank')}
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                View on SAM.gov
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Brand & Communication Preferences */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Volume2 className="h-5 w-5" />
+            Brand & Communication Preferences
+          </CardTitle>
+          <CardDescription>
+            Configure how your company communicates and represents itself in proposals and interactions
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* Error/Success Messages */}
+            {brandError && (
+              <Alert variant="destructive">
+                <AlertDescription>{brandError}</AlertDescription>
+              </Alert>
+            )}
+
+            {brandSuccess && (
+              <Alert>
+                <AlertDescription className="text-green-600">{brandSuccess}</AlertDescription>
+              </Alert>
+            )}
+
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* Brand Voice */}
+              <div className="space-y-2">
+                <Label htmlFor="brandVoice">Brand Voice</Label>
+                <Select
+                  value={brandVoice}
+                  onValueChange={(value) => setBrandVoice(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your brand voice" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {BRAND_VOICE_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        <div className="flex items-center gap-2">
+                          <span>{option.emoji}</span>
+                          <span>{option.label}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  How your company communicates with clients and partners
+                </p>
+              </div>
+
+              {/* Brand Tone */}
+              <div className="space-y-2">
+                <Label htmlFor="brandTone">Communication Tone</Label>
+                <Select
+                  value={brandTone}
+                  onValueChange={(value) => setBrandTone(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select communication tone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {BRAND_TONE_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        <div className="flex items-center gap-2">
+                          <span>{option.emoji}</span>
+                          <span>{option.label}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  The style and approach of your business communication
+                </p>
+              </div>
+            </div>
+
+            {/* Save Button */}
+            <div className="flex justify-end">
+              <Button
+                onClick={handleBrandSave}
+                disabled={brandLoading || !csrfToken}
+                className="min-w-32"
+              >
+                {brandLoading ? 'Saving...' : 'Save Brand Preferences'}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Sound Effects Preferences */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            {soundEffectsEnabled ? (
+              <Volume2 className="h-5 w-5" />
+            ) : (
+              <VolumeX className="h-5 w-5" />
+            )}
+            Sound Effects
+          </CardTitle>
+          <CardDescription>
+            Control sound effects for user interactions
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <div className="text-sm font-medium">Enable Sound Effects</div>
+              <div className="text-sm text-muted-foreground">
+                Play sounds when dragging files or deleting folders
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={soundEffectsEnabled}
+                onCheckedChange={handleSoundToggle}
+                disabled={isLoading}
+              />
+              <span className="text-sm text-muted-foreground">
+                {isLoading ? 'Loading...' : soundEffectsEnabled ? 'On' : 'Off'}
+              </span>
+            </div>
+          </div>
+
+          {soundEffectsEnabled && (
+            <div className="pt-2 border-t">
+              <div className="text-xs text-muted-foreground">
+                Sound effects are enabled for:
+              </div>
+              <div className="mt-1 space-y-1">
+                <div className="text-xs text-muted-foreground">
+                  • File drag and drop
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  • Folder deletion
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Account Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center text-red-600">
+            <UserX className="h-5 w-5 mr-2" />
+            Danger Zone
+          </CardTitle>
+          <CardDescription>
+            Irreversible actions that affect your entire account
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Alert className="border-red-200 bg-red-50">
+            <AlertTriangle className="h-4 w-4 text-red-600" />
+            <AlertDescription className="text-red-800">
+              <strong>Warning:</strong> Account deletion is permanent and cannot
+              be undone. All your data will be deleted after a 30-day grace
+              period.
+            </AlertDescription>
+          </Alert>
+
+          <div className="flex items-center justify-between p-4 border border-red-200 rounded-lg bg-red-50">
+            <div>
+              <h4 className="font-semibold text-red-900">Delete Account</h4>
+              <p className="text-sm text-red-700 mt-1">
+                Permanently delete your account and all associated data. This
+                action cannot be undone.
+              </p>
+            </div>
+            <Button
+              variant="destructive"
+              onClick={onShowDeleteDialog}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              <UserX className="h-4 w-4 mr-2" />
+              Delete Account
+            </Button>
+          </div>
+
+          {user && (
+            <div className="text-xs text-gray-500 pt-4 border-t">
+              <strong>Account:</strong> {user.emailAddresses[0]?.emailAddress} •
+              <strong> User ID:</strong> {user.id}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+    </div>
+  )
+}

@@ -1,0 +1,49 @@
+import { serve } from "inngest/next";
+import { inngest } from "@/lib/inngest/client";
+import { 
+  // scoreDocument,  // Temporarily disabled due to import error
+  batchProcessDocuments, 
+  processDocumentBasic, 
+  processDocumentFull,
+  cancelDocumentProcessing,
+  analyzeDocument,
+  vectorizeDocument,
+  handleVectorizeError,
+  // SAM.gov Sync Functions
+  syncSamGovOpportunities,
+  triggerSamGovSync,
+  scheduledSamGovSync,
+  // Match Score Functions
+  calculateMatchScoreFunction,
+  calculateBatchMatchScoresFunction,
+  // Comprehensive Analysis Functions
+  analyzeOpportunityComprehensive
+} from "@/lib/inngest/functions";
+
+/**
+ * Inngest API route handler
+ * This serves the Inngest dashboard and handles function execution
+ */
+export const { GET, POST, PUT } = serve({
+  client: inngest,
+  functions: [
+    // scoreDocument,  // Temporarily disabled due to import error
+    batchProcessDocuments,
+    processDocumentBasic,
+    processDocumentFull,
+    cancelDocumentProcessing,
+    analyzeDocument,
+    vectorizeDocument,
+    handleVectorizeError,
+    // SAM.gov Sync Functions
+    syncSamGovOpportunities,
+    triggerSamGovSync,
+    scheduledSamGovSync,
+    // Match Score Functions
+    calculateMatchScoreFunction,
+    calculateBatchMatchScoresFunction,
+    // Comprehensive Analysis Functions
+    analyzeOpportunityComprehensive,
+  ],
+  signingKey: process.env.INNGEST_SIGNING_KEY,
+});

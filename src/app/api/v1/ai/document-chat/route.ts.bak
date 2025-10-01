@@ -1,0 +1,329 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
+import { streamText, generateText } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { anthropic } from '@ai-sdk/anthropic';
+import { z } from 'zod';
+import { prisma } from '@/lib/db';
+import { AIServiceManager } from '@/lib/ai/ai-service-manager';
+import { UsageTrackingService } from '@/lib/usage-tracking';
+
+const documentChatSchema = z.object({
+  messages: z.array(z.object({
+    role: z.enum(['user', 'assistant', 'system'])
+      .describe("Message role in document-based conversation: 'user' asks questions about documents, 'assistant' provides answers based on document content, 'system' contains document context and analysis instructions."),
+    
+    content: z.string()
+      .describe("Message content for document-based chat. User messages should reference specific document sections, requirements, or ask analysis questions. Assistant responses include document-grounded answers with relevant citations.")
+  }))
+    .describe("Conversation history for document-based chat. The AI uses both the conversation context and document content to provide accurate, grounded responses about government solicitations, amendments, and requirements."),
+  
+  documentId: z.string().optional()
+    .describe("Specific document ID to focus the chat on. When provided, the AI will prioritize this document's content in responses. If not provided, the chat considers all uploaded documents in the organization's context."),
+  
+  organizationId: z.string()
+    .describe("Organization identifier required for document access control and ensuring the AI only references documents that belong to this organization. Critical for multi-tenant security and compliance."),
+  
+  useVercelOptimized: z.boolean().default(true)
+    .describe("Enable Vercel AI SDK for optimized document analysis and chat responses. Provides enhanced RAG (Retrieval Augmented Generation) capabilities and better streaming performance for document-based conversations."),
+  
+  streamingEnabled: z.boolean().default(true)
+    .describe("Enable real-time streaming of document analysis responses. Particularly useful for complex document analysis that may take longer to process, providing immediate feedback as the AI analyzes and responds."),
+  
+  model: z.string().optional()
+    .describe("AI model for document analysis and chat. Defaults to organization preferences. Models like 'claude-3-sonnet' excel at document analysis, while 'gpt-4o' provides balanced performance for government contract documents."),
+  
+  temperature: z.number().min(0).max(2).optional()
+    .describe("Response creativity control for document-based chat. Lower values (0-0.3) recommended for factual document analysis and compliance checking. Higher values (0.7-1.0) for creative interpretation and strategic insights."),
+  
+  maxTokens: z.number().optional()
+    .describe("Maximum response length for document chat. Longer responses may be needed for comprehensive document analysis, opportunity summaries, and detailed requirement breakdowns. Defaults to model-appropriate limits.")
+});
+
+async function getDocumentContext(documentId: string, organizationId: string, internalUserId: string) {
+  const document = await prisma.document.findFirst({
+    where: {
+      id: documentId,
+      organizationId,
+      uploadedById: internalUserId, // Use internal user ID, not Clerk ID
+      status: 'COMPLETED'
+    },
+    select: {
+      id: true,
+      name: true,
+      extractedText: true,
+      summary: true,
+      mimeType: true
+    }
+  });
+
+  if (!document) {
+    throw new Error('Document not found or not yet processed');
+  }
+
+  return document;
+}
+
+function buildDocumentSystemPrompt(document: any): string {
+  return `You are an AI assistant specialized in analyzing and discussing documents. You are currently analyzing a document with the following details:
+
+Document: ${document.originalName}
+Type: ${document.mimeType}
+Summary: ${document.summary || 'No summary available'}
+
+Content:
+${document.extractedText}
+
+Instructions:
+1. Answer questions based ONLY on the content of this specific document
+2. If asked about something not in the document, clearly state that the information is not available in this document
+3. Provide specific quotes or references when possible
+4. Be helpful and thorough in your analysis
+5. If the user asks about government contracting aspects, focus on relevant details from the document
+6. Maintain a professional tone suitable for business and government contracting contexts
+
+Remember: You can only reference information that is explicitly contained in the document content provided above.`;
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const { userId } = auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const validation = documentChatSchema.safeParse(body);
+    
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: 'Invalid request data', details: validation.error.format() },
+        { status: 400 }
+      );
+    }
+
+    const { 
+      messages, 
+      documentId, 
+      organizationId, 
+      useVercelOptimized,
+      streamingEnabled,
+      model = 'gpt-4o',
+      temperature = 0.7,
+      maxTokens = 2000
+    } = validation.data;
+
+    // Verify user access to organization
+    const userOrg = await prisma.user.findFirst({
+      where: {
+        clerkId: userId,
+        organizationId
+      }
+    });
+
+    if (!userOrg) {
+      return NextResponse.json(
+        { error: 'Access denied to organization' },
+        { status: 403 }
+      );
+    }
+
+    // Get document context if documentId is provided
+    let documentContext = null;
+    let enhancedMessages = [...messages];
+
+    if (documentId) {
+      try {
+        documentContext = await getDocumentContext(documentId, organizationId, userOrg.id);
+        
+        // Add document context as system message
+        const systemPrompt = buildDocumentSystemPrompt(documentContext);
+        enhancedMessages = [
+          { role: 'system' as const, content: systemPrompt },
+          ...messages
+        ];
+      } catch (error) {
+        return NextResponse.json(
+          { error: 'Failed to load document context' },
+          { status: 404 }
+        );
+      }
+    }
+
+    // Initialize usage tracking
+    const usageTracker = new UsageTrackingService();
+    const startTime = Date.now();
+
+    if (useVercelOptimized && streamingEnabled) {
+      // Use Vercel AI SDK for optimized streaming
+      
+      // Select model provider
+      let aiModel;
+      if (model.startsWith('gpt-')) {
+        aiModel = openai(model);
+      } else if (model.startsWith('claude-')) {
+        aiModel = anthropic(model);
+      } else {
+        aiModel = openai('gpt-4o'); // Default fallback
+      }
+
+      try {
+        const result = await streamText({
+          model: aiModel,
+          messages: enhancedMessages,
+          temperature,
+          maxTokens,
+          onFinish: async (completion) => {
+            // Track usage after completion
+            const endTime = Date.now();
+            const latency = endTime - startTime;
+            
+            await usageTracker.recordAIUsage(organizationId, userId, {
+              provider: model.startsWith('claude-') ? 'anthropic' : 'openai',
+              model,
+              operation: 'document_chat_stream',
+              promptTokens: completion.usage?.promptTokens || 0,
+              completionTokens: completion.usage?.completionTokens || 0,
+              totalTokens: completion.usage?.totalTokens || 0,
+              latency,
+              cost: calculateCost(model, completion.usage?.totalTokens || 0),
+              success: true,
+              metadata: {
+                documentId,
+                documentName: documentContext?.originalName,
+                streamingEnabled: true,
+                vercelOptimized: true
+              }
+            });
+          }
+        });
+
+        return result.toTextStreamResponse();
+        
+      } catch (error) {
+        console.error('Vercel AI streaming error:', error);
+        
+        // Track failure
+        await usageTracker.recordAIUsage(organizationId, userId, {
+          provider: model.startsWith('claude-') ? 'anthropic' : 'openai',
+          model,
+          operation: 'document_chat_stream',
+          promptTokens: 0,
+          completionTokens: 0,
+          totalTokens: 0,
+          latency: Date.now() - startTime,
+          cost: 0,
+          success: false,
+          metadata: {
+            error: error instanceof Error ? error.message : 'Unknown error',
+            documentId,
+            vercelOptimized: true
+          }
+        });
+
+        return NextResponse.json(
+          { error: 'Failed to generate response' },
+          { status: 500 }
+        );
+      }
+    } else {
+      // Use our existing AI service manager for non-streaming or fallback
+      try {
+        const aiService = new AIServiceManager({
+          enableFallback: true,
+          enableVercelAI: false // Use custom system for non-streaming
+        });
+
+        const response = await aiService.generateCompletion({
+          messages: enhancedMessages,
+          model,
+          temperature,
+          maxTokens,
+        });
+
+        // Track usage
+        const endTime = Date.now();
+        const latency = endTime - startTime;
+        
+        await usageTracker.recordAIUsage(organizationId, userId, {
+          provider: response.metadata?.provider || 'openai',
+          model: response.metadata?.model || model,
+          operation: 'document_chat',
+          promptTokens: response.usage?.promptTokens || 0,
+          completionTokens: response.usage?.completionTokens || 0,
+          totalTokens: response.usage?.totalTokens || 0,
+          latency,
+          cost: response.cost || 0,
+          success: true,
+          metadata: {
+            documentId,
+            documentName: documentContext?.originalName,
+            streamingEnabled: false,
+            vercelOptimized: false
+          }
+        });
+
+        return NextResponse.json({
+          id: `msg_${Date.now()}`,
+          role: 'assistant',
+          content: response.content,
+          usage: response.usage,
+          metadata: {
+            documentId,
+            documentName: documentContext?.originalName,
+            latency,
+            provider: response.metadata?.provider
+          }
+        });
+
+      } catch (error) {
+        console.error('Custom AI service error:', error);
+        
+        // Track failure
+        await usageTracker.recordAIUsage(organizationId, userId, {
+          provider: 'unknown',
+          model,
+          operation: 'document_chat',
+          promptTokens: 0,
+          completionTokens: 0,
+          totalTokens: 0,
+          latency: Date.now() - startTime,
+          cost: 0,
+          success: false,
+          metadata: {
+            error: error instanceof Error ? error.message : 'Unknown error',
+            documentId,
+            vercelOptimized: false
+          }
+        });
+
+        return NextResponse.json(
+          { error: 'Failed to generate response' },
+          { status: 500 }
+        );
+      }
+    }
+
+  } catch (error) {
+    console.error('Document chat error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+function calculateCost(model: string, totalTokens: number): number {
+  // Simplified cost calculation - in production this would be more sophisticated
+  const costs: Record<string, number> = {
+    'gpt-4o': 0.03 / 1000, // $0.03 per 1K tokens (average of input/output)
+    'gpt-4': 0.045 / 1000,
+    'gpt-3.5-turbo': 0.002 / 1000,
+    'claude-3-opus': 0.075 / 1000,
+    'claude-3-sonnet': 0.015 / 1000,
+    'claude-3-haiku': 0.00125 / 1000
+  };
+
+  const costPerToken = costs[model] || costs['gpt-4o'];
+  return totalTokens * costPerToken;
+}

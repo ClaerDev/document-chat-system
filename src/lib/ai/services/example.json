@@ -1,0 +1,142 @@
+{
+    "2022": [
+        {
+            "sector": 11,
+            "definition": "Agriculture, Forestry, Fishing and Hunting",
+            "description": "The Agriculture, Forestry, Fishing and Hunting sector comprises establishments primarily engaged in growing crops, raising animals, harvesting timber, and harvesting fish and other animals from a farm, ranch, or their natural habitats.",
+            "subsectors": [
+                {
+                    "code": 111,
+                    "definition": "Crop Production",
+                    "description": "Industries in the Crop Production subsector grow crops mainly for food and fiber.",
+                    "industryGroups": [
+                        {
+                            "code": 1111,
+                            "definition": "Oilseed and Grain Farming",
+                            "description": "This industry group comprises establishments primarily engaged in growing oilseed and/or grain crops.",
+                            "industries": [
+                                {
+                                    "code": 11111,
+                                    "definition": "Soybean Farming",
+                                    "description": "This industry comprises establishments primarily engaged in growing soybeans.",
+                                    "nationalIndustries": [
+                                        {
+                                            "code": 111110,
+                                            "definition": "Soybean Farming",
+                                            "description": "This U.S. industry comprises establishments primarily engaged in growing soybeans.",
+                                            "examples": [
+                                                "Soybean farms",
+                                                "Edamame farming"
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "code": 11112,
+                                    "definition": "Oilseed (except Soybean) Farming",
+                                    "description": "This industry comprises establishments primarily engaged in growing oilseed crops (except soybeans).",
+                                    "nationalIndustries": [
+                                        {
+                                            "code": 111120,
+                                            "definition": "Oilseed (except Soybean) Farming",
+                                            "description": "This U.S. industry comprises establishments primarily engaged in growing fibrous oilseed crops.",
+                                            "examples": [
+                                                "Canola farming",
+                                                "Flaxseed farming",
+                                                "Safflower farming",
+                                                "Sunflower farming"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "code": 1112,
+                            "definition": "Vegetable and Melon Farming",
+                            "description": "This industry group comprises establishments primarily engaged in growing vegetables and melons.",
+                            "industries": [
+                                {
+                                    "code": 11121,
+                                    "definition": "Vegetable and Melon Farming",
+                                    "description": "This industry comprises establishments primarily engaged in growing vegetables and melons.",
+                                    "nationalIndustries": [
+                                        {
+                                            "code": 111211,
+                                            "definition": "Potato Farming",
+                                            "description": "This U.S. industry comprises establishments primarily engaged in growing potatoes.",
+                                            "examples": [
+                                                "Irish potato farming",
+                                                "Sweet potato farming"
+                                            ]
+                                        },
+                                        {
+                                            "code": 111219,
+                                            "definition": "Other Vegetable (except Potato) and Melon Farming",
+                                            "description": "This U.S. industry comprises establishments primarily engaged in growing vegetables (except potatoes) and melons.",
+                                            "examples": [
+                                                "Bean farming (green)",
+                                                "Beet farming",
+                                                "Broccoli farming",
+                                                "Cabbage farming",
+                                                "Carrot farming",
+                                                "Cauliflower farming",
+                                                "Celery farming",
+                                                "Corn farming (sweet)",
+                                                "Cucumber farming",
+                                                "Lettuce farming",
+                                                "Melon farming",
+                                                "Onion farming",
+                                                "Pea farming (green)",
+                                                "Pepper farming (bell)",
+                                                "Spinach farming",
+                                                "Squash farming",
+                                                "Tomato farming (field and greenhouse)"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "code": 112,
+                    "definition": "Animal Production and Aquaculture",
+                    "description": "Industries in the Animal Production and Aquaculture subsector raise or fatten animals for the sale of animals or animal products.",
+                    "industryGroups": [
+                        {
+                            "code": 1121,
+                            "definition": "Cattle Ranching and Farming",
+                            "description": "This industry group comprises establishments primarily engaged in raising cattle, milking dairy cattle, or feeding cattle for fattening.",
+                            "industries": [
+                                {
+                                    "code": 11211,
+                                    "definition": "Beef Cattle Ranching and Farming",
+                                    "description": "This industry comprises establishments primarily engaged in raising cattle for beef production.",
+                                    "nationalIndustries": [
+                                        {
+                                            "code": 112111,
+                                            "definition": "Beef Cattle Ranching and Farming",
+                                            "description": "This U.S. industry comprises establishments primarily engaged in raising cattle for beef production.",
+                                            "examples": [
+                                                "Beef cattle ranching",
+                                                "Cattle feedlots",
+                                                "Cattle ranching"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "2017": [],
+    "2012": [],
+    "2007": [],
+    "2002": [],
+    "1997": []
+}

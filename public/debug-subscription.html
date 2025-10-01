@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Debug Tool</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 12px;
+            border-radius: 6px;
+            margin: 12px 0;
+        }
+        .success { background: #dcfce7; color: #166534; border-left: 4px solid #16a34a; }
+        .error { background: #fef2f2; color: #991b1b; border-left: 4px solid #dc2626; }
+        .warning { background: #fefce8; color: #a16207; border-left: 4px solid #ca8a04; }
+        .info { background: #eff6ff; color: #1e40af; border-left: 4px solid #3b82f6; }
+        pre {
+            background: #f1f5f9;
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 8px 8px 8px 0;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 16px 0;
+        }
+        @media (max-width: 640px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Subscription Debug Tool</h1>
+        <p>This tool helps debug subscription issues by checking your current subscription data and Stripe synchronization.</p>
+        
+        <div>
+            <button onclick="checkSubscription()">Check Current Subscription</button>
+            <button onclick="checkBillingHistory()">Check Billing History</button>
+            <button onclick="checkAll()">Check Everything</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        let results = document.getElementById('results');
+
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+        }
+
+        function logJson(data, title = 'Data') {
+            const div = document.createElement('div');
+            div.innerHTML = `<h3>${title}</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+            results.appendChild(div);
+        }
+
+        function clearResults() {
+            results.innerHTML = '';
+        }
+
+        async function checkSubscription() {
+            clearResults();
+            log('🔄 Checking current subscription...', 'info');
+
+            try {
+                const response = await fetch('/api/billing/subscription', {
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    log(`❌ API Error (${response.status}): ${errorData.error}`, 'error');
+                    logJson(errorData, 'Error Details');
+                    return;
+                }
+
+                const data = await response.json();
+                log('✅ Successfully retrieved subscription data', 'success');
+                
+                const sub = data.subscription;
+                log(`📋 Current Plan: <strong>${sub.planType}</strong> (${sub.status})`, 'info');
+                log(`💰 Amount: $${sub.amount / 100} ${sub.currency}/${sub.interval}`, 'info');
+                log(`📅 Period: ${new Date(sub.currentPeriodStart).toLocaleDateString()} - ${new Date(sub.currentPeriodEnd).toLocaleDateString()}`, 'info');
+                
+                if (sub.status === 'TRIALING') {
+                    log(`⏰ Trial ends: ${new Date(sub.currentPeriodEnd).toLocaleDateString()}`, 'warning');
+                }
+
+                if (sub.cancelAtPeriodEnd) {
+                    log(`⚠️ Subscription will be canceled on ${new Date(sub.currentPeriodEnd).toLocaleDateString()}`, 'warning');
+                }
+
+                logJson(sub, 'Full Subscription Data');
+
+            } catch (error) {
+                log(`❌ Network Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkBillingHistory() {
+            clearResults();
+            log('🔄 Checking billing history...', 'info');
+
+            try {
+                const response = await fetch('/api/billing/invoices', {
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    log(`❌ API Error (${response.status}): ${errorData.error}`, 'error');
+                    return;
+                }
+
+                const data = await response.json();
+                
+                if (data.invoices && data.invoices.length > 0) {
+                    log(`✅ Found ${data.invoices.length} invoice(s)`, 'success');
+                    
+                    data.invoices.slice(0, 3).forEach((invoice, index) => {
+                        const amount = invoice.amount / 100;
+                        const date = new Date(invoice.date).toLocaleDateString();
+                        log(`${index + 1}. ${invoice.description} - $${amount} (${invoice.status}) - ${date}`, 'info');
+                    });
+                    
+                    if (data.invoices.length > 3) {
+                        log(`... and ${data.invoices.length - 3} more invoice(s)`, 'info');
+                    }
+                } else {
+                    log('📭 No billing history found', 'warning');
+                    log('This is normal if you just started your subscription or are on a trial', 'info');
+                }
+
+                logJson(data, 'Billing History Data');
+
+            } catch (error) {
+                log(`❌ Network Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkAll() {
+            clearResults();
+            
+            log('🔄 Running comprehensive subscription check...', 'info');
+            
+            // Check subscription
+            await checkSubscription();
+            
+            // Add separator
+            const separator = document.createElement('hr');
+            separator.style.margin = '24px 0';
+            results.appendChild(separator);
+            
+            // Check billing history
+            log('🔄 Now checking billing history...', 'info');
+            
+            try {
+                const response = await fetch('/api/billing/invoices', {
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.invoices && data.invoices.length > 0) {
+                        log(`✅ Found ${data.invoices.length} invoice(s) in billing history`, 'success');
+                    } else {
+                        log('📭 No billing history found (normal for trials)', 'warning');
+                    }
+                } else {
+                    log('⚠️ Could not fetch billing history', 'warning');
+                }
+            } catch (error) {
+                log('⚠️ Error checking billing history', 'warning');
+            }
+
+            // Recommendations
+            const recommendations = document.createElement('div');
+            recommendations.innerHTML = `
+                <h3>💡 Troubleshooting Tips</h3>
+                <div class="status info">
+                    <strong>If your plan isn't updating:</strong><br>
+                    1. Try refreshing the page (Ctrl+F5 or Cmd+Shift+R)<br>
+                    2. Check if you're still in a trial period<br>
+                    3. Wait a few minutes for Stripe synchronization<br>
+                    4. Contact support if the issue persists
+                </div>
+                <div class="status warning">
+                    <strong>During Trial Period:</strong><br>
+                    Plan changes may not take effect until the trial ends. This is normal Stripe behavior.
+                </div>
+            `;
+            results.appendChild(recommendations);
+        }
+
+        // Auto-run check on page load
+        window.addEventListener('load', () => {
+            log('🚀 Subscription Debug Tool loaded. Click a button above to start checking.', 'info');
+        });
+    </script>
+</body>
+</html>

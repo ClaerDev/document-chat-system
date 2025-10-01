@@ -1,0 +1,764 @@
+{
+  "openrouter_ai_capabilities_mapping": {
+    "metadata": {
+      "version": "1.0",
+      "last_updated": "2025-01-15",
+      "total_models": 45,
+      "api_info": {
+        "base_url": "https://openrouter.ai/api/v1",
+        "models_endpoint": "https://openrouter.ai/api/v1/models",
+        "chat_endpoint": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "Bearer token required",
+        "api_format": "OpenAI-compatible"
+      }
+    },
+    
+    "quick_reference": {
+      "best_for_web_search": ["perplexity/sonar-pro", "openai/gpt-4o:online"],
+      "best_for_reasoning": ["openai/o1-preview", "deepseek/deepseek-r1", "google/gemini-2.5-pro-exp"],
+      "best_for_coding": ["openai/o1-mini", "deepseek/deepseek-chat-v3-0324:free"],
+      "best_for_image_analysis": ["openai/gpt-4o", "anthropic/claude-3.5-sonnet", "google/gemini-2.5-flash"],
+      "best_free_models": ["meta-llama/llama-3.3-70b-instruct:free", "deepseek/deepseek-chat-v3-0324:free", "qwen/qwq-32b:free"],
+      "fastest_models": ["openai/gpt-4o-mini", "google/gemini-flash-1.5", "anthropic/claude-3-haiku"],
+      "enterprise_grade": ["anthropic/claude-3-opus", "google/gemini-pro-1.5", "openai/gpt-4-turbo"]
+    },
+
+    "models_by_capability": {
+      "web_search": {
+        "description": "Models with real-time web search capabilities",
+        "models": [
+          {
+            "id": "perplexity/sonar-pro",
+            "name": "Perplexity: Sonar Pro",
+            "provider": "Perplexity",
+            "description": "Advanced web search model with enhanced reasoning capabilities",
+            "capabilities": ["web_search", "reasoning", "real_time_data"],
+            "context_length": 32768,
+            "pricing": {
+              "prompt": "0.000003",
+              "completion": "0.000015",
+              "web_search": "0.005"
+            },
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "stop", "web_search_options"]
+          },
+          {
+            "id": "perplexity/llama-3.1-sonar-large-128k-online",
+            "name": "Perplexity: Llama 3.1 Sonar Large 128K Online",
+            "provider": "Perplexity",
+            "description": "Large language model with built-in web search capabilities",
+            "capabilities": ["web_search", "reasoning", "long_context"],
+            "context_length": 131072,
+            "pricing": {
+              "prompt": "0.000001",
+              "completion": "0.000001",
+              "web_search": "0.005"
+            },
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "stop", "web_search_options", "reasoning"]
+          },
+          {
+            "id": "openai/gpt-4o:online",
+            "name": "OpenAI: GPT-4o with Web Search",
+            "provider": "OpenAI",
+            "description": "GPT-4o enhanced with real-time web search via plugin",
+            "capabilities": ["web_search", "multimodal", "tool_calling", "reasoning"],
+            "context_length": 128000,
+            "pricing": {
+              "prompt": "0.000005",
+              "completion": "0.000015",
+              "web_search": "0.02"
+            },
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "tool_choice", "stop", "structured_outputs", "seed"]
+          }
+        ]
+      },
+      
+      "reasoning": {
+        "description": "Models optimized for complex reasoning and analysis",
+        "models": [
+          {
+            "id": "openai/o1-preview",
+            "name": "OpenAI: o1 Preview",
+            "provider": "OpenAI",
+            "description": "Advanced reasoning model with chain-of-thought capabilities",
+            "capabilities": ["reasoning", "mathematics", "coding", "scientific_analysis"],
+            "context_length": 128000,
+            "pricing": {
+              "prompt": "0.000015",
+              "completion": "0.00006"
+            },
+            "supported_parameters": ["max_tokens", "reasoning", "include_reasoning", "temperature", "seed"]
+          },
+          {
+            "id": "openai/o1-mini",
+            "name": "OpenAI: o1 Mini",
+            "provider": "OpenAI",
+            "description": "Compact reasoning model optimized for coding and STEM tasks",
+            "capabilities": ["reasoning", "coding", "mathematics", "problem_solving"],
+            "context_length": 128000,
+            "pricing": {
+              "prompt": "0.000003",
+              "completion": "0.000012"
+            },
+            "supported_parameters": ["max_tokens", "reasoning", "include_reasoning", "temperature", "seed"]
+          },
+          {
+            "id": "deepseek/deepseek-r1",
+            "name": "DeepSeek: R1",
+            "provider": "DeepSeek",
+            "description": "Reasoning-focused model with strong performance in mathematics and coding",
+            "capabilities": ["reasoning", "mathematics", "coding", "problem_solving"],
+            "context_length": 64000,
+            "pricing": {
+              "prompt": "0.00000055",
+              "completion": "0.0000022"
+            },
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "reasoning", "include_reasoning", "stop", "seed"]
+          },
+          {
+            "id": "deepseek/deepseek-r1-zero:free",
+            "name": "DeepSeek: R1 Zero (Free)",
+            "provider": "DeepSeek",
+            "description": "Free reasoning model with reinforcement learning capabilities",
+            "capabilities": ["reasoning", "mathematics", "coding", "analysis"],
+            "context_length": 64000,
+            "pricing": {
+              "prompt": "0",
+              "completion": "0"
+            },
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "reasoning", "include_reasoning", "stop"]
+          },
+          {
+            "id": "google/gemini-2.5-pro-exp",
+            "name": "Google: Gemini 2.5 Pro Experimental",
+            "provider": "Google",
+            "description": "Experimental model with advanced reasoning for complex research",
+            "capabilities": ["reasoning", "multimodal", "scientific_analysis", "mathematics"],
+            "context_length": 1048576,
+            "pricing": {
+              "prompt": "0.00000125",
+              "completion": "0.00001"
+            },
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "reasoning", "include_reasoning", "stop", "seed"]
+          },
+          {
+            "id": "qwen/qwq-32b:free",
+            "name": "Qwen: QwQ 32B (Free)",
+            "provider": "Qwen",
+            "description": "Free reasoning model optimized for question-answering and research",
+            "capabilities": ["reasoning", "question_answering", "analysis", "mathematics"],
+            "context_length": 32768,
+            "pricing": {
+              "prompt": "0",
+              "completion": "0"
+            },
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "reasoning", "include_reasoning", "stop"]
+          }
+        ]
+      },
+
+      "multimodal": {
+        "description": "Models that can process text, images, and other media types",
+        "models": [
+          {
+            "id": "openai/gpt-4o",
+            "name": "OpenAI: GPT-4o",
+            "provider": "OpenAI",
+            "description": "Advanced multimodal model with strong vision and analysis capabilities",
+            "capabilities": ["multimodal", "image_analysis", "tool_calling", "reasoning"],
+            "context_length": 128000,
+            "pricing": {
+              "prompt": "0.000005",
+              "completion": "0.000015",
+              "image": "0.001445"
+            },
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "tool_choice", "structured_outputs", "stop", "seed", "top_k"]
+          },
+          {
+            "id": "openai/gpt-4o-mini",
+            "name": "OpenAI: GPT-4o Mini",
+            "provider": "OpenAI",
+            "description": "Lightweight multimodal model with fast inference",
+            "capabilities": ["multimodal", "image_analysis", "fast_inference", "cost_effective"],
+            "context_length": 128000,
+            "pricing": {
+              "prompt": "0.00000015",
+              "completion": "0.0000006",
+              "image": "0.002975"
+            },
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "tool_choice", "structured_outputs", "stop", "seed"]
+          },
+          {
+            "id": "anthropic/claude-3.5-sonnet",
+            "name": "Anthropic: Claude 3.5 Sonnet",
+            "provider": "Anthropic",
+            "description": "Advanced model with excellent document and image analysis",
+            "capabilities": ["multimodal", "document_analysis", "reasoning", "tool_calling"],
+            "context_length": 200000,
+            "pricing": {
+              "prompt": "0.000003",
+              "completion": "0.000015",
+              "image": "0.0012"
+            },
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "tool_choice", "structured_outputs", "stop"]
+          },
+          {
+            "id": "google/gemini-2.5-flash",
+            "name": "Google: Gemini 2.5 Flash",
+            "provider": "Google",
+            "description": "Fast multimodal model optimized for image and document analysis",
+            "capabilities": ["multimodal", "image_analysis", "reasoning", "fast_inference"],
+            "context_length": 1048576,
+            "pricing": {
+              "prompt": "0.0000003",
+              "completion": "0.0000025",
+              "image": "0.001238"
+            },
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "reasoning", "include_reasoning", "stop", "seed"]
+          },
+          {
+            "id": "meta-llama/llama-3.2-90b-vision-instruct",
+            "name": "Meta: Llama 3.2 90B Vision",
+            "provider": "Meta",
+            "description": "Large vision-language model with strong multimodal capabilities",
+            "capabilities": ["multimodal", "image_analysis", "instruction_following"],
+            "context_length": 131072,
+            "pricing": {
+              "prompt": "0.0000009",
+              "completion": "0.0000009"
+            },
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "stop", "frequency_penalty", "presence_penalty"]
+          },
+          {
+            "id": "qwen/qwen2.5-vl-3b-instruct:free",
+            "name": "Qwen: Qwen2.5-VL 3B (Free)",
+            "provider": "Qwen",
+            "description": "Free compact vision-language model for image analysis",
+            "capabilities": ["multimodal", "image_analysis", "lightweight"],
+            "context_length": 32768,
+            "pricing": {
+              "prompt": "0",
+              "completion": "0"
+            },
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "stop"]
+          }
+        ]
+      },
+
+      "coding": {
+        "description": "Models specialized for software development and programming",
+        "models": [
+          {
+            "id": "deepseek/deepseek-chat-v3-0324:free",
+            "name": "DeepSeek: Chat V3 (Free)",
+            "provider": "DeepSeek",
+            "description": "Free model with exceptional coding capabilities and reasoning",
+            "capabilities": ["coding", "reasoning", "software_engineering", "debugging"],
+            "context_length": 64000,
+            "pricing": {
+              "prompt": "0",
+              "completion": "0"
+            },
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "tool_choice", "stop", "reasoning"]
+          },
+          {
+            "id": "meta-llama/llama-3.1-70b-instruct",
+            "name": "Meta: Llama 3.1 70B Instruct",
+            "provider": "Meta",
+            "description": "Large instruction-tuned model with strong coding capabilities",
+            "capabilities": ["coding", "tool_calling", "reasoning", "general_purpose"],
+            "context_length": 131072,
+            "pricing": {
+              "prompt": "0.00000088",
+              "completion": "0.00000088"
+            },
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "tool_choice", "stop", "frequency_penalty", "presence_penalty", "seed"]
+          },
+          {
+            "id": "meta-llama/llama-3.1-8b-instruct",
+            "name": "Meta: Llama 3.1 8B Instruct",
+            "provider": "Meta",
+            "description": "Compact instruction-tuned model for general coding tasks",
+            "capabilities": ["coding", "instruction_following", "cost_effective"],
+            "context_length": 131072,
+            "pricing": {
+              "prompt": "0.0000001",
+              "completion": "0.0000001"
+            },
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "tool_choice", "stop", "frequency_penalty", "presence_penalty"]
+          }
+        ]
+      },
+
+      "enterprise": {
+        "description": "High-performance models for enterprise and production use",
+        "models": [
+          {
+            "id": "anthropic/claude-3-opus",
+            "name": "Anthropic: Claude 3 Opus",
+            "provider": "Anthropic",
+            "description": "Flagship model with exceptional capabilities for complex enterprise tasks",
+            "capabilities": ["enterprise_scale", "reasoning", "multimodal", "long_context"],
+            "context_length": 200000,
+            "pricing": {
+              "prompt": "0.000015",
+              "completion": "0.000075"
+            },
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "tool_choice", "structured_outputs", "stop"]
+          },
+          {
+            "id": "google/gemini-pro-1.5",
+            "name": "Google: Gemini Pro 1.5",
+            "provider": "Google",
+            "description": "Enterprise-grade model with ultra-long context and multimodal capabilities",
+            "capabilities": ["enterprise_scale", "ultra_long_context", "multimodal", "reasoning"],
+            "context_length": 2097152,
+            "pricing": {
+              "prompt": "0.00000125",
+              "completion": "0.000005"
+            },
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "tool_choice", "structured_outputs", "stop", "seed"]
+          },
+          {
+            "id": "openai/gpt-4-turbo",
+            "name": "OpenAI: GPT-4 Turbo",
+            "provider": "OpenAI",
+            "description": "Optimized for tool calling and structured outputs with multimodal capabilities",
+            "capabilities": ["enterprise_scale", "tool_calling", "structured_outputs", "multimodal"],
+            "context_length": 128000,
+            "pricing": {
+              "prompt": "0.00001",
+              "completion": "0.00003"
+            },
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "tool_choice", "response_format", "structured_outputs", "stop", "seed"]
+          }
+        ]
+      },
+
+      "free": {
+        "description": "High-quality models available at no cost",
+        "models": [
+          {
+            "id": "meta-llama/llama-3.3-70b-instruct:free",
+            "name": "Meta: Llama 3.3 70B (Free)",
+            "provider": "Meta",
+            "description": "Free large model suitable for general-purpose tasks",
+            "capabilities": ["general_purpose", "instruction_following", "creative_writing"],
+            "context_length": 131072,
+            "pricing": {
+              "prompt": "0",
+              "completion": "0"
+            },
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "stop", "frequency_penalty", "presence_penalty"]
+          },
+          {
+            "id": "google/gemini-2.0-flash-thinking-exp:free",
+            "name": "Google: Gemini 2.0 Flash Thinking (Free)",
+            "provider": "Google",
+            "description": "Free experimental model with enhanced thinking capabilities",
+            "capabilities": ["reasoning", "thinking", "problem_solving", "analysis"],
+            "context_length": 1048576,
+            "pricing": {
+              "prompt": "0",
+              "completion": "0"
+            },
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "reasoning", "include_reasoning", "stop"]
+          }
+        ]
+      },
+
+      "fast_inference": {
+        "description": "Models optimized for speed and real-time applications",
+        "models": [
+          {
+            "id": "anthropic/claude-3-haiku",
+            "name": "Anthropic: Claude 3 Haiku",
+            "provider": "Anthropic",
+            "description": "Fast, efficient model optimized for quick responses",
+            "capabilities": ["fast_inference", "creative_writing", "conversational"],
+            "context_length": 200000,
+            "pricing": {
+              "prompt": "0.00000025",
+              "completion": "0.00000125"
+            },
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "stop", "frequency_penalty", "presence_penalty"]
+          },
+          {
+            "id": "google/gemini-flash-1.5",
+            "name": "Google: Gemini Flash 1.5",
+            "provider": "Google",
+            "description": "Fast, lightweight multimodal model for efficient processing",
+            "capabilities": ["fast_inference", "multimodal", "cost_effective"],
+            "context_length": 1048576,
+            "pricing": {
+              "prompt": "0.000000075",
+              "completion": "0.0000003"
+            },
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "stop", "seed"]
+          }
+        ]
+      }
+    },
+
+    "models_by_provider": {
+      "openai": {
+        "provider_info": {
+          "name": "OpenAI",
+          "strengths": ["reasoning", "tool_calling", "multimodal", "structured_outputs"],
+          "pricing_tier": "premium",
+          "api_compatibility": "native"
+        },
+        "models": [
+          {
+            "id": "openai/gpt-4o",
+            "name": "GPT-4o",
+            "capabilities": ["multimodal", "image_analysis", "tool_calling", "reasoning"],
+            "context_length": 128000,
+            "pricing": {"prompt": "0.000005", "completion": "0.000015", "image": "0.001445"},
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "tool_choice", "structured_outputs", "stop", "seed", "top_k"]
+          },
+          {
+            "id": "openai/gpt-4o-mini",
+            "name": "GPT-4o Mini",
+            "capabilities": ["multimodal", "image_analysis", "fast_inference", "cost_effective"],
+            "context_length": 128000,
+            "pricing": {"prompt": "0.00000015", "completion": "0.0000006", "image": "0.002975"},
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "tool_choice", "structured_outputs", "stop", "seed"]
+          },
+          {
+            "id": "openai/o1-preview",
+            "name": "o1 Preview",
+            "capabilities": ["reasoning", "mathematics", "coding", "scientific_analysis"],
+            "context_length": 128000,
+            "pricing": {"prompt": "0.000015", "completion": "0.00006"},
+            "supported_parameters": ["max_tokens", "reasoning", "include_reasoning", "temperature", "seed"]
+          },
+          {
+            "id": "openai/o1-mini",
+            "name": "o1 Mini",
+            "capabilities": ["reasoning", "coding", "mathematics", "problem_solving"],
+            "context_length": 128000,
+            "pricing": {"prompt": "0.000003", "completion": "0.000012"},
+            "supported_parameters": ["max_tokens", "reasoning", "include_reasoning", "temperature", "seed"]
+          },
+          {
+            "id": "openai/gpt-4-turbo",
+            "name": "GPT-4 Turbo",
+            "capabilities": ["enterprise_scale", "tool_calling", "structured_outputs", "multimodal"],
+            "context_length": 128000,
+            "pricing": {"prompt": "0.00001", "completion": "0.00003"},
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "tool_choice", "response_format", "structured_outputs", "stop", "seed"]
+          }
+        ]
+      },
+      
+      "anthropic": {
+        "provider_info": {
+          "name": "Anthropic",
+          "strengths": ["reasoning", "safety", "long_context", "document_analysis"],
+          "pricing_tier": "premium",
+          "api_compatibility": "openai_compatible"
+        },
+        "models": [
+          {
+            "id": "anthropic/claude-3.5-sonnet",
+            "name": "Claude 3.5 Sonnet",
+            "capabilities": ["multimodal", "document_analysis", "reasoning", "tool_calling"],
+            "context_length": 200000,
+            "pricing": {"prompt": "0.000003", "completion": "0.000015", "image": "0.0012"},
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "tool_choice", "structured_outputs", "stop"]
+          },
+          {
+            "id": "anthropic/claude-3-opus",
+            "name": "Claude 3 Opus",
+            "capabilities": ["enterprise_scale", "reasoning", "multimodal", "long_context"],
+            "context_length": 200000,
+            "pricing": {"prompt": "0.000015", "completion": "0.000075"},
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "tool_choice", "structured_outputs", "stop"]
+          },
+          {
+            "id": "anthropic/claude-3-haiku",
+            "name": "Claude 3 Haiku",
+            "capabilities": ["fast_inference", "creative_writing", "conversational"],
+            "context_length": 200000,
+            "pricing": {"prompt": "0.00000025", "completion": "0.00000125"},
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "stop", "frequency_penalty", "presence_penalty"]
+          }
+        ]
+      },
+
+      "google": {
+        "provider_info": {
+          "name": "Google",
+          "strengths": ["ultra_long_context", "multimodal", "scientific_tasks", "cost_effective"],
+          "pricing_tier": "budget_to_premium",
+          "api_compatibility": "openai_compatible"
+        },
+        "models": [
+          {
+            "id": "google/gemini-2.5-pro-exp",
+            "name": "Gemini 2.5 Pro Experimental",
+            "capabilities": ["reasoning", "multimodal", "scientific_analysis", "mathematics"],
+            "context_length": 1048576,
+            "pricing": {"prompt": "0.00000125", "completion": "0.00001"},
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "reasoning", "include_reasoning", "stop", "seed"]
+          },
+          {
+            "id": "google/gemini-2.5-flash",
+            "name": "Gemini 2.5 Flash",
+            "capabilities": ["multimodal", "image_analysis", "reasoning", "fast_inference"],
+            "context_length": 1048576,
+            "pricing": {"prompt": "0.0000003", "completion": "0.0000025", "image": "0.001238"},
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "reasoning", "include_reasoning", "stop", "seed"]
+          },
+          {
+            "id": "google/gemini-pro-1.5",
+            "name": "Gemini Pro 1.5",
+            "capabilities": ["enterprise_scale", "ultra_long_context", "multimodal", "reasoning"],
+            "context_length": 2097152,
+            "pricing": {"prompt": "0.00000125", "completion": "0.000005"},
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "tool_choice", "structured_outputs", "stop", "seed"]
+          },
+          {
+            "id": "google/gemini-flash-1.5",
+            "name": "Gemini Flash 1.5",
+            "capabilities": ["fast_inference", "multimodal", "cost_effective"],
+            "context_length": 1048576,
+            "pricing": {"prompt": "0.000000075", "completion": "0.0000003"},
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "stop", "seed"]
+          }
+        ]
+      },
+
+      "meta": {
+        "provider_info": {
+          "name": "Meta",
+          "strengths": ["open_source", "cost_effective", "general_purpose"],
+          "pricing_tier": "budget",
+          "api_compatibility": "openai_compatible"
+        },
+        "models": [
+          {
+            "id": "meta-llama/llama-3.3-70b-instruct:free",
+            "name": "Llama 3.3 70B (Free)",
+            "capabilities": ["general_purpose", "instruction_following", "creative_writing"],
+            "context_length": 131072,
+            "pricing": {"prompt": "0", "completion": "0"},
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "stop", "frequency_penalty", "presence_penalty"]
+          },
+          {
+            "id": "meta-llama/llama-3.1-70b-instruct",
+            "name": "Llama 3.1 70B Instruct",
+            "capabilities": ["coding", "tool_calling", "reasoning", "general_purpose"],
+            "context_length": 131072,
+            "pricing": {"prompt": "0.00000088", "completion": "0.00000088"},
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "tool_choice", "stop", "frequency_penalty", "presence_penalty", "seed"]
+          },
+          {
+            "id": "meta-llama/llama-3.2-90b-vision-instruct",
+            "name": "Llama 3.2 90B Vision",
+            "capabilities": ["multimodal", "image_analysis", "instruction_following"],
+            "context_length": 131072,
+            "pricing": {"prompt": "0.0000009", "completion": "0.0000009"},
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "stop", "frequency_penalty", "presence_penalty"]
+          }
+        ]
+      },
+
+      "deepseek": {
+        "provider_info": {
+          "name": "DeepSeek",
+          "strengths": ["reasoning", "coding", "mathematics", "free_options"],
+          "pricing_tier": "budget_to_free",
+          "api_compatibility": "openai_compatible"
+        },
+        "models": [
+          {
+            "id": "deepseek/deepseek-r1",
+            "name": "DeepSeek R1",
+            "capabilities": ["reasoning", "mathematics", "coding", "problem_solving"],
+            "context_length": 64000,
+            "pricing": {"prompt": "0.00000055", "completion": "0.0000022"},
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "reasoning", "include_reasoning", "stop", "seed"]
+          },
+          {
+            "id": "deepseek/deepseek-chat-v3-0324:free",
+            "name": "DeepSeek Chat V3 (Free)",
+            "capabilities": ["coding", "reasoning", "software_engineering", "debugging"],
+            "context_length": 64000,
+            "pricing": {"prompt": "0", "completion": "0"},
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "tools", "tool_choice", "stop", "reasoning"]
+          },
+          {
+            "id": "deepseek/deepseek-r1-zero:free",
+            "name": "DeepSeek R1 Zero (Free)",
+            "capabilities": ["reasoning", "mathematics", "coding", "analysis"],
+            "context_length": 64000,
+            "pricing": {"prompt": "0", "completion": "0"},
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "reasoning", "include_reasoning", "stop"]
+          }
+        ]
+      },
+
+      "perplexity": {
+        "provider_info": {
+          "name": "Perplexity",
+          "strengths": ["web_search", "real_time_information", "research"],
+          "pricing_tier": "standard",
+          "api_compatibility": "openai_compatible"
+        },
+        "models": [
+          {
+            "id": "perplexity/sonar-pro",
+            "name": "Sonar Pro",
+            "capabilities": ["web_search", "reasoning", "real_time_data"],
+            "context_length": 32768,
+            "pricing": {"prompt": "0.000003", "completion": "0.000015", "web_search": "0.005"},
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "stop", "web_search_options"]
+          },
+          {
+            "id": "perplexity/llama-3.1-sonar-large-128k-online",
+            "name": "Llama 3.1 Sonar Large 128K Online",
+            "capabilities": ["web_search", "reasoning", "long_context"],
+            "context_length": 131072,
+            "pricing": {"prompt": "0.000001", "completion": "0.000001", "web_search": "0.005"},
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "stop", "web_search_options", "reasoning"]
+          }
+        ]
+      },
+
+      "qwen": {
+        "provider_info": {
+          "name": "Qwen",
+          "strengths": ["reasoning", "multimodal", "free_options", "multilingual"],
+          "pricing_tier": "budget_to_free",
+          "api_compatibility": "openai_compatible"
+        },
+        "models": [
+          {
+            "id": "qwen/qwq-32b:free",
+            "name": "QwQ 32B (Free)",
+            "capabilities": ["reasoning", "question_answering", "analysis", "mathematics"],
+            "context_length": 32768,
+            "pricing": {"prompt": "0", "completion": "0"},
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "reasoning", "include_reasoning", "stop"]
+          },
+          {
+            "id": "qwen/qwen2.5-vl-3b-instruct:free",
+            "name": "Qwen2.5-VL 3B (Free)",
+            "capabilities": ["multimodal", "image_analysis", "lightweight"],
+            "context_length": 32768,
+            "pricing": {"prompt": "0", "completion": "0"},
+            "supported_parameters": ["max_tokens", "temperature", "top_p", "stop"]
+          }
+        ]
+      }
+    },
+
+    "special_features": {
+      "web_search_variants": {
+        "description": "Add real-time web search to any model",
+        "suffix": ":online",
+        "pricing": "$4 per 1000 results (default max 5 results = $0.02/request)",
+        "powered_by": "Exa.ai",
+        "examples": ["openai/gpt-4o:online", "anthropic/claude-3.5-sonnet:online"]
+      },
+      "performance_variants": {
+        "nitro": {
+          "suffix": ":nitro",
+          "description": "Prioritizes throughput over cost"
+        },
+        "floor": {
+          "suffix": ":floor", 
+          "description": "Prioritizes lowest cost providers"
+        }
+      },
+      "free_tier": {
+        "suffix": ":free",
+        "description": "Free models with rate limits",
+        "rate_limits": "50 requests/day (free tier), 1000 requests/day (with $10+ credits)"
+      }
+    },
+
+    "usage_guides": {
+      "by_use_case": {
+        "web_search_research": {
+          "recommended_models": ["perplexity/sonar-pro", "openai/gpt-4o:online"],
+          "best_for": "Real-time information, current events, fact-checking",
+          "cost_optimization": "Use Perplexity for frequent searches, :online suffix for occasional"
+        },
+        "complex_reasoning": {
+          "recommended_models": ["openai/o1-preview", "deepseek/deepseek-r1", "google/gemini-2.5-pro-exp"],
+          "best_for": "Scientific analysis, mathematical problems, complex logic",
+          "cost_optimization": "Use o1-mini for STEM, free DeepSeek for learning"
+        },
+        "image_analysis": {
+          "recommended_models": ["openai/gpt-4o", "anthropic/claude-3.5-sonnet", "google/gemini-2.5-flash"],
+          "best_for": "Document processing, visual analysis, chart interpretation",
+          "cost_optimization": "Gemini Flash for volume, GPT-4o for complex analysis"
+        },
+        "software_development": {
+          "recommended_models": ["deepseek/deepseek-chat-v3-0324:free", "openai/o1-mini", "meta-llama/llama-3.1-70b-instruct"],
+          "best_for": "Code generation, debugging, software engineering",
+          "cost_optimization": "Free DeepSeek for learning, o1-mini for complex algorithms"
+        },
+        "enterprise_applications": {
+          "recommended_models": ["anthropic/claude-3-opus", "google/gemini-pro-1.5", "openai/gpt-4-turbo"],
+          "best_for": "High-stakes decisions, complex workflows, enterprise scale",
+          "cost_optimization": "Claude Opus for analysis, Gemini Pro for documents"
+        },
+        "budget_conscious": {
+          "recommended_models": ["meta-llama/llama-3.3-70b-instruct:free", "qwen/qwq-32b:free", "google/gemini-2.0-flash-thinking-exp:free"],
+          "best_for": "Learning, experimentation, low-volume applications",
+          "cost_optimization": "Start with free models, upgrade selectively for production"
+        }
+      },
+      
+      "parameter_optimization": {
+        "temperature": {
+          "creative_tasks": "0.7-1.0",
+          "analytical_tasks": "0.1-0.3",
+          "coding": "0.0-0.2"
+        },
+        "top_p": {
+          "focused_responses": "0.1-0.3",
+          "balanced": "0.9",
+          "creative": "0.95-1.0"
+        },
+        "reasoning_parameters": {
+          "include_reasoning": "Set to true to see chain-of-thought process",
+          "reasoning": "Enable for o1 models and reasoning-capable models"
+        }
+      }
+    },
+
+    "pricing_analysis": {
+      "cost_tiers": {
+        "free": {
+          "cost": "$0",
+          "models": ["deepseek/deepseek-chat-v3-0324:free", "meta-llama/llama-3.3-70b-instruct:free", "qwen/qwq-32b:free"],
+          "limitations": "Rate limited, no premium features"
+        },
+        "ultra_budget": {
+          "cost": "$0.01-$0.50 per 1M tokens",
+          "models": ["google/gemini-flash-1.5", "meta-llama/llama-3.1-8b-instruct"],
+          "best_for": "High-volume, simple tasks"
+        },
+        "budget": {
+          "cost": "$0.50-$5.00 per 1M tokens", 
+          "models": ["openai/gpt-4o-mini", "anthropic/claude-3-haiku", "google/gemini-2.5-flash"],
+          "best_for": "Production applications, balanced performance"
+        },
+        "premium": {
+          "cost": "$5.00-$20.00 per 1M tokens",
+          "models": ["openai/gpt-4o", "anthropic/claude-3.5-sonnet", "google/gemini-2.5-pro-exp"],
+          "best_for": "Complex tasks, high-quality outputs"
+        },
+        "enterprise": {
+          "cost": "$20.00+ per 1M tokens",
+          "models": ["openai/o1-preview", "anthropic/claude-3-opus"],
+          "best_for": "Mission-critical applications, complex reasoning"
+        }
+      }
+    }
+  }
+}

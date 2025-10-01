@@ -1,0 +1,209 @@
+/* Enhanced Markdown Styling for Dark Theme */
+
+.markdown-content {
+  @apply text-gray-200 leading-relaxed;
+}
+
+.markdown-content p {
+  @apply mb-4 leading-relaxed;
+}
+
+.markdown-content h1 {
+  @apply text-2xl font-bold text-white mt-6 mb-4 border-b border-gray-600 pb-2;
+}
+
+.markdown-content h2 {
+  @apply text-xl font-semibold text-white mt-6 mb-3;
+}
+
+.markdown-content h3 {
+  @apply text-lg font-medium text-white mt-5 mb-2;
+}
+
+.markdown-content h4 {
+  @apply text-base font-medium text-white mt-4 mb-2;
+}
+
+.markdown-content h5 {
+  @apply text-sm font-medium text-white mt-3 mb-2;
+}
+
+.markdown-content h6 {
+  @apply text-sm font-medium text-gray-300 mt-3 mb-2;
+}
+
+.markdown-content ul {
+  @apply list-disc list-outside ml-6 space-y-2 mb-4;
+}
+
+.markdown-content ol {
+  @apply list-decimal list-outside ml-6 space-y-2 mb-4;
+}
+
+.markdown-content li {
+  @apply text-gray-200 leading-relaxed;
+}
+
+.markdown-content li > p {
+  @apply mb-2;
+}
+
+.markdown-content blockquote {
+  @apply border-l-4 border-blue-500 pl-4 py-2 my-4 bg-blue-900/20 text-gray-200 italic;
+}
+
+.markdown-content table {
+  @apply min-w-full border border-gray-600 rounded-lg overflow-hidden mb-4;
+}
+
+.markdown-content thead {
+  @apply bg-gray-700;
+}
+
+.markdown-content th {
+  @apply border-b border-gray-600 px-4 py-3 text-left text-gray-100 font-semibold;
+}
+
+.markdown-content td {
+  @apply border-b border-gray-700 px-4 py-3 text-gray-200;
+}
+
+.markdown-content tbody tr:last-child td {
+  @apply border-b-0;
+}
+
+.markdown-content code {
+  @apply bg-gray-700 text-gray-100 px-2 py-1 rounded text-sm font-mono;
+}
+
+.markdown-content pre {
+  @apply bg-gray-800 border border-gray-700 rounded-lg p-4 mb-4 overflow-x-auto;
+}
+
+.markdown-content pre code {
+  @apply bg-transparent p-0 text-sm;
+}
+
+.markdown-content a {
+  @apply text-blue-400 hover:text-blue-300 underline transition-colors;
+}
+
+.markdown-content strong {
+  @apply font-semibold text-white;
+}
+
+.markdown-content em {
+  @apply italic text-gray-300;
+}
+
+.markdown-content hr {
+  @apply border-gray-600 my-6;
+}
+
+.markdown-content img {
+  @apply max-w-full h-auto rounded-lg border border-gray-600;
+}
+
+/* Task Lists */
+.markdown-content input[type="checkbox"] {
+  @apply mr-2 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500;
+}
+
+.markdown-content li:has(input[type="checkbox"]) {
+  @apply list-none -ml-6;
+}
+
+/* Syntax highlighting improvements */
+.markdown-content .hljs {
+  @apply bg-gray-800 text-gray-200;
+}
+
+/* Strikethrough */
+.markdown-content del {
+  @apply line-through text-gray-400;
+}
+
+/* Mark/highlight */
+.markdown-content mark {
+  @apply bg-yellow-600/30 text-yellow-200 px-1 rounded;
+}
+
+/* Keyboard keys */
+.markdown-content kbd {
+  @apply bg-gray-700 border border-gray-600 rounded px-2 py-1 text-xs font-mono text-gray-200;
+}
+
+/* Definition lists */
+.markdown-content dl {
+  @apply mb-4;
+}
+
+.markdown-content dt {
+  @apply font-semibold text-white mt-4 mb-1;
+}
+
+.markdown-content dd {
+  @apply ml-6 text-gray-200 mb-2;
+}
+
+/* Abbreviations */
+.markdown-content abbr {
+  @apply border-b border-dotted border-gray-400 cursor-help;
+}
+
+/* Better spacing for nested elements */
+.markdown-content li > ul,
+.markdown-content li > ol {
+  @apply mt-2 mb-0;
+}
+
+.markdown-content blockquote > p:last-child {
+  @apply mb-0;
+}
+
+.markdown-content blockquote > p:first-child {
+  @apply mt-0;
+}
+
+/* Code block copy button container */
+.markdown-content .code-block-wrapper {
+  @apply relative;
+}
+
+.markdown-content .copy-code-button {
+  @apply absolute top-2 right-2 p-1 bg-gray-600 hover:bg-gray-500 rounded text-xs text-gray-300 opacity-0 transition-opacity;
+}
+
+.markdown-content .code-block-wrapper:hover .copy-code-button {
+  @apply opacity-100;
+}
+
+/* Mermaid diagrams and other special content */
+.markdown-content .mermaid {
+  @apply bg-card rounded-lg p-4 my-4;
+}
+
+/* Footnotes */
+.markdown-content .footnotes {
+  @apply mt-8 pt-4 border-t border-gray-600 text-sm;
+}
+
+.markdown-content .footnotes ol {
+  @apply text-gray-300;
+}
+
+/* Responsive tables */
+.markdown-content .table-wrapper {
+  @apply overflow-x-auto -mx-4 px-4 mb-4;
+}
+
+@media (max-width: 768px) {
+  .markdown-content table {
+    @apply text-sm;
+  }
+  
+  .markdown-content th,
+  .markdown-content td {
+    @apply px-2 py-2;
+  }
+}

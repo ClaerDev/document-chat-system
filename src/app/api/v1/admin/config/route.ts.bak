@@ -1,0 +1,298 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
+import { z } from 'zod';
+import { dbConfig, updateOrgConfig, getOrgConfig, DatabaseConfig } from '@/lib/config/database-config';
+import { checkRateLimit, rateLimitConfigs } from '@/lib/rate-limit';
+
+/**
+ * @swagger
+ * /api/admin/config:
+ *   get:
+ *     summary: Get organization configuration
+ *     description: Retrieve configuration settings for the organization
+ *     tags: [Admin - Configuration]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: organizationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Organization ID
+ *       - in: query
+ *         name: category
+ *         required: false
+ *         schema:
+ *           type: string
+ *           enum: [rateLimiting, caching, billing, fileUpload, ai, features]
+ *         description: Specific configuration category to retrieve
+ *     responses:
+ *       200:
+ *         description: Configuration retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   description: Configuration data
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal server error
+ */
+export async function GET(request: NextRequest) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Rate limiting
+    const rateLimitResult = await checkRateLimit(request, rateLimitConfigs.api, 'config');
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many requests' },
+        { status: 429 }
+      );
+    }
+
+    const { searchParams } = new URL(request.url);
+    const organizationId = searchParams.get('organizationId');
+    const category = searchParams.get('category') as keyof DatabaseConfig | null;
+
+    if (!organizationId) {
+      return NextResponse.json(
+        { error: 'Organization ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // TODO: Verify user has admin access to this organization
+    // This would check user's role in the organization
+
+    let data;
+    if (category) {
+      data = await getOrgConfig(organizationId, category);
+    } else {
+      data = await dbConfig.getAllConfigs(organizationId);
+    }
+
+    return NextResponse.json({
+      success: true,
+      data
+    });
+
+  } catch (error) {
+    console.error('Configuration retrieval error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+const updateConfigSchema = z.object({
+  organizationId: z.string().min(1),
+  category: z.enum(['rateLimiting', 'caching', 'billing', 'fileUpload', 'ai', 'features']),
+  settings: z.record(z.any())
+});
+
+/**
+ * @swagger
+ * /api/admin/config:
+ *   put:
+ *     summary: Update organization configuration
+ *     description: Update configuration settings for the organization
+ *     tags: [Admin - Configuration]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [organizationId, category, settings]
+ *             properties:
+ *               organizationId:
+ *                 type: string
+ *                 description: Organization ID
+ *               category:
+ *                 type: string
+ *                 enum: [rateLimiting, caching, billing, fileUpload, ai, features]
+ *                 description: Configuration category
+ *               settings:
+ *                 type: object
+ *                 description: Configuration settings to update
+ *             example:
+ *               organizationId: "org_123"
+ *               category: "rateLimiting"
+ *               settings:
+ *                 matchScores:
+ *                   window: 60000
+ *                   max: 20
+ *     responses:
+ *       200:
+ *         description: Configuration updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal server error
+ */
+export async function PUT(request: NextRequest) {
+  try {
+    const { userId } = auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Rate limiting
+    const rateLimitResult = await checkRateLimit(request, rateLimitConfigs.api, 'config');
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many requests' },
+        { status: 429 }
+      );
+    }
+
+    const body = await request.json();
+    const validation = updateConfigSchema.safeParse(body);
+
+    if (!validation.success) {
+      return NextResponse.json(
+        { 
+          error: 'Invalid request data',
+          details: validation.error.errors
+        },
+        { status: 400 }
+      );
+    }
+
+    const { organizationId, category, settings } = validation.data;
+
+    // TODO: Verify user has admin access to this organization
+    // This would check user's role in the organization
+
+    await updateOrgConfig(organizationId, category, settings, userId);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Configuration updated successfully'
+    });
+
+  } catch (error) {
+    console.error('Configuration update error:', error);
+    
+    if (error instanceof Error && error.message.includes('Invalid configuration')) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 400 }
+      );
+    }
+    
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * @swagger
+ * /api/admin/config:
+ *   post:
+ *     summary: Initialize default configuration
+ *     description: Initialize default configuration settings for a new organization
+ *     tags: [Admin - Configuration]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [organizationId]
+ *             properties:
+ *               organizationId:
+ *                 type: string
+ *                 description: Organization ID to initialize
+ *             example:
+ *               organizationId: "org_123"
+ *     responses:
+ *       201:
+ *         description: Default configuration initialized successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal server error
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const { userId } = auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { organizationId } = body;
+
+    if (!organizationId) {
+      return NextResponse.json(
+        { error: 'Organization ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // TODO: Verify user has admin access to this organization
+
+    await dbConfig.initializeOrgDefaults(organizationId, userId);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Default configuration initialized successfully'
+    }, { status: 201 });
+
+  } catch (error) {
+    console.error('Configuration initialization error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
