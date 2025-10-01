@@ -20,7 +20,6 @@ import {
   Sparkles,
   BarChart3,
   Clock,
-  Target,
   AlertTriangle
 } from 'lucide-react';
 
@@ -143,18 +142,6 @@ export function AISettingsPanel({ className }: AISettingsPanelProps) {
             <Switch
               checked={features.openRouterEnabled}
               onCheckedChange={(checked) => handleFeatureToggle('openRouterEnabled', checked)}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Target className="h-4 w-4 text-green-500" />
-              <span className="text-sm font-medium">Smart Routing</span>
-            </div>
-            <Switch
-              checked={features.smartRouting}
-              onCheckedChange={(checked) => handleFeatureToggle('smartRouting', checked)}
-              disabled={!features.openRouterEnabled}
             />
           </div>
 

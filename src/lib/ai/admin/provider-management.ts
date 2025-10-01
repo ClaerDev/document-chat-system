@@ -177,6 +177,33 @@ export class ProviderManager {
       }
     });
 
+    // ImageRouter configuration
+    this.configurations.set('imagerouter', {
+      id: 'imagerouter',
+      name: 'imagerouter',
+      displayName: 'ImageRouter',
+      enabled: true,
+      priority: 7,
+      defaultModel: 'test/test',
+      availableModels: ['test/test', 'ir/test-video'],
+      features: ['image-generation', 'video-generation', 'media', 'multi-provider'],
+      costTier: 'medium',
+      rateLimits: {
+        requestsPerMinute: 30,
+        tokensPerMinute: 50000
+      },
+      healthCheck: {
+        enabled: true,
+        interval: 180000,
+        timeout: 10000
+      },
+      metadata: {
+        description: 'AI-powered image and video generation via ImageRouter',
+        benefits: ['Multiple image models', 'Video generation', 'Cost optimization', 'Fast generation'],
+        website: 'https://imagerouter.io'
+      }
+    });
+
     // Demo provider configuration (always available as final fallback)
     this.configurations.set('demo', {
       id: 'demo',

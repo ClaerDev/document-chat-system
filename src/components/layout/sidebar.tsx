@@ -8,25 +8,13 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   Home,
-  Search,
-  Target,
   FileText,
-  BarChart3,
   Settings,
-  Users,
   Building,
   MessageSquare,
-  Calendar,
   Folder,
-  Star,
-  TrendingUp,
   X,
-  Palette,
-  Book,
   CreditCard,
-  Shield,
-  Contact,
-  Brain,
   Activity,
 } from 'lucide-react'
 
@@ -43,53 +31,19 @@ const navigation = [
     icon: Home,
   },
   {
+    name: 'Documents',
+    href: '/documents',
+    icon: Folder,
+  },
+  {
     name: 'AI Chat',
     href: '/chat',
     icon: MessageSquare,
   },
   {
-    name: 'Opportunities',
-    href: '/opportunities',
-    icon: Search,
-    badge: '124',
-  },
-  {
-    name: 'Match Scores',
-    href: '/match-scores',
-    icon: Target,
-    badge: '12',
-  },
-  {
-    name: 'LLM Scoring Test',
-    href: '/test-llm-scoring',
-    icon: Brain,
-    badge: 'NEW',
-  },
-  {
     name: 'Activity Logs',
     href: '/logs',
     icon: Activity,
-  },
-  {
-    name: 'Proposals',
-    href: '/proposals',
-    icon: FileText,
-  },
-  {
-    name: 'Analytics',
-    href: '/analytics',
-    icon: BarChart3,
-  },
-  {
-    name: 'Contacts',
-    href: '/contacts',
-    icon: Contact,
-    badge: '12',
-  },
-  {
-    name: 'Components',
-    href: '/components-showcase',
-    icon: Palette,
   },
 ]
 
@@ -103,57 +57,6 @@ const secondaryNavigation = [
     name: 'Billing',
     href: '/billing',
     icon: CreditCard,
-  },
-  {
-    name: 'Team',
-    href: '/team',
-    icon: Users,
-  },
-  {
-    name: 'Competitors',
-    href: '/competitors',
-    icon: Shield,
-  },
-  {
-    name: 'API Docs',
-    href: '/api-docs',
-    icon: Book,
-  },
-  {
-    name: 'Documents',
-    href: '/documents',
-    icon: Folder,
-  },
-  {
-    name: 'Document Details',
-    href: '/document-details',
-    icon: FileText,
-  },
-  {
-    name: 'Calendar',
-    href: '/calendar',
-    icon: Calendar,
-  },
-]
-
-const quickAccess = [
-  {
-    name: 'Saved Searches',
-    href: '/saved-searches',
-    icon: Star,
-    count: 5,
-  },
-  {
-    name: 'Recent Activity',
-    href: '/activity',
-    icon: TrendingUp,
-    count: 8,
-  },
-  {
-    name: 'Messages',
-    href: '/messages',
-    icon: MessageSquare,
-    count: 3,
   },
 ]
 
@@ -264,7 +167,7 @@ export function Sidebar({
               {/* Secondary Navigation */}
               <div className="px-3 py-2">
                 <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
-                  Workspace
+                  Account
                 </h2>
                 <div className="space-y-1">
                   {secondaryNavigation.map((item) => {
@@ -279,37 +182,6 @@ export function Sidebar({
                         <Link href={item.href} prefetch={true}>
                           <item.icon className="mr-2 h-4 w-4" />
                           {item.name}
-                        </Link>
-                      </Button>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Quick Access */}
-              <div className="px-3 py-2">
-                <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
-                  Quick Access
-                </h2>
-                <div className="space-y-1">
-                  {quickAccess.map((item) => {
-                    const isCurrent = isCurrentPath(item.href)
-                    return (
-                      <Button
-                        key={item.name}
-                        asChild
-                        variant={isCurrent ? 'secondary' : 'ghost'}
-                        size="sm"
-                        className="w-full justify-start"
-                      >
-                        <Link href={item.href} prefetch={true}>
-                          <item.icon className="mr-2 h-4 w-4" />
-                          {item.name}
-                          {item.count > 0 && (
-                            <Badge variant="outline" className="ml-auto">
-                              {item.count}
-                            </Badge>
-                          )}
                         </Link>
                       </Button>
                     )

@@ -67,7 +67,14 @@ const MEDIA_PATTERNS = {
   DOCUMENT: /\.(doc|docx|xls|xlsx|ppt|pptx|txt|rtf|odt|ods|odp)(\?[^\s]*)?$/i,
   ARCHIVE: /\.(zip|rar|7z|tar|gz|bz2|xz)(\?[^\s]*)?$/i,
   CODE: /\.(js|ts|jsx|tsx|html|css|scss|sass|less|json|xml|yaml|yml|md|py|java|cpp|c|h|php|rb|go|rs|swift|kt|scala|sql|sh|bash|zsh|fish|ps1|bat|cmd)(\?[^\s]*)?$/i,
+  YOUTUBE: /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/i,
   URL: /https?:\/\/[^\s]+/g
+};
+
+// Helper function to extract YouTube video ID
+const getYouTubeVideoId = (url: string): string | null => {
+  const match = url.match(MEDIA_PATTERNS.YOUTUBE);
+  return match ? match[1] : null;
 };
 
 // Enhanced MediaRenderer component
@@ -163,6 +170,42 @@ const MediaRenderer: React.FC<{ url: string; alt?: string; className?: string }>
           </div>
         </CardContent>
       </Card>
+    );
+  }
+
+  // YouTube video embedding
+  const youtubeVideoId = getYouTubeVideoId(url);
+  if (youtubeVideoId) {
+    return (
+      <div className={`my-4 ${className}`}>
+        <div className="relative w-full max-w-3xl rounded-lg overflow-hidden border border-gray-600 bg-black">
+          <div className="relative pb-[56.25%]"> {/* 16:9 aspect ratio */}
+            <iframe
+              className="absolute top-0 left-0 w-full h-full"
+              src={`https://www.youtube.com/embed/${youtubeVideoId}`}
+              title={alt || 'YouTube video player'}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          </div>
+          <div className="px-3 py-2 bg-gray-900/50 flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Film className="h-4 w-4 text-red-500" />
+              <span className="text-xs text-gray-300">YouTube Video</span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.open(url, '_blank')}
+              className="text-gray-400 hover:text-white"
+            >
+              <ExternalLink className="h-3 w-3 mr-1" />
+              <span className="text-xs">Watch on YouTube</span>
+            </Button>
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -390,8 +433,26 @@ export const UniversalMessageRenderer: React.FC<UniversalMessageRendererProps> =
 }) => {
   // Preprocess content to convert all media URLs to appropriate formats
   const preprocessContent = (text: string): string => {
-    // Convert image URLs to markdown format
+    // Extract YouTube URLs from markdown links and convert to plain URLs for embedding
+    // Matches: [Title](youtube_url) or [Title](youtu.be_url)
+    text = text.replace(/\[([^\]]+)\]\((https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:[^\)]*)?)\)/g, (match, title, url) => {
+      // Return the URL on its own line with the title as a heading
+      return `\n\n### ${title}\n${url}\n\n`;
+    });
+
+    // Find standalone YouTube URLs and ensure they're on their own line for embedding
+    text = text.replace(/(?:^|\s)(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:[^\s]*))/gm, (match, url) => {
+      // Return the URL on its own line to ensure it gets rendered as an embed
+      return `\n\n${url}\n\n`;
+    });
+
+    // Convert standalone image URLs to markdown format
     text = text.replace(MEDIA_PATTERNS.URL, (url) => {
+      // Skip if it's already in markdown format or a YouTube URL
+      if (text.includes(`](${url})`) || MEDIA_PATTERNS.YOUTUBE.test(url)) {
+        return url;
+      }
+
       if (MEDIA_PATTERNS.IMAGE.test(url)) {
         const filename = url.split('/').pop()?.split('?')[0] || 'image';
         return `![${filename}](${url})`;
@@ -461,25 +522,35 @@ export const UniversalMessageRenderer: React.FC<UniversalMessageRendererProps> =
       // Check if this is a media URL
       if (href && MEDIA_PATTERNS.URL.test(href)) {
         const filename = typeof children === 'string' ? children : href.split('/').pop()?.split('?')[0];
-        
+
+        // Check for YouTube URLs first - ALWAYS embed, never show as link
+        if (MEDIA_PATTERNS.YOUTUBE.test(href)) {
+          console.log('🎬 Embedding YouTube URL from link:', href);
+          return (
+            <div className="block my-4">
+              <MediaRenderer url={href} alt={filename} />
+            </div>
+          );
+        }
+
         // Render media inline
         if (MEDIA_PATTERNS.IMAGE.test(href) || MEDIA_PATTERNS.VIDEO.test(href) || MEDIA_PATTERNS.AUDIO.test(href)) {
           return <MediaRenderer url={href} alt={filename} />;
         }
-        
+
         // Render other files as file cards
         if (MEDIA_PATTERNS.DOCUMENT.test(href) || MEDIA_PATTERNS.ARCHIVE.test(href) || MEDIA_PATTERNS.PDF.test(href)) {
           return <MediaRenderer url={href} alt={filename} />;
         }
       }
-      
+
       // Regular link
       return (
-        <a 
-          className="text-blue-400 hover:text-blue-300 underline transition-colors inline-flex items-center gap-1" 
-          href={href} 
-          target="_blank" 
-          rel="noopener noreferrer" 
+        <a
+          className="text-blue-400 hover:text-blue-300 underline transition-colors inline-flex items-center gap-1"
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
           {...props}
         >
           {children}
@@ -555,11 +626,25 @@ export const UniversalMessageRenderer: React.FC<UniversalMessageRendererProps> =
       </li>
     ),
 
-    p: ({ children, ...props }: any) => (
-      <p className="text-gray-200 leading-relaxed mb-3" {...props}>
-        {children}
-      </p>
-    ),
+    p: ({ children, ...props }: any) => {
+      // Check if paragraph contains a standalone YouTube URL
+      if (typeof children === 'string') {
+        const youtubeMatch = children.match(MEDIA_PATTERNS.YOUTUBE);
+        if (youtubeMatch) {
+          // Extract the full URL
+          const urlMatch = children.match(/https?:\/\/[^\s]+/);
+          if (urlMatch) {
+            return <MediaRenderer url={urlMatch[0]} />;
+          }
+        }
+      }
+
+      return (
+        <p className="text-gray-200 leading-relaxed mb-3" {...props}>
+          {children}
+        </p>
+      );
+    },
 
     strong: ({ children, ...props }: any) => (
       <strong className="font-semibold text-white" {...props}>

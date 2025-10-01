@@ -19,7 +19,12 @@ import {
   FileText
 } from 'lucide-react';
 import { FilePreview } from './file-preview';
-import { TradingChart } from '@/components/charts/trading-chart';
+import dynamic from 'next/dynamic';
+
+const TradingChart = dynamic(() => import('@/components/charts/trading-chart').then(mod => ({ default: mod.TradingChart })), {
+  ssr: false,
+  loading: () => <div className="w-full h-64 bg-muted animate-pulse rounded-md" />
+});
 import { Citations } from './citations';
 import { useImageErrorHandler } from '@/lib/utils/image-error-handler';
 
@@ -481,6 +486,40 @@ const VideoEmbedRenderer: React.FC<{ url: string; platform: string; videoId: str
 };
 
 
+/**
+ * Inject YouTube search URLs for video titles that don't have actual URLs
+ * This is a fallback for when OpenRouter's :online feature doesn't provide direct video URLs
+ */
+function injectYouTubeURLs(content: string): string {
+  // Pattern: Play button emoji followed by title (without URL on next line)
+  // Example: "▶️ NO WAY NICK FUENTES TELLS BLACK AMERICA THIS..."
+  const pattern = /▶️\s*([^\n]+?)(?=\n|$)(?!\nhttps?:)/g;
+
+  let injectedContent = content;
+  const matches = [...content.matchAll(pattern)];
+
+  if (matches.length > 0) {
+    console.log(`🎬 Found ${matches.length} video titles without URLs, injecting YouTube search links...`);
+
+    matches.forEach((match) => {
+      const fullMatch = match[0];
+      const title = match[1].trim();
+
+      // Create YouTube search URL
+      const searchQuery = encodeURIComponent(title);
+      const youtubeSearchURL = `https://www.youtube.com/results?search_query=${searchQuery}`;
+
+      // Replace "▶️ Title" with "### Title\n[YouTube URL]"
+      const replacement = `### ${title}\n${youtubeSearchURL}`;
+      injectedContent = injectedContent.replace(fullMatch, replacement);
+
+      console.log(`🔗 Injected YouTube search for: "${title}"`);
+    });
+  }
+
+  return injectedContent;
+}
+
 // Main component
 export const EnhancedMessageRenderer: React.FC<EnhancedMessageRendererProps> = ({
   content,
@@ -493,12 +532,14 @@ export const EnhancedMessageRenderer: React.FC<EnhancedMessageRendererProps> = (
   // Track rendered video IDs to prevent duplicates in inline rendering
   const renderedVideoIds = new Set<string>();
 
+  // Inject YouTube URLs for video titles without URLs (fallback solution)
+  let contentWithURLs = injectYouTubeURLs(content);
 
   // Check if content should render a trading chart
-  const chartDetection = shouldRenderChart(content);
+  const chartDetection = shouldRenderChart(contentWithURLs);
 
   // Process content to handle base64 images like the original renderer
-  let processedContent = content.replace(
+  let processedContent = contentWithURLs.replace(
     /data:image\/[^;]+;base64,[A-Za-z0-9+/]+=*/g,
     (match) => `![Image](${match})`
   );

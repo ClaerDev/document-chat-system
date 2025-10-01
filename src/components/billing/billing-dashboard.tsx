@@ -132,7 +132,7 @@ export function BillingDashboard() {
   const checkUsageLimits = async () => {
     try {
       // Check different usage types that are commonly at risk of limits
-      const usageTypesToCheck = ['MATCH_SCORE_CALCULATION', 'AI_QUERY', 'OPPORTUNITY_MATCH'];
+      const usageTypesToCheck = ['DOCUMENT_PROCESSING', 'AI_QUERY', 'EXPORT'];
       
       for (const usageType of usageTypesToCheck) {
         const response = await fetch('/api/v1/billing/usage/check', {
@@ -893,7 +893,7 @@ export function BillingDashboard() {
 
   const usageMetrics = [
     {
-      name: 'AI Credits',
+      name: 'AI Chat Messages',
       icon: Zap,
       current: usage?.totals.AI_QUERY || 0,
       limit: subscription?.limits?.aiCreditsPerMonth ?? 0,
@@ -902,19 +902,19 @@ export function BillingDashboard() {
       progressColor: 'bg-orange-500'
     },
     {
-      name: 'Match Scores',
-      icon: TrendingUp,
-      current: usage?.totals.MATCH_SCORE_CALCULATION || 0,
-      limit: subscription?.limits?.matchScoreCalculations ?? 0,
+      name: 'Documents',
+      icon: FileText,
+      current: usage?.totals.DOCUMENT_PROCESSING || 0,
+      limit: subscription?.limits?.matchScoreCalculations ?? 0, // Will be updated to document limit
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
       progressColor: 'bg-blue-500'
     },
     {
-      name: 'Saved Searches',
-      icon: Filter,
-      current: usage?.totals.SAVED_SEARCH || 0,
-      limit: subscription?.limits?.savedSearches ?? 0,
+      name: 'Pages Processed',
+      icon: FileText,
+      current: usage?.totals.SAVED_SEARCH || 0, // Will be updated to pages processed
+      limit: subscription?.limits?.savedSearches ?? 0, // Will be updated to pages limit
       color: 'text-green-600',
       bgColor: 'bg-green-50',
       progressColor: 'bg-green-500'
@@ -923,15 +923,15 @@ export function BillingDashboard() {
 
   const activityMetrics = [
     {
-      name: 'Opportunities Found',
-      value: usage?.totals.OPPORTUNITY_MATCH || 0,
-      icon: Search,
+      name: 'Documents Uploaded',
+      value: usage?.totals.DOCUMENT_PROCESSING || 0,
+      icon: FileText,
       color: 'text-purple-600'
     },
     {
-      name: 'Documents Processed',
-      value: usage?.totals.DOCUMENT_PROCESSING || 0,
-      icon: FileText,
+      name: 'Chat Sessions',
+      value: usage?.totals.AI_QUERY || 0,
+      icon: Zap,
       color: 'text-indigo-600'
     },
     {

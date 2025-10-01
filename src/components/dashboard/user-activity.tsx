@@ -1,20 +1,24 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { 
-  FileText, 
-  MessageCircle, 
-  Upload, 
-  Clock, 
+import {
+  FileText,
+  MessageCircle,
+  Upload,
+  Clock,
   Eye,
-  Search
+  Search,
+  Edit,
+  Trash2,
+  Share2
 } from 'lucide-react'
 
 interface ActivityItem {
   id: string
-  type: 'document_upload' | 'chat' | 'document_view' | 'search'
+  type: 'document_upload' | 'chat' | 'document_view' | 'search' | 'document_edit' | 'document_delete' | 'document_share'
   title: string
   description: string
   timestamp: Date
@@ -24,50 +28,6 @@ interface ActivityItem {
     searchQuery?: string
   }
 }
-
-// Mock data for demonstration
-const mockActivityData: ActivityItem[] = [
-  {
-    id: '1',
-    type: 'document_upload',
-    title: 'Document Uploaded',
-    description: 'annual_report_2024.pdf',
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-    metadata: { documentName: 'annual_report_2024.pdf' }
-  },
-  {
-    id: '2',
-    type: 'chat',
-    title: 'AI Chat Session',
-    description: 'Asked 5 questions about quarterly results',
-    timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
-    metadata: { chatMessages: 5, documentName: 'quarterly_results.pdf' }
-  },
-  {
-    id: '3',
-    type: 'search',
-    title: 'Document Search',
-    description: 'Searched for "revenue growth"',
-    timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
-    metadata: { searchQuery: 'revenue growth' }
-  },
-  {
-    id: '4',
-    type: 'document_view',
-    title: 'Document Viewed',
-    description: 'project_proposal.docx',
-    timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-    metadata: { documentName: 'project_proposal.docx' }
-  },
-  {
-    id: '5',
-    type: 'chat',
-    title: 'AI Chat Session',
-    description: 'Asked 3 questions about technical specifications',
-    timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-    metadata: { chatMessages: 3, documentName: 'technical_specs.pdf' }
-  }
-]
 
 function getActivityIcon(type: ActivityItem['type']) {
   switch (type) {
@@ -79,6 +39,12 @@ function getActivityIcon(type: ActivityItem['type']) {
       return <Eye className="h-4 w-4" />
     case 'search':
       return <Search className="h-4 w-4" />
+    case 'document_edit':
+      return <Edit className="h-4 w-4" />
+    case 'document_delete':
+      return <Trash2 className="h-4 w-4" />
+    case 'document_share':
+      return <Share2 className="h-4 w-4" />
     default:
       return <FileText className="h-4 w-4" />
   }
@@ -94,6 +60,12 @@ function getActivityColor(type: ActivityItem['type']) {
       return 'text-purple-600'
     case 'search':
       return 'text-orange-600'
+    case 'document_edit':
+      return 'text-yellow-600'
+    case 'document_delete':
+      return 'text-red-600'
+    case 'document_share':
+      return 'text-indigo-600'
     default:
       return 'text-gray-600'
   }
@@ -109,6 +81,12 @@ function getActivityBadge(type: ActivityItem['type']) {
       return <Badge variant="outline" className="text-purple-600 border-purple-600">View</Badge>
     case 'search':
       return <Badge variant="outline" className="text-orange-600 border-orange-600">Search</Badge>
+    case 'document_edit':
+      return <Badge variant="outline" className="text-yellow-600 border-yellow-600">Edit</Badge>
+    case 'document_delete':
+      return <Badge variant="outline" className="text-red-600 border-red-600">Delete</Badge>
+    case 'document_share':
+      return <Badge variant="outline" className="text-indigo-600 border-indigo-600">Share</Badge>
     default:
       return <Badge variant="outline">Activity</Badge>
   }
@@ -126,7 +104,92 @@ function formatRelativeTime(date: Date): string {
   return date.toLocaleDateString()
 }
 
+// Map audit log event types to activity types
+function mapAuditEventToActivityType(eventType: string): ActivityItem['type'] {
+  const eventMap: Record<string, ActivityItem['type']> = {
+    'DOCUMENT_CREATED': 'document_upload',
+    'DOCUMENT_UPLOADED': 'document_upload',
+    'DOCUMENT_VIEWED': 'document_view',
+    'DOCUMENT_UPDATED': 'document_edit',
+    'DOCUMENT_DELETED': 'document_delete',
+    'DOCUMENT_SHARED': 'document_share',
+    'CHAT_MESSAGE': 'chat',
+    'SEARCH_PERFORMED': 'search',
+  }
+
+  return eventMap[eventType] || 'document_view'
+}
+
+function transformAuditLogToActivity(log: any): ActivityItem {
+  const eventType = log.eventType || 'UNKNOWN'
+  const activityType = mapAuditEventToActivityType(eventType)
+  const resourceName = log.resourceName || log.metadata?.documentName || 'Unknown'
+
+  let title = ''
+  let description = resourceName
+
+  switch (activityType) {
+    case 'document_upload':
+      title = 'Document Uploaded'
+      break
+    case 'document_view':
+      title = 'Document Viewed'
+      break
+    case 'document_edit':
+      title = 'Document Updated'
+      break
+    case 'document_delete':
+      title = 'Document Deleted'
+      break
+    case 'document_share':
+      title = 'Document Shared'
+      break
+    case 'chat':
+      title = 'AI Chat Session'
+      description = log.description || 'Chat interaction'
+      break
+    case 'search':
+      title = 'Document Search'
+      description = log.metadata?.query || 'Search performed'
+      break
+    default:
+      title = log.eventType?.replace(/_/g, ' ') || 'Activity'
+  }
+
+  return {
+    id: log.id,
+    type: activityType,
+    title,
+    description,
+    timestamp: new Date(log.createdAt),
+    metadata: log.metadata
+  }
+}
+
 export function UserActivity() {
+  const [activities, setActivities] = useState<ActivityItem[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchActivity = async () => {
+      try {
+        const response = await fetch('/api/v1/audit-logs?limit=10&sortBy=createdAt&sortOrder=desc')
+        const data = await response.json()
+
+        if (data.success && data.logs) {
+          const transformedLogs = data.logs.map(transformAuditLogToActivity)
+          setActivities(transformedLogs)
+        }
+      } catch (error) {
+        console.error('Error fetching activity:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchActivity()
+  }, [])
+
   return (
     <Card className="col-span-4">
       <CardHeader>
@@ -140,32 +203,44 @@ export function UserActivity() {
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[400px]">
-          <div className="space-y-4">
-            {mockActivityData.map((activity) => (
-              <div key={activity.id} className="flex items-start space-x-3 pb-3 border-b border-gray-100 last:border-b-0 dark:border-gray-800">
-                <div className={`p-2 rounded-full bg-gray-100 dark:bg-gray-800 ${getActivityColor(activity.type)}`}>
-                  {getActivityIcon(activity.type)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                      {activity.title}
-                    </p>
-                    {getActivityBadge(activity.type)}
+          {loading ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100"></div>
+            </div>
+          ) : activities.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-center">
+              <FileText className="h-12 w-12 text-gray-400 mb-2" />
+              <p className="text-sm text-gray-500 dark:text-gray-400">No activity yet</p>
+              <p className="text-xs text-gray-400 mt-1">Start uploading documents to see your activity here</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {activities.map((activity) => (
+                <div key={activity.id} className="flex items-start space-x-3 pb-3 border-b border-gray-100 last:border-b-0 dark:border-gray-800">
+                  <div className={`p-2 rounded-full bg-gray-100 dark:bg-gray-800 ${getActivityColor(activity.type)}`}>
+                    {getActivityIcon(activity.type)}
                   </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                    {activity.description}
-                  </p>
-                  <div className="flex items-center mt-1">
-                    <Clock className="h-3 w-3 mr-1 text-gray-400" />
-                    <p className="text-xs text-gray-400">
-                      {formatRelativeTime(activity.timestamp)}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                        {activity.title}
+                      </p>
+                      {getActivityBadge(activity.type)}
+                    </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                      {activity.description}
                     </p>
+                    <div className="flex items-center mt-1">
+                      <Clock className="h-3 w-3 mr-1 text-gray-400" />
+                      <p className="text-xs text-gray-400">
+                        {formatRelativeTime(activity.timestamp)}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </ScrollArea>
       </CardContent>
     </Card>

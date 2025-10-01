@@ -484,6 +484,16 @@ async function handleExistingSystem(
       try {
         if (stream) {
           // Use streaming with real provider
+
+          // CRITICAL: Append :online suffix if web search is enabled
+          let streamModelToUse = request.model;
+          const webSearchEnabled = request.options?.webSearch?.enabled;
+
+          if (webSearchEnabled && !streamModelToUse.includes(':online')) {
+            streamModelToUse = `${streamModelToUse}:online`;
+            console.log(`🌐 Web search enabled (streaming): ${request.model} → ${streamModelToUse}`);
+          }
+
           const streamRequest = {
             messages: request.messages.map((msg: any) => {
               // Convert message to OpenRouter format with attachments
@@ -491,7 +501,7 @@ async function handleExistingSystem(
                 role: msg.role,
                 content: msg.content
               };
-              
+
               // Add attachments if present
               if (msg.attachments && msg.attachments.length > 0) {
                 return {
@@ -507,10 +517,10 @@ async function handleExistingSystem(
                   }))
                 };
               }
-              
+
               return baseMessage;
             }),
-            model: request.model,
+            model: streamModelToUse,
             temperature,
             maxTokens,
             options: request.options, // Pass through the options including webSearch
@@ -576,22 +586,38 @@ async function handleExistingSystem(
           };
 
           console.log('🚀 Sending completion request to AI service:', completionRequest);
-          
+
+          // CRITICAL: Append :online suffix if web search is enabled
+          let modelToUse = completionRequest.model;
+          const webSearchEnabled = completionRequest.options?.webSearch?.enabled;
+
+          if (webSearchEnabled && !modelToUse.includes(':online')) {
+            modelToUse = `${modelToUse}:online`;
+            console.log(`🌐 Web search enabled: ${completionRequest.model} → ${modelToUse}`);
+          }
+
+          // Update the request with the modified model
+          const enhancedCompletionRequest = {
+            ...completionRequest,
+            model: modelToUse
+          };
+
           // Try OpenRouter adapter first, fallback to direct API if needed
           const openrouterAdapter = aiService.getOpenRouterAdapter();
           let response;
-          
+
           console.log('🔍 API Enhanced-chat request:', {
-            hasOptions: !!completionRequest.options,
-            options: completionRequest.options,
-            webSearchEnabled: completionRequest.options?.webSearch?.enabled,
-            messages: completionRequest.messages.length
+            hasOptions: !!enhancedCompletionRequest.options,
+            options: enhancedCompletionRequest.options,
+            webSearchEnabled: enhancedCompletionRequest.options?.webSearch?.enabled,
+            model: enhancedCompletionRequest.model,
+            messages: enhancedCompletionRequest.messages.length
           });
-          
+
           if (openrouterAdapter) {
-            console.log('🎯 Using OpenRouter adapter directly for online search');
+            console.log('🎯 Using OpenRouter adapter directly for online search with model:', enhancedCompletionRequest.model);
             try {
-              response = await openrouterAdapter.generateCompletion(completionRequest);
+              response = await openrouterAdapter.generateCompletion(enhancedCompletionRequest);
             } catch (adapterError) {
               console.error('❌ OpenRouter adapter failed, trying direct API:', adapterError);
               response = null;

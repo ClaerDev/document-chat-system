@@ -184,7 +184,7 @@ const contentTemplates: ContentTemplate[] = [
 ];
 
 export function CleanAIChat({ organizationId, className, demoMode = false, onCitationsUpdate, chatState }: CleanAIChatProps) {
-  const { isSignedIn, userId } = useAuth();
+  const { isSignedIn, isLoaded, userId } = useAuth();
   const { success: notifySuccess, error: notifyError, warning: notifyWarning, info: notifyInfo } = useNotify();
   const [isMounted, setIsMounted] = useState(false);
 
@@ -237,13 +237,17 @@ export function CleanAIChat({ organizationId, className, demoMode = false, onCit
   const [modalMode, setModalMode] = useState<'text' | 'media'>('text');
   
   // AI settings derived from Zustand store
-  const autoRouting = features.smartRouting;
   const selectedProvider = getDefaultProvider(organizationId);
   const selectedModel = ai.selectedModel || 'openai/gpt-4o-mini';
 
-  // Initialize mounted state
+  // Initialize mounted state and default text model
   useEffect(() => {
     setIsMounted(true);
+
+    // Ensure we start with a text generation model, not an image model
+    if (!ai.selectedModel || ai.selectedModel.includes('test/test') || ai.selectedModel.includes('ir/')) {
+      ai.setSelectedModel('openai/gpt-4o-mini');
+    }
   }, []);
 
   // Initialize with appropriate welcome message based on chat state
@@ -340,12 +344,18 @@ export function CleanAIChat({ organizationId, className, demoMode = false, onCit
     }
   }, []);
 
-  // Initialize AI models if not already loaded (only once)
+  // Initialize AI models if not already loaded (wait for auth to be ready)
   useEffect(() => {
-    if (models.length === 0 && !ai.loading) {
-      ai.refreshModels();
+    // Wait for auth to be loaded before fetching models
+    if (isLoaded && isSignedIn && models.length === 0 && !ai.loading) {
+      console.log('🔄 Auto-loading AI models after auth ready...');
+      // Small delay to ensure auth cookie is propagated
+      const timer = setTimeout(() => {
+        ai.refreshModels();
+      }, 500);
+      return () => clearTimeout(timer);
     }
-  }, []); // Empty dependency array to run only once
+  }, [isLoaded, isSignedIn, models.length, ai.loading]); // Depend on auth state
   
   // Initialize ImageRouter models if not already loaded (optional feature)
   useEffect(() => {
@@ -402,29 +412,60 @@ export function CleanAIChat({ organizationId, className, demoMode = false, onCit
 
   // Convert Zustand models to legacy format for backward compatibility
   const providers: AIProvider[] = useMemo(() => {
+    const providerMap = new Map<string, AIProvider>();
+
+    // Always include OpenRouter provider (even if models aren't loaded yet)
+    providerMap.set('openrouter', {
+      id: 'openrouter',
+      name: 'OpenRouter',
+      status: 'active',
+      models: [],
+      priority: 1,
+      costPerPromptToken: 0.00015,
+      costPerCompletionToken: 0.0006,
+      maxTokens: 200000,
+      rateLimitPerMinute: 500,
+      features: ['chat', 'completion'],
+      description: 'OpenRouter provider with 100+ models'
+    });
+
+    // Always include ImageRouter provider (even if models aren't loaded yet)
+    providerMap.set('imagerouter', {
+      id: 'imagerouter',
+      name: 'ImageRouter',
+      status: 'active',
+      models: [],
+      priority: 2,
+      costPerPromptToken: 0.0002,
+      costPerCompletionToken: 0.0008,
+      maxTokens: 4000,
+      rateLimitPerMinute: 30,
+      features: ['image-generation', 'video-generation'],
+      description: 'ImageRouter provider for AI image and video generation'
+    });
+
+    // Add models to OpenRouter provider from Zustand store
     if (models.length > 0) {
-      // Create providers from Zustand store models
-      const providerMap = new Map<string, AIProvider>();
-      
       models.forEach(model => {
         const providerId = model.provider || (model.name.includes('/') ? model.name.split('/')[0] : 'openrouter');
-        
+
+        // Get or create provider
         if (!providerMap.has(providerId)) {
           providerMap.set(providerId, {
             id: providerId,
-            name: providerId === 'openrouter' ? 'OpenRouter' : providerId.charAt(0).toUpperCase() + providerId.slice(1),
+            name: providerId.charAt(0).toUpperCase() + providerId.slice(1),
             status: 'active',
             models: [],
-            priority: providerId === 'openrouter' ? 1 : 2,
+            priority: 3,
             costPerPromptToken: 0.00015,
             costPerCompletionToken: 0.0006,
-            maxTokens: 200000,
+            maxTokens: 128000,
             rateLimitPerMinute: 500,
             features: ['chat', 'completion'],
             description: `${providerId} provider`
           });
         }
-        
+
         const provider = providerMap.get(providerId)!;
         provider.models.push({
           id: model.name,
@@ -441,70 +482,73 @@ export function CleanAIChat({ organizationId, className, demoMode = false, onCit
           cost: model.costPer1KTokens ? (model.costPer1KTokens.prompt + model.costPer1KTokens.completion) / 10 : 20
         });
       });
-      
-      return Array.from(providerMap.values());
     }
-    
-    // Fallback to static providers if no models in store
-    return [
-      {
-        id: 'openrouter',
-        name: 'OpenRouter',
-        status: 'active',
-        models: [
-          {
-            id: 'openai/gpt-4o-mini',
-            name: 'GPT-4o Mini (OpenRouter)',
-            description: 'Fast and efficient via OpenRouter - Best value',
-            maxTokens: 128000,
-            costPerPromptToken: 0.00015,
-            costPerCompletionToken: 0.0006,
-            features: ['reasoning', 'code', 'math'],
-            provider: 'openrouter',
-            tier: 'balanced',
-            quality: 85,
-            speed: 90,
-            cost: 20
-          }
-        ],
-        priority: 1,
-        costPerPromptToken: 0.00015,
-        costPerCompletionToken: 0.0006,
-        maxTokens: 200000,
-        rateLimitPerMinute: 500,
-        features: ['chat', 'completion', 'multi-provider', 'cost-optimization'],
-        description: 'Access to 200+ AI models with transparent pricing and smart routing'
-      },
-      {
-        id: 'demo',
-        name: 'Demo Mode',
-        status: 'active',
-        models: [
-          {
-            id: 'demo-gpt-4o-mini',
-            name: 'Demo GPT-4o Mini',
-            description: 'Simulated AI responses for demonstration',
-            maxTokens: 128000,
-            costPerPromptToken: 0,
-            costPerCompletionToken: 0,
-            features: ['reasoning', 'demo', 'fallback'],
-            provider: 'demo',
-            tier: 'balanced',
-            quality: 70,
-            speed: 100,
-            cost: 0
-          }
-        ],
-        priority: 0,
-        costPerPromptToken: 0,
-        costPerCompletionToken: 0,
-        maxTokens: 128000,
-        rateLimitPerMinute: 1000,
-        features: ['chat', 'completion', 'demo', 'fallback'],
-        description: 'Demo provider - Always available as final fallback'
-      }
-    ];
-  }, [models]);
+
+    // Add ImageRouter models if available
+    if (imageRouter.models.length > 0) {
+      const imageRouterProvider = providerMap.get('imagerouter')!;
+      imageRouter.models.forEach((model: any) => {
+        imageRouterProvider.models.push({
+          id: model.id || model.name,
+          name: model.name || model.displayName,
+          description: model.description || `${model.name} via ImageRouter`,
+          maxTokens: 4000,
+          costPerPromptToken: 0.0002,
+          costPerCompletionToken: 0.0008,
+          features: model.features || ['image-generation'],
+          provider: 'imagerouter',
+          tier: 'balanced',
+          quality: 85,
+          speed: 80,
+          cost: 30
+        });
+      });
+    }
+
+    // If no models loaded for OpenRouter, add fallback models
+    const openRouterProvider = providerMap.get('openrouter')!;
+    if (openRouterProvider.models.length === 0) {
+      openRouterProvider.models = [
+        {
+          id: 'openai/gpt-4o-mini',
+          name: 'GPT-4o Mini (OpenRouter)',
+          description: 'Fast and efficient via OpenRouter - Best value',
+          maxTokens: 128000,
+          costPerPromptToken: 0.00015,
+          costPerCompletionToken: 0.0006,
+          features: ['reasoning', 'code', 'math'],
+          provider: 'openrouter',
+          tier: 'balanced',
+          quality: 85,
+          speed: 90,
+          cost: 20
+        }
+      ];
+    }
+
+    // If no models loaded for ImageRouter, add fallback models
+    const imageRouterProvider = providerMap.get('imagerouter')!;
+    if (imageRouterProvider.models.length === 0) {
+      imageRouterProvider.models = [
+        {
+          id: 'test/test',
+          name: 'Test Image Model',
+          description: 'AI image generation via ImageRouter',
+          maxTokens: 4000,
+          costPerPromptToken: 0.0002,
+          costPerCompletionToken: 0.0008,
+          features: ['image-generation'],
+          provider: 'imagerouter',
+          tier: 'balanced',
+          quality: 85,
+          speed: 80,
+          cost: 30
+        }
+      ];
+    }
+
+    return Array.from(providerMap.values());
+  }, [models, imageRouter.models]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -592,7 +636,8 @@ export function CleanAIChat({ organizationId, className, demoMode = false, onCit
   // Simple web search detection
   const needsWebSearch = (content: string): boolean => {
     const input = content.toLowerCase().trim();
-    return /\b(search|find|lookup|current|latest|recent|today|news|what.*happening|tell.*about.*current)\b/i.test(input);
+    // Enhanced detection for web search, videos, and images
+    return /\b(search|find|lookup|current|latest|recent|today|news|what.*happening|tell.*about.*current|show.*video|find.*video|youtube|video.*of|image.*of|picture.*of|photo.*of)\b/i.test(input);
   };
 
   // Handle image generation toggle with automatic model switching
@@ -793,7 +838,7 @@ export function CleanAIChat({ organizationId, className, demoMode = false, onCit
           const assistantMessage: ChatMessage = {
             id: `assistant_${Date.now()}`,
             role: 'assistant' as const,
-            content: `Here's the generated image for: "${processedContent}"\n\n![Generated Image](${mediaResult.url})`,
+            content: `![Generated Image](${mediaResult.url})`,
             timestamp: new Date(),
             metadata: {
               model: mediaResult.model,
@@ -822,22 +867,29 @@ export function CleanAIChat({ organizationId, className, demoMode = false, onCit
       }
       
       // 3. WEB SEARCH: Auto-detect web search needs
+      let finalContent = processedContent;
       const webSearchNeeded = needsWebSearch(processedContent);
-      
+
+      // If web search is needed for videos, add explicit URL requirement to the query
+      if (webSearchNeeded && /\b(video|youtube|show.*video|find.*video)\b/i.test(processedContent)) {
+        finalContent = `${processedContent}\n\n[SYSTEM INSTRUCTION: You MUST include the actual YouTube URLs (https://www.youtube.com/watch?v=ID) in your response. Format as: ### Title followed by the URL on the next line. DO NOT just list titles!]`;
+        console.log('📺 Added explicit YouTube URL requirement to query');
+      }
+
       console.log('🔍 Web search check:', {
         needed: webSearchNeeded,
         hasAttachedFiles: attachedFiles.length > 0,
-        messageContent: processedContent.substring(0, 100)
+        messageContent: finalContent.substring(0, 100)
       });
-      
+
       if (webSearchNeeded) {
         console.log('🔍 Web search detected, will use online model');
       }
       
       // 4. DEFAULT: Text generation with file processing
-      const modelToUse = features.smartRouting ? 'auto' : selectedModel;
+      const modelToUse = selectedModel;
       console.log('💬 Text/file processing mode, using model:', modelToUse);
-      
+
       setCurrentlyUsedModel(modelToUse);
       
       // Add thinking delay (1.5-3 seconds) - This delay does NOT count toward usage
@@ -850,10 +902,10 @@ export function CleanAIChat({ organizationId, className, demoMode = false, onCit
 
       // Determine if we should use real AI or demo mode
       const shouldUseRealAI = !demoMode && features.openRouterEnabled && hasUsageQuota && apiKeyConfigured;
-      
+
       if (shouldUseRealAI) {
-        // Use the original message content (no prompt amplification needed)
-        await callRealAI(processedContent, attachedFiles, modelToUse, webSearchNeeded);
+        // Use the final content (with video URL instructions if needed)
+        await callRealAI(finalContent, attachedFiles, modelToUse, webSearchNeeded);
       } else {
         const fallbackContent = generateFallbackContent(messageContent);
         const fileCitations = extractFileCitations(fallbackContent, attachedFiles);
@@ -913,6 +965,42 @@ CRITICAL: When referencing information from uploaded files, you MUST cite the sp
 Always include the filename in brackets when referencing uploaded content. This helps users understand which specific document contains the information you're referencing.
 
 If a user asks you to "extract data from this file" or similar requests, it means they have uploaded a file and you should analyze it immediately. Never ask them to upload a file if they've already uploaded one.
+
+⚠️ CRITICAL MEDIA EMBEDDING INSTRUCTIONS - READ CAREFULLY ⚠️
+
+When users ask for videos or images, you MUST include actual URLs:
+
+**FOR YOUTUBE VIDEOS:**
+
+YOU HAVE WEB SEARCH ACCESS. Your search results INCLUDE actual YouTube URLs.
+
+REQUIRED FORMAT (copy this exactly):
+### [Video Title Here]
+https://www.youtube.com/watch?v=[VIDEO_ID]
+
+EXAMPLE - THIS IS CORRECT:
+### Who Is Nick Fuentes? | PBD Podcast
+https://www.youtube.com/watch?v=7TEnJ5pyFDg
+
+### Nick Fuentes Interview 2024
+https://www.youtube.com/watch?v=M6eEn5IsDxk
+
+❌ NEVER DO THIS:
+- "Here are some videos: ▶️ Title" (NO URLS = WRONG!)
+- "Feel free to check them out!" (WHERE ARE THE URLS?!)
+- Describing videos without actual URLs
+- Using emojis without URLs
+
+✅ ALWAYS DO THIS:
+1. Search the web for videos (you have this capability)
+2. Find the actual youtube.com URLs in search results
+3. Copy the FULL URL including https://www.youtube.com/watch?v=VIDEO_ID
+4. Format as shown above with ### heading and URL on separate line
+5. Repeat for each video (3-5 videos recommended)
+
+If you cannot find actual YouTube URLs in your search results, say: "I searched but could not retrieve embeddable YouTube URLs. Please try a different search."
+
+DO NOT respond with just video titles. URLs are MANDATORY.
 
 Provide accurate, helpful, and professional guidance for government contracting success.`
       };
@@ -1033,7 +1121,7 @@ Provide accurate, helpful, and professional guidance for government contracting 
       let requestBody = {
         messages: apiMessages,
         model: modelToUse,
-        provider: features.smartRouting ? 'auto' : selectedProvider,
+        provider: selectedProvider,
         organizationId: organizationId === 'demo' ? null : organizationId,
         streamingEnabled: true,
         temperature: 0,
@@ -1052,6 +1140,7 @@ Provide accurate, helpful, and professional guidance for government contracting 
         messageCount: requestBody.messages?.length,
         model: requestBody.model,
         provider: requestBody.provider,
+        webSearchEnabled: requestBody.options?.webSearch?.enabled,
         hasAttachments: 'checking...'
       });
       
@@ -2252,12 +2341,7 @@ Would you like me to dive deeper into any of these areas? I can also help you se
                   <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
                   <span className="text-xs text-muted-foreground whitespace-nowrap">Demo Mode</span>
                 </div>
-                {features.smartRouting && (
-                  <Badge variant="outline" className="text-xs hidden sm:inline-flex">
-                    Smart Routing
-                  </Badge>
-                )}
-                {!features.smartRouting && selectedProvider && (
+                {selectedProvider && (
                   <Badge variant="outline" className="text-xs hidden sm:inline-flex">
                     {providers.find(p => p.id === selectedProvider)?.name || selectedProvider}
                   </Badge>
@@ -2383,81 +2467,54 @@ Would you like me to dive deeper into any of these areas? I can also help you se
                               </button>
                             </div>
                             
-                            {/* Smart Routing Toggle */}
-                            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                              <div className="flex items-center space-x-2">
-                                <Target className="h-4 w-4 text-primary" />
-                                <div>
-                                  <div className="text-sm font-medium text-foreground">Smart Routing</div>
-                                  <div className="text-xs text-muted-foreground">Let AI choose the best model</div>
-                                </div>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => ai.toggleFeature('smartRouting', !features.smartRouting)}
-                                disabled={!features.openRouterEnabled}
-                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                                  features.smartRouting && features.openRouterEnabled ? 'bg-primary' : 'bg-muted-foreground/30'
-                                } ${!features.openRouterEnabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                              >
-                                <span
-                                  className={`inline-block h-4 w-4 transform rounded-full bg-background transition-transform ${
-                                    features.smartRouting && features.openRouterEnabled ? 'translate-x-6' : 'translate-x-1'
-                                  }`}
-                                />
-                              </button>
-                            </div>
-                            
-                            {/* Manual Provider/Model Selection */}
-                            {!features.smartRouting && (
-                              <div className="space-y-2">
-                                <Select 
-                                  value={selectedProvider} 
-                                  onValueChange={(value) => {
-                                    // Reset to first model of new provider
-                                    const provider = providers.find(p => p.id === value);
-                                    if (provider && provider.models.length > 0) {
-                                      ai.setSelectedModel(provider.models[0].id);
-                                    }
-                                  }}
-                                >
-                                  <SelectTrigger className="w-full bg-background border-border">
-                                    <SelectValue placeholder="Select provider" />
-                                  </SelectTrigger>
-                                  <SelectContent className="bg-popover border-border">
-                                    {providers.map(provider => (
-                                      <SelectItem
-                                        key={provider.id}
-                                        value={provider.id}
-                                        className="text-foreground hover:bg-muted"
-                                      >
-                                        {provider.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                
-                                <ModelSelectionModal
-                                  selectedProvider={selectedProvider}
-                                  selectedModel={selectedModel}
-                                  onModelSelect={(model) => ai.setSelectedModel(model)}
-                                  providers={providers}
-                                  mode={modalMode}
-                                  onModeChange={setModalMode}
-                                  trigger={
-                                    <Button variant="outline" className="w-full justify-between">
-                                      <span>
-                                        {providers
-                                          .find(p => p.id === selectedProvider)
-                                          ?.models.find(m => m.id === selectedModel)?.name || 'Select model'}
-                                      </span>
-                                      <ChevronRight className="h-4 w-4" />
-                                    </Button>
+                            {/* Provider/Model Selection */}
+                            <div className="space-y-2">
+                              <Select
+                                value={selectedProvider}
+                                onValueChange={(value) => {
+                                  // Reset to first model of new provider
+                                  const provider = providers.find(p => p.id === value);
+                                  if (provider && provider.models.length > 0) {
+                                    ai.setSelectedModel(provider.models[0].id);
                                   }
-                                />
-                              </div>
-                            )}
-                            
+                                }}
+                              >
+                                <SelectTrigger className="w-full bg-background border-border">
+                                  <SelectValue placeholder="Select provider" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-popover border-border">
+                                  {providers.map(provider => (
+                                    <SelectItem
+                                      key={provider.id}
+                                      value={provider.id}
+                                      className="text-foreground hover:bg-muted"
+                                    >
+                                      {provider.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+
+                              <ModelSelectionModal
+                                selectedProvider={selectedProvider}
+                                selectedModel={selectedModel}
+                                onModelSelect={(model) => ai.setSelectedModel(model)}
+                                providers={providers}
+                                mode={modalMode}
+                                onModeChange={setModalMode}
+                                trigger={
+                                  <Button variant="outline" className="w-full justify-between">
+                                    <span>
+                                      {providers
+                                        .find(p => p.id === selectedProvider)
+                                        ?.models.find(m => m.id === selectedModel)?.name || 'Select model'}
+                                    </span>
+                                    <ChevronRight className="h-4 w-4" />
+                                  </Button>
+                                }
+                              />
+                            </div>
+
                             {/* Image Generation Toggle */}
                             <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
                               <div className="flex items-center space-x-2">

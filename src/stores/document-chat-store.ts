@@ -217,7 +217,6 @@ interface AISlice {
   // Feature toggles
   features: {
     openRouterEnabled: boolean
-    smartRouting: boolean
     costOptimization: boolean
     realTimeMetrics: boolean
     advancedSettings: boolean
@@ -2181,7 +2180,6 @@ export const useDocumentChatSystemStore = create<DocumentChatSystemStore>()(
             },
             features: {
               openRouterEnabled: true,
-              smartRouting: true,
               costOptimization: true,
               realTimeMetrics: true,
               advancedSettings: false
@@ -2277,15 +2275,16 @@ export const useDocumentChatSystemStore = create<DocumentChatSystemStore>()(
               
               try {
                 console.log('🚀 Fetching models from all providers in parallel...')
-                
+
                 // Use the new parallel loading endpoint for better performance
                 const response = await fetch('/api/v1/ai/models/all', {
                   method: 'GET',
                   headers: {
                     'Content-Type': 'application/json',
                   },
+                  credentials: 'include', // Include auth cookies
                 });
-                
+
                 if (!response.ok) {
                   throw new Error(`Failed to fetch models: ${response.status} ${response.statusText}`);
                 }
@@ -2348,7 +2347,9 @@ export const useDocumentChatSystemStore = create<DocumentChatSystemStore>()(
                   state.ai.models = allModels
                   state.ai.search.filteredModels = allModels
                   if (!state.ai.selectedModel && allModels.length > 0) {
-                    state.ai.selectedModel = allModels[0].name
+                    // Prioritize text generation models (non-imagerouter) as default
+                    const textModel = allModels.find(m => m.provider !== 'imagerouter' && !m.features?.includes('media-generation'))
+                    state.ai.selectedModel = textModel ? textModel.name : allModels[0].name
                   }
                 })
                 

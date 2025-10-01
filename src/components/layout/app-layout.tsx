@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { Header } from './header'
 import { Sidebar } from './sidebar'
@@ -13,10 +13,15 @@ interface AppLayoutProps {
 
 export function AppLayout({ children, showNavigation = true }: AppLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const pathname = usePathname()
-  
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   // Temporarily disable FloatingChat on documents page to test interference
-  const shouldShowFloatingChat = showNavigation && !pathname.startsWith('/documents')
+  const shouldShowFloatingChat = mounted && showNavigation && !pathname.startsWith('/documents')
 
   if (!showNavigation) {
     return (

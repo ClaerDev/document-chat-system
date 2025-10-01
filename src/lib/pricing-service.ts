@@ -294,6 +294,13 @@ export class PricingService {
    * Convert default plans to PricingPlan format
    */
   private static convertDefaultPlansToFormat(defaultPlans: typeof DEFAULT_PLANS): PricingPlan[] {
+    // Map plan keys to Stripe price IDs from environment variables
+    const priceIdMap: Record<string, string | undefined> = {
+      'STARTER': process.env.STRIPE_PRICE_STARTER,
+      'PROFESSIONAL': process.env.STRIPE_PRICE_PROFESSIONAL,
+      'AGENCY': process.env.STRIPE_PRICE_AGENCY,
+    };
+
     return Object.entries(defaultPlans).map(([key, plan], index) => ({
       id: plan.id || key.toLowerCase(),
       planType: key,
@@ -318,7 +325,7 @@ export class PricingService {
       isPopular: key === 'PROFESSIONAL',
       displayOrder: index,
       metadata: null,
-      stripeMonthlyPriceId: null,
+      stripeMonthlyPriceId: priceIdMap[key] || null,
       stripeYearlyPriceId: null
     }))
   }
