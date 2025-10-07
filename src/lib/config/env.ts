@@ -101,24 +101,24 @@ const envSchema = z.object({
     ),
   OPENROUTER_APP_NAME: z
     .string()
-    .default('GovMatch-AI')
+    .default('Document-Chat-System')
     .describe(
-      'Application name for OpenRouter requests. Used for tracking and analytics. Default: GovMatch-AI'
+      'Application name for OpenRouter requests. Used for tracking and analytics. Default: Document-Chat-System'
     ),
   OPENROUTER_SITE_URL: z
     .string()
     .transform((val) => {
-      if (!val || val === '') return 'https://govmatch.ai'
+      if (!val || val === '') return 'https://document-chat-system.vercel.app'
       try {
         new URL(val)
         return val
       } catch {
-        return 'https://govmatch.ai'
+        return 'https://document-chat-system.vercel.app'
       }
     })
-    .default('https://govmatch.ai')
+    .default('https://document-chat-system.vercel.app')
     .describe(
-      'Site URL for OpenRouter requests. Used for provider attribution and analytics. Default: https://govmatch.ai'
+      'Site URL for OpenRouter requests. Used for provider attribution and analytics. Default: https://document-chat-system.vercel.app'
     ),
 
   // Extended AI Provider Configuration
@@ -1107,12 +1107,12 @@ const envSchema = z.object({
   SUPPORT_EMAIL: z
     .string()
     .email()
-    .default('support@govmatch.ai')
-    .describe('Support contact email address. Default: support@govmatch.ai'),
+    .default('support@document-chat-system.com')
+    .describe('Support contact email address. Default: support@document-chat-system.com'),
   SUPPORT_NAME: z
     .string()
-    .default('GovMatch AI Support')
-    .describe('Support contact display name. Default: GovMatch AI Support'),
+    .default('Document Chat System Support')
+    .describe('Support contact display name. Default: Document Chat System Support'),
 
   // Third-party Service URLs
   STRIPE_PUBLISHABLE_KEY_DOMAIN: z
@@ -1193,9 +1193,9 @@ const envSchema = z.object({
     ),
   PINECONE_INDEX_NAME: z
     .string()
-    .default('govmatch-ai-2')
+    .default('document-chat-index')
     .describe(
-      'Name of the Pinecone index for vector storage. Used for all vector search operations. Default: govmatch-ai-2'
+      'Name of the Pinecone index for vector storage. Used for all vector search operations. Default: document-chat-index'
     ),
   PGVECTOR_CONNECTION_STRING: z
     .string()
@@ -1278,8 +1278,8 @@ function validateEnv() {
       AZURE_OPENAI_REQUESTS_PER_MINUTE: 60,
       AZURE_OPENAI_TOKENS_PER_MINUTE: 100000,
       OPENROUTER_API_KEY: '',
-      OPENROUTER_APP_NAME: 'govmatch-ai',
-      OPENROUTER_SITE_URL: '',
+      OPENROUTER_APP_NAME: 'document-chat-system',
+      OPENROUTER_SITE_URL: 'https://document-chat-system.vercel.app',
       OPENROUTER_SMART_ROUTING: true,
       OPENROUTER_COST_OPTIMIZATION: true,
       OPENROUTER_FALLBACK_STRATEGY: 'balanced',
@@ -1294,7 +1294,7 @@ function validateEnv() {
       AI_RETRY_DELAY: 1000,
       PINECONE_API_KEY: '',
       PINECONE_ENVIRONMENT: 'us-east1-gcp',
-      PINECONE_INDEX_NAME: 'govmatch-embeddings',
+      PINECONE_INDEX_NAME: 'document-chat-index',
       PGVECTOR_CONNECTION_STRING: '',
       PGVECTOR_TABLE_NAME: 'embeddings',
       RATE_LIMIT_WINDOW: 60000,
