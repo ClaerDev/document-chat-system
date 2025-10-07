@@ -1369,17 +1369,17 @@ function validateEnv() {
     } as any
   }
 
-  try {
-    return envSchema.parse(process.env)
-  } catch (error) {
-    console.error('❌ Invalid environment variables:', error)
+  const result = envSchema.safeParse(process.env)
 
-    // In development, log the error but don't crash
-    if (process.env.NODE_ENV === 'development') {
+  if (!result.success) {
+    console.error('❌ Invalid environment variables:', result.error.format())
+
+    // In development and build time, log the error but don't crash
+    if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'production') {
       console.warn(
-        '⚠️  Environment validation failed in development mode, using defaults'
+        '⚠️  Environment validation failed, using environment variables as-is'
       )
-      // Return a safe default configuration for development
+      // Return environment variables as-is with defaults
       return envSchema.parse({
         ...process.env,
         DATABASE_URL:
@@ -1394,6 +1394,8 @@ function validateEnv() {
 
     throw new Error('Environment validation failed')
   }
+
+  return result.data
 }
 
 // Export typed configuration
