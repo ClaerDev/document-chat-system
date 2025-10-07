@@ -23,6 +23,7 @@
 ## Table of Contents
 
 - [Overview](#overview)
+- [Use Cases](#use-cases)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Prerequisites](#prerequisites)
@@ -58,6 +59,64 @@
 - **🐳 Docker Ready** - Production Dockerfile included
 - **⚡ Background Jobs** - Scalable processing with Inngest
 - **🎨 Modern UI** - Beautiful, responsive interface with dark mode
+
+---
+
+## Use Cases
+
+Document Chat System is perfect for a variety of applications and industries:
+
+### 📚 **Knowledge Management**
+- **Internal Wikis & Documentation**: Build a searchable knowledge base where teams can ask questions and get instant answers from company documentation
+- **Research Libraries**: Organize and chat with research papers, technical documents, and academic materials
+- **Personal Knowledge Base**: Create your own "second brain" by uploading notes, articles, and PDFs for AI-powered recall
+
+### 👨‍💼 **Business & Enterprise**
+- **Customer Support**: Train support teams by uploading product manuals, policies, and FAQs for instant AI-powered answers
+- **Legal Document Analysis**: Upload contracts, agreements, and legal documents for quick reference and analysis
+- **HR & Onboarding**: Create an interactive employee handbook where new hires can ask questions about policies and procedures
+- **Compliance & Regulations**: Maintain regulatory documents and get instant answers about compliance requirements
+
+### 🎓 **Education & Learning**
+- **Study Assistant**: Upload textbooks, lecture notes, and course materials for AI-powered tutoring
+- **Course Management**: Create interactive course materials where students can ask questions about readings
+- **Research Assistant**: Organize and query research papers, journals, and academic resources
+
+### 💼 **Professional Services**
+- **Client Portal**: Provide clients with a secure portal to access and query project documents, reports, and deliverables
+- **Proposal Management**: Store RFPs, proposals, and past projects for quick reference during bidding
+- **Case Management**: Organize case files, evidence, and documentation with intelligent search and retrieval
+
+### 🏥 **Healthcare & Medical**
+- **Medical Literature**: Organize medical journals, research papers, and clinical guidelines for healthcare professionals
+- **Patient Education**: Create an interactive resource where patients can learn about conditions and treatments
+- **Clinical Documentation**: Maintain clinical protocols and treatment guidelines with AI-powered search
+
+### 🔬 **Research & Development**
+- **Lab Notebooks**: Digitize and make searchable lab notes, experiment results, and research findings
+- **Patent Research**: Upload and analyze patent documents, prior art, and technical specifications
+- **Literature Reviews**: Organize and query scientific papers, journals, and research publications
+
+### 🏗️ **Real Estate & Property**
+- **Property Documentation**: Manage contracts, inspection reports, and property disclosures
+- **Tenant Resources**: Create a knowledge base for tenants with lease agreements, maintenance guides, and community rules
+- **Development Projects**: Organize architectural plans, permits, and project documentation
+
+### 💻 **SaaS & Startups**
+- **Product Documentation**: Build an AI-powered help center where customers can ask questions about your product
+- **Developer Documentation**: Create interactive API docs and technical guides
+- **White-Label Solutions**: Deploy as a white-labeled document management platform for your customers
+
+### 🌐 **Content Creation**
+- **Content Library**: Organize blog posts, articles, and creative works with AI-powered search
+- **Writing Assistant**: Upload research materials and reference documents for content creation
+- **Media Archives**: Manage scripts, transcripts, and multimedia documentation
+
+### 🔒 **Privacy-Focused Applications**
+Thanks to client-side encryption and BYOK (Bring Your Own Key) architecture:
+- **Personal Finance**: Upload financial statements and documents knowing your data stays secure
+- **Confidential Projects**: Maintain sensitive business information with enterprise-grade security
+- **Private Research**: Keep proprietary research and development documentation secure
 
 ---
 

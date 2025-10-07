@@ -80,6 +80,9 @@ export function LandingPageClient() {
         </Link>
         {/* Desktop Navigation */}
         <nav className="ml-auto hidden md:flex gap-2 sm:gap-4 items-center">
+          <Link href="#use-cases" className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+            Use Cases
+          </Link>
           <Link href="#features" className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
             Features
           </Link>
@@ -88,9 +91,6 @@ export function LandingPageClient() {
           </Link>
           <Link href="#tech-stack" className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
             Tech Stack
-          </Link>
-          <Link href="#monetization" className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-            Monetization
           </Link>
           <ThemeToggle />
           <Link href="/sign-in">
@@ -136,6 +136,13 @@ export function LandingPageClient() {
         <div className="md:hidden border-b bg-white dark:bg-gray-950 shadow-lg">
           <nav className="flex flex-col p-4 space-y-3">
             <Link
+              href="#use-cases"
+              className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Use Cases
+            </Link>
+            <Link
               href="#features"
               className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-2"
               onClick={() => setMobileMenuOpen(false)}
@@ -155,13 +162,6 @@ export function LandingPageClient() {
               onClick={() => setMobileMenuOpen(false)}
             >
               Tech Stack
-            </Link>
-            <Link
-              href="#monetization"
-              className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-2"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Monetization
             </Link>
             <Link
               href="https://github.com/watat83/document-chat-system"
@@ -245,6 +245,107 @@ export function LandingPageClient() {
                 <span>No Vendor Lock-In</span>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Use Cases Section */}
+      <section id="use-cases" className="w-full py-12 md:py-24 lg:py-32 bg-gray-50 dark:bg-gray-900">
+        <div className="container px-4 md:px-6">
+          <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
+            <Badge variant="outline">Use Cases</Badge>
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+              Built for Every Industry
+            </h2>
+            <p className="max-w-[900px] text-gray-600 md:text-xl dark:text-gray-400">
+              From knowledge management to customer support, Document Chat System adapts to your needs
+            </p>
+          </div>
+
+          <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-3">
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="h-12 w-12 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-4">
+                  <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <CardTitle>Knowledge Management</CardTitle>
+                <CardDescription>
+                  Build searchable knowledge bases, research libraries, and personal "second brains" with AI-powered recall
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="h-12 w-12 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mb-4">
+                  <Users className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <CardTitle>Customer Support</CardTitle>
+                <CardDescription>
+                  Train support teams with product manuals, policies, and FAQs for instant AI-powered answers
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="h-12 w-12 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-4">
+                  <Terminal className="h-6 w-6 text-green-600 dark:text-green-400" />
+                </div>
+                <CardTitle>Developer Docs</CardTitle>
+                <CardDescription>
+                  Create interactive API documentation and technical guides where developers can ask questions
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="h-12 w-12 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mb-4">
+                  <Activity className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                </div>
+                <CardTitle>Legal & Compliance</CardTitle>
+                <CardDescription>
+                  Maintain regulatory documents and get instant answers about compliance requirements and policies
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="h-12 w-12 rounded-lg bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center mb-4">
+                  <Sparkles className="h-6 w-6 text-pink-600 dark:text-pink-400" />
+                </div>
+                <CardTitle>Education & Research</CardTitle>
+                <CardDescription>
+                  Upload textbooks, lecture notes, and research papers for AI-powered tutoring and study assistance
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="h-12 w-12 rounded-lg bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center mb-4">
+                  <Globe className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />
+                </div>
+                <CardTitle>White-Label SaaS</CardTitle>
+                <CardDescription>
+                  Deploy as your own branded document management platform with built-in billing and multi-tenancy
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+
+          <div className="mt-12 text-center">
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              And many more: HR onboarding, content creation, medical research, property management, and more
+            </p>
+            <Link href="https://github.com/watat83/document-chat-system#use-cases" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" size="lg">
+                View All Use Cases
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
