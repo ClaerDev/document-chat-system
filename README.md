@@ -194,36 +194,43 @@ Thanks to client-side encryption and BYOK (Bring Your Own Key) architecture:
 - **[React 19](https://react.dev/)** - Latest React with concurrent features
 - **[TypeScript 5](https://www.typescriptlang.org/)** - Type-safe development
 - **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first CSS framework
+- **[shadcn/ui](https://ui.shadcn.com/)** - Re-usable components built with Radix UI
 - **[Radix UI](https://www.radix-ui.com/)** - Accessible component primitives
 - **[Zustand](https://zustand-demo.pmnd.rs/)** - Lightweight state management
 - **[Framer Motion](https://www.framer.com/motion/)** - Animation library
+- **[React PDF](https://react-pdf.org/)** - PDF rendering
+- **[Lexical](https://lexical.dev/)** - Rich text editor framework
 
 ### Backend
 
-- **[Next.js API Routes](https://nextjs.org/docs/api-routes/introduction)** - Serverless API endpoints
-- **[Prisma ORM](https://www.prisma.io/)** - Type-safe database client
-- **[PostgreSQL](https://www.postgresql.org/)** - Primary database
+- **[Next.js 15 API Routes](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)** - Serverless API endpoints
+- **[Prisma ORM](https://www.prisma.io/)** - Type-safe database client with PostgreSQL
+- **[PostgreSQL 14+](https://www.postgresql.org/)** - Primary database
 - **[Clerk](https://clerk.com/)** - Authentication & user management
-- **[Zod](https://zod.dev/)** - Schema validation
-- **[tRPC](https://trpc.io/)** - End-to-end type safety
+- **[Zod](https://zod.dev/)** - Runtime schema validation
+- **[Inngest](https://www.inngest.com/)** - Background job processing & workflows
 
 ### AI & Machine Learning
 
-- **[OpenRouter](https://openrouter.ai/)** - Access to 100+ AI models
-- **[OpenAI](https://openai.com/)** - GPT-4 Turbo and embeddings
-- **[ImageRouter](https://imagerouter.com/)** - for Image Generation with over 50+ models to choose from
+- **[OpenRouter](https://openrouter.ai/)** - Unified access to 100+ AI models (GPT-4, Claude, Llama, Mistral, etc.)
+- **[OpenAI](https://openai.com/)** - Direct GPT-4 Turbo integration and text embeddings
+- **[ImageRouter](https://imagerouter.com/)** - Image generation with 50+ models
 - **[Pinecone](https://www.pinecone.io/)** - Vector database for semantic search
-- **[pgvector](https://github.com/pgvector/pgvector)** - PostgreSQL vector extension
-- **[LangChain](https://www.langchain.com/)** - AI workflow orchestration
+- **[pgvector](https://github.com/pgvector/pgvector)** - PostgreSQL vector extension (alternative to Pinecone)
 
-### Infrastructure
+### File Processing
 
-- **[Supabase](https://supabase.com/)** - File storage and database hosting
-- **[Upstash Redis](https://upstash.com/)** - Serverless Redis for caching
-- **[Inngest](https://www.inngest.com/)** - Background job processing
-- **[Stripe](https://stripe.com/)** - Payment processing (optional)
-- **[Sentry](https://sentry.io/)** - Error tracking and monitoring
-- **[Docker](https://www.docker.com/)** - Containerization
+- **[pdf-parse](https://www.npmjs.com/package/pdf-parse)** - PDF text extraction
+- **[mammoth](https://www.npmjs.com/package/mammoth)** - DOCX to HTML conversion
+- **[Sharp](https://sharp.pixelplumbing.com/)** - Image processing and optimization
+
+### Infrastructure & Services
+
+- **[Supabase](https://supabase.com/)** - File storage and PostgreSQL database hosting
+- **[Upstash Redis](https://upstash.com/)** - Serverless Redis for caching (optional)
+- **[Stripe](https://stripe.com/)** - Payment processing and subscription management (optional)
+- **[Docker](https://www.docker.com/)** - Containerization for deployment
+- **[Vercel](https://vercel.com/)** - Recommended deployment platform
 
 ---
 
@@ -549,45 +556,75 @@ User sends message → Retrieve relevant docs (Vector Search)
 ```
 document-chat-system/
 ├── prisma/
-│   ├── schema.prisma           # Database schema
-│   └── seed.ts                 # Database seeding
-├── public/                     # Static assets
+│   ├── migrations/             # Database migration history
+│   ├── schema.prisma           # Database schema with all models
+│   ├── seed.ts                 # Database seeding script
+│   └── rls-policies.sql        # Row-level security policies
+├── public/                     # Static assets (images, fonts, etc.)
 ├── scripts/
-│   └── seed-pricing-plans.ts   # Pricing tier configuration
+│   ├── README.md               # Scripts documentation
+│   └── setup-vercel.sh         # Automated Vercel deployment script
 ├── src/
-│   ├── app/                    # Next.js App Router
+│   ├── app/                    # Next.js 15 App Router
 │   │   ├── api/               # API routes
-│   │   │   └── v1/           # Versioned APIs
-│   │   ├── documents/        # Document management pages
-│   │   ├── chat/             # Chat interface pages
-│   │   ├── billing/          # Billing pages (optional)
-│   │   └── layout.tsx        # Root layout
+│   │   │   ├── ai/           # AI-related endpoints
+│   │   │   ├── inngest/      # Inngest webhook endpoint
+│   │   │   └── v1/           # Versioned REST APIs
+│   │   ├── billing/          # Billing & subscription pages
+│   │   ├── chat/             # AI chat interface
+│   │   ├── dashboard/        # Main dashboard & analytics
+│   │   ├── documents/        # Document management UI
+│   │   ├── logs/             # Audit logs viewer
+│   │   ├── profile/          # User profile pages
+│   │   ├── sign-in/          # Authentication pages
+│   │   ├── sign-up/          # Registration pages
+│   │   ├── layout.tsx        # Root layout with providers
+│   │   └── page.tsx          # Landing page
 │   ├── components/            # React components
-│   │   ├── ui/               # Reusable UI components
-│   │   ├── documents/        # Document components
-│   │   ├── chat/             # Chat components
-│   │   ├── billing/          # Billing components
-│   │   └── layout/           # Layout components
-│   ├── lib/                  # Core libraries
+│   │   ├── ui/               # shadcn/ui components
+│   │   ├── documents/        # Document-specific components
+│   │   ├── chat/             # Chat UI components
+│   │   ├── billing/          # Billing UI components
+│   │   ├── ai/               # AI configuration components
+│   │   ├── layout/           # Layout components
+│   │   └── profile/          # Profile management components
+│   ├── lib/                  # Core library code
 │   │   ├── ai/              # AI service integrations
-│   │   │   ├── providers/   # AI provider adapters
-│   │   │   └── services/    # AI processing services
-│   │   ├── inngest/         # Background job functions
-│   │   ├── documents/       # Document processing
-│   │   ├── file-processing/ # File type handlers
-│   │   └── db.ts            # Database client
+│   │   │   ├── providers/   # OpenRouter, OpenAI, ImageRouter adapters
+│   │   │   ├── services/    # AI processing & routing services
+│   │   │   ├── monitoring/  # AI usage tracking & metrics
+│   │   │   ├── config/      # AI configuration management
+│   │   │   └── __tests__/   # AI service tests
+│   │   ├── inngest/         # Background job processing
+│   │   │   └── functions/   # Inngest function definitions
+│   │   ├── documents/       # Document management logic
+│   │   ├── file-processing/ # File type handlers (PDF, DOCX, etc.)
+│   │   ├── audit/           # Audit logging system
+│   │   ├── auth/            # Authentication utilities
+│   │   ├── cache/           # Caching layer (Redis)
+│   │   ├── config/          # Environment configuration
+│   │   ├── db/              # Database utilities
+│   │   ├── errors/          # Error handling framework
+│   │   ├── storage/         # File storage (Supabase)
+│   │   ├── supabase/        # Supabase client setup
+│   │   └── validation/      # Input validation schemas
 │   ├── hooks/                # Custom React hooks
-│   ├── stores/               # Zustand state stores
-│   ├── types/                # TypeScript types
-│   └── middleware.ts         # Next.js middleware
+│   ├── stores/               # Zustand state management
+│   ├── contexts/             # React context providers
+│   ├── types/                # TypeScript type definitions
+│   ├── data/                 # Static data files
+│   ├── styles/               # Global styles
+│   └── middleware.ts         # Next.js middleware (auth, CORS)
 ├── .env.example              # Environment variables template
-├── .env.local               # Your configuration (git-ignored)
+├── .env.local               # Your local config (git-ignored)
+├── .gitignore               # Git ignore rules
 ├── Dockerfile               # Production Docker image
-├── docker-compose.yml       # Local development with Docker
+├── docker-compose.yml       # Local development setup
 ├── next.config.mjs          # Next.js configuration
 ├── tailwind.config.ts       # Tailwind CSS configuration
 ├── tsconfig.json            # TypeScript configuration
-└── package.json             # Dependencies and scripts
+├── package.json             # Dependencies and npm scripts
+└── README.md                # This file
 ```
 
 ---
@@ -753,70 +790,135 @@ The platform includes **optional Stripe integration** that allows you to:
 
 ### 💰 Customizing Pricing Tiers
 
-It's incredibly easy to customize pricing - just edit one file and run one command!
+Pricing plans are stored in the database and can be managed through the admin API or directly in the database.
 
-#### Step 1: Edit the Pricing Configuration
+#### Creating/Updating Pricing Plans
 
-Open `scripts/seed-pricing-plans.ts` and customize the plans:
+You can create pricing plans by inserting them into the `PricingPlan` table in your database. Here's an example plan configuration:
 
 ```typescript
-const plans = [
-  {
-    id: "starter-plan",
-    planType: "STARTER",
-    displayName: "Starter",
-    monthlyPrice: 2900, // $29 in cents
-    yearlyPrice: 29000, // $290/year (save ~17%)
-    features: {
-      list: [
-        "3 user seats",
-        "500 AI credits per month",
-        "1,000 pages processed per month",
-        "Priority email support",
-        "All document formats",
-        "Vector search",
-      ],
-    },
-    limits: {
-      seats: 3,
-      savedFilters: 10,
-      aiCreditsPerMonth: 500,
-      pagesPerMonth: 1000,
-    },
+// Example pricing plan structure
+{
+  planType: "STARTER",           // Unique identifier (STARTER, PROFESSIONAL, AGENCY, ENTERPRISE)
+  displayName: "Starter",        // Display name shown to users
+  description: "Perfect for individuals and small teams",
+  monthlyPrice: 2900,            // Price in cents ($29.00)
+  yearlyPrice: 29000,            // Yearly price in cents ($290.00, ~17% discount)
+  currency: "usd",               // Currency code
+
+  // Features array (displayed on pricing page)
+  features: [
+    "3 user seats",
+    "500 AI credits per month",
+    "1,000 documents per month",
+    "10 GB storage",
+    "Priority email support",
+    "All document formats",
+    "Vector search & semantic indexing",
+    "Basic API access",
+  ],
+
+  // Usage limits (enforced by the application)
+  limits: {
+    seats: 3,                     // Number of users per organization
+    documentsPerMonth: 1000,      // Documents that can be uploaded monthly
+    aiCreditsPerMonth: 500,       // AI API usage credits
+    storageGB: 10,                // File storage limit in gigabytes
+    apiCallsPerMonth: 10000,      // API rate limit per month
+    maxFileSize: 50,              // Max file size in MB
+    folders: 50,                  // Number of folders allowed
+    chatHistory: 100,             // Chat conversation history limit
+  },
+
+  // Display settings
+  isActive: true,                 // Show in pricing table
+  isPopular: true,                // Display "Most Popular" badge
+  displayOrder: 1,                // Order in pricing table (lower = first)
+}
+```
+
+#### Managing Plans via Database
+
+**Option 1: Direct Database Insert**
+
+```sql
+INSERT INTO "PricingPlan" (
+  id, "planType", "displayName", description,
+  "monthlyPrice", "yearlyPrice", currency,
+  features, limits,
+  "isActive", "isPopular", "displayOrder"
+) VALUES (
+  'cuid_here',
+  'STARTER',
+  'Starter',
+  'Perfect for individuals and small teams',
+  2900,
+  29000,
+  'usd',
+  '["3 user seats", "500 AI credits/month", "1,000 documents/month"]'::jsonb,
+  '{"seats": 3, "documentsPerMonth": 1000, "aiCreditsPerMonth": 500}'::jsonb,
+  true,
+  true,
+  1
+);
+```
+
+**Option 2: Admin API Endpoint**
+
+```bash
+# Create/update pricing plan via API
+curl -X POST http://localhost:3000/api/v1/admin/pricing-plans \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
+  -d '{
+    "planType": "STARTER",
+    "displayName": "Starter",
+    "monthlyPrice": 2900,
+    "features": [...],
+    "limits": {...}
+  }'
+```
+
+**Option 3: Using Prisma Client**
+
+```typescript
+// In your seed script or admin tool
+import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient()
+
+await prisma.pricingPlan.create({
+  data: {
+    planType: 'STARTER',
+    displayName: 'Starter',
+    description: 'Perfect for individuals and small teams',
+    monthlyPrice: 2900,
+    yearlyPrice: 29000,
+    currency: 'usd',
+    features: [...],
+    limits: {...},
     isActive: true,
     isPopular: true,
     displayOrder: 1,
-  },
-  // Add more plans here...
-];
+  }
+})
 ```
-
-#### Step 2: Run the Seed Command
-
-```bash
-npx tsx scripts/seed-pricing-plans.ts
-```
-
-This will:
-
-1. ✅ Create/update plans in your database
-2. ✅ Automatically sync products to Stripe
-3. ✅ Create price objects in Stripe
-4. ✅ Set up subscription logic
-
-#### Step 3: Profit!
-
-That's it! Your new pricing plans are live and Stripe is configured automatically.
 
 ### Available Limit Options
 
 You can customize these limits for each plan:
 
-- `seats`: Number of user seats per organization
-- `documentsPerMonth`: Documents that can be uploaded per month
-- `aiCreditsPerMonth`: AI API usage quota
-- `storageGB`: File storage quota in gigabytes
-- `apiCallsPerMonth`: API rate limits
+| Limit | Description | Example Values |
+|-------|-------------|----------------|
+| `seats` | Number of user seats per organization | 3, 10, 50, unlimited |
+| `documentsPerMonth` | Documents that can be uploaded monthly | 100, 1000, 10000 |
+| `aiCreditsPerMonth` | AI API usage quota (tokens/requests) | 500, 5000, 50000 |
+| `storageGB` | File storage quota in gigabytes | 10, 50, 500 |
+| `apiCallsPerMonth` | API rate limits per month | 1000, 10000, 100000 |
+| `maxFileSize` | Maximum file size in MB | 10, 50, 200 |
+| `folders` | Number of folders allowed | 10, 100, unlimited |
+| `chatHistory` | Chat conversation history retention | 50, 500, unlimited |
+
+These limits are automatically enforced throughout the application via usage tracking middleware.
 
 ### Disabling Billing Completely
 
@@ -976,20 +1078,46 @@ vercel
 
 **4. Add Environment Variables:**
 
+We've provided an automated script to sync your environment variables to Vercel:
+
 ```bash
-# Option 1: Via CLI
+# Option 1: Automated Script (Recommended)
+./scripts/setup-vercel.sh --all
+
+# This will:
+# - Read your .env.local file
+# - Add all variables to Vercel (production, preview, development)
+# - Skip placeholder values automatically
+# - Handle sensitive variables securely
+
+# For production only:
+./scripts/setup-vercel.sh --prod
+
+# To preview what would be added without making changes:
+./scripts/setup-vercel.sh --dry-run
+
+# See all options:
+./scripts/setup-vercel.sh --help
+```
+
+```bash
+# Option 2: Manual CLI (Alternative)
 vercel env add NEXT_PUBLIC_APP_URL
 # Enter: https://your-app.vercel.app
 # Select: Production
 
 # Repeat for all environment variables...
+```
 
-# Option 2: Via Dashboard (Easier)
+```bash
+# Option 3: Via Dashboard (Alternative)
 # 1. Go to: https://vercel.com/your-username/document-chat-system
 # 2. Click "Settings" → "Environment Variables"
-# 3. Add all variables from your .env file
-# 4. Select "Production" for each
+# 3. Add all variables from your .env.local file
+# 4. Select appropriate environments for each
 ```
+
+📖 **For detailed deployment instructions, see [scripts/README.md](scripts/README.md)**
 
 **5. Configure Clerk Redirect URLs:**
 
@@ -1577,9 +1705,6 @@ npm run db:reset         # Reset database (⚠️ deletes all data)
 
 # Background Jobs
 npx inngest-cli dev      # Run Inngest dev server (http://localhost:8288)
-
-# Pricing
-npx tsx scripts/seed-pricing-plans.ts  # Update pricing tiers
 ```
 
 ### Code Style
