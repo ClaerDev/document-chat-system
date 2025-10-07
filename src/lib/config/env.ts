@@ -200,12 +200,14 @@ const envSchema = z.object({
     ),
   OPENROUTER_COST_OPTIMIZATION: z
     .enum(['aggressive', 'balanced', 'conservative'])
+    .optional()
     .default('balanced')
     .describe(
       'Cost optimization strategy for OpenRouter. Used in ai-config.ts for model selection based on cost priorities. Default: balanced'
     ),
   OPENROUTER_FALLBACK_STRATEGY: z
     .enum(['internal', 'openrouter', 'hybrid'])
+    .optional()
     .default('hybrid')
     .describe(
       'Fallback strategy when primary providers fail. Used in ai-config.ts for resilient AI service architecture. Default: hybrid'
