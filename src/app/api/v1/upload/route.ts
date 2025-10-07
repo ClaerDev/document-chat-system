@@ -90,11 +90,17 @@ const FileUploadSchema = z.object({
   type: z.enum(['profile-image', 'document', 'attachment']).default('profile-image'),
 })
 
-// Initialize Supabase client for storage
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Initialize Supabase client for storage (lazy initialization)
+function getSupabaseClient() {
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Supabase configuration missing. Please set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables.')
+  }
+
+  return createClient(supabaseUrl, supabaseKey)
+}
 
 // File type validation
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
@@ -182,6 +188,9 @@ export async function POST(request: NextRequest) {
     // Convert File to ArrayBuffer for upload
     const fileBuffer = await file.arrayBuffer()
 
+    // Get Supabase client
+    const supabase = getSupabaseClient()
+
     // Upload to Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('govmatch-files')
@@ -194,11 +203,11 @@ export async function POST(request: NextRequest) {
     if (uploadError) {
       console.error('Upload error:', uploadError)
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Failed to upload file', 
+        {
+          success: false,
+          error: 'Failed to upload file',
           code: 'UPLOAD_FAILED',
-          details: uploadError.message 
+          details: uploadError.message
         },
         { status: 500 }
       )

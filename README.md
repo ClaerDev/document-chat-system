@@ -44,7 +44,7 @@
 
 ## Overview
 
-**Document Chat System** is a full-stack, production-ready application that combines intelligent document management with AI-powered conversations. Upload documents in 50+ formats, automatically process and index them, then have natural language conversations about your content.
+**Document Chat System** is a full-stack, production-ready application that combines intelligent document management with AI-powered conversations. Upload documents in 10+ formats, automatically process and index them, then have natural language conversations about your content.
 
 ### Key Highlights
 
@@ -889,16 +889,19 @@ STRIPE_WEBHOOK_SECRET="whsec_xxxxx"
 #### Option A: Vercel (Recommended - Easiest)
 
 **1. Install Vercel CLI:**
+
 ```bash
 npm install -g vercel
 ```
 
 **2. Login to Vercel:**
+
 ```bash
 vercel login
 ```
 
 **3. Deploy:**
+
 ```bash
 # From your project directory
 vercel
@@ -913,6 +916,7 @@ vercel
 ```
 
 **4. Add Environment Variables:**
+
 ```bash
 # Option 1: Via CLI
 vercel env add NEXT_PUBLIC_APP_URL
@@ -929,6 +933,7 @@ vercel env add NEXT_PUBLIC_APP_URL
 ```
 
 **5. Configure Clerk Redirect URLs:**
+
 ```bash
 # In Clerk Dashboard:
 # 1. Go to: https://dashboard.clerk.com
@@ -941,6 +946,7 @@ vercel env add NEXT_PUBLIC_APP_URL
 ```
 
 **6. Redeploy with Environment Variables:**
+
 ```bash
 vercel --prod
 ```
@@ -952,22 +958,26 @@ vercel --prod
 #### Option B: Railway
 
 **1. Install Railway CLI:**
+
 ```bash
 npm install -g @railway/cli
 ```
 
 **2. Login:**
+
 ```bash
 railway login
 ```
 
 **3. Initialize Project:**
+
 ```bash
 railway init
 # Project name: document-chat-system
 ```
 
 **4. Add Environment Variables:**
+
 ```bash
 # Add all variables from your .env file
 railway variables set NEXT_PUBLIC_APP_URL=https://your-app.up.railway.app
@@ -977,11 +987,13 @@ railway variables set NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_live_..."
 ```
 
 **5. Deploy:**
+
 ```bash
 railway up
 ```
 
 **6. Get your URL:**
+
 ```bash
 railway domain
 # Your app: https://your-app.up.railway.app
@@ -992,11 +1004,13 @@ railway domain
 #### Option C: Render
 
 **1. Create New Web Service:**
+
 - Go to: https://dashboard.render.com/
 - Click "New" → "Web Service"
 - Connect your GitHub repository
 
 **2. Configure Service:**
+
 ```yaml
 Name: document-chat-system
 Environment: Node
@@ -1007,11 +1021,13 @@ Start Command: npm start
 ```
 
 **3. Add Environment Variables:**
+
 - Click "Environment" tab
 - Add all variables from your .env file
 - Click "Save Changes"
 
 **4. Deploy:**
+
 - Click "Create Web Service"
 - Wait for deployment (~5-10 minutes)
 
@@ -1024,18 +1040,21 @@ Start Command: npm start
 **For AWS, GCP, Azure, DigitalOcean, or any VPS:**
 
 **1. Install Docker on Server:**
+
 ```bash
 curl -fsSL https://get.docker.com -o get-docker.sh
 sh get-docker.sh
 ```
 
 **2. Clone Repository:**
+
 ```bash
 git clone https://github.com/watat83/document-chat-system.git
 cd document-chat-system
 ```
 
 **3. Create Production Environment File:**
+
 ```bash
 cp .env.example .env.production
 nano .env.production
@@ -1043,11 +1062,13 @@ nano .env.production
 ```
 
 **4. Build Docker Image:**
+
 ```bash
 docker build -t document-chat-system .
 ```
 
 **5. Run Container:**
+
 ```bash
 docker run -d \
   --name document-chat-system \
@@ -1058,6 +1079,7 @@ docker run -d \
 ```
 
 **6. Set Up Reverse Proxy (Nginx):**
+
 ```bash
 # Install Nginx
 sudo apt update && sudo apt install nginx certbot python3-certbot-nginx
@@ -1067,6 +1089,7 @@ sudo nano /etc/nginx/sites-available/document-chat-system
 ```
 
 Add this configuration:
+
 ```nginx
 server {
     listen 80;
@@ -1084,6 +1107,7 @@ server {
 ```
 
 Enable and start:
+
 ```bash
 sudo ln -s /etc/nginx/sites-available/document-chat-system /etc/nginx/sites-enabled/
 sudo nginx -t
@@ -1102,6 +1126,7 @@ sudo certbot --nginx -d your-domain.com
 Go to: [Clerk Dashboard](https://dashboard.clerk.com) → Your App → "Paths"
 
 Add these URLs (replace with your actual domain):
+
 ```
 Sign-in URL: https://your-domain.com/sign-in
 Sign-up URL: https://your-domain.com/sign-up
@@ -1113,6 +1138,7 @@ Home URL: https://your-domain.com
 **2. Add Allowed Origins:**
 
 Go to: "Settings" → "Advanced" → "Allowed origins"
+
 ```
 https://your-domain.com
 ```
@@ -1120,6 +1146,7 @@ https://your-domain.com
 **3. Switch to Production Keys:**
 
 Make sure you're using **Production** API keys (not Test keys):
+
 - `pk_live_...` (not `pk_test_...`)
 - `sk_live_...` (not `sk_test_...`)
 
@@ -1134,6 +1161,7 @@ Inngest handles all background jobs (document processing, vectorization, AI anal
 #### Understanding Inngest in Production
 
 In production, Inngest Cloud needs to:
+
 1. **Discover your functions** by calling your `/api/inngest` endpoint
 2. **Execute functions** when events are triggered
 3. **Monitor and retry** failed jobs automatically
@@ -1174,19 +1202,23 @@ After deployment, you need to tell Inngest about your app:
 3. **Click "Apps" tab** in the sidebar
 4. **Click "Sync" or "Create App Sync"**
 5. **Enter your deployed app URL:**
+
    ```
    https://your-actual-domain.com/api/inngest
    ```
+
    **Important:** Must be the full URL with `/api/inngest` endpoint
 
 6. **Click "Sync Now"**
 
 **What happens:**
+
 - Inngest makes a GET request to your app
 - Your app returns a list of all available functions
 - Inngest registers these functions
 
 **You should see 7 functions appear:**
+
 - ✅ `process-document-basic` - Extract text from documents
 - ✅ `process-document-full` - Complete document analysis
 - ✅ `vectorize-document` - Create embeddings for search
@@ -1210,6 +1242,7 @@ After deployment, you need to tell Inngest about your app:
    - Result: Success
 
 **If you DON'T see any runs:**
+
 - ❌ Check that `INNGEST_EVENT_KEY` is set correctly
 - ❌ Verify you synced functions in Step 4.3
 - ❌ Check browser console for errors
@@ -1220,6 +1253,7 @@ After deployment, you need to tell Inngest about your app:
 #### Step 4.5: How Inngest Works in Production
 
 **Event Flow:**
+
 ```
 1. User uploads document
    ↓
@@ -1237,6 +1271,7 @@ After deployment, you need to tell Inngest about your app:
 ```
 
 **Security:**
+
 - All requests from Inngest are signed with `INNGEST_SIGNING_KEY`
 - Your app automatically verifies the signature
 - Only Inngest can trigger your functions
@@ -1248,6 +1283,7 @@ After deployment, you need to tell Inngest about your app:
 **Problem:** Functions not showing up after sync
 
 **Solution:**
+
 1. Verify `/api/inngest` endpoint is publicly accessible:
    ```bash
    curl https://your-domain.com/api/inngest
@@ -1259,6 +1295,7 @@ After deployment, you need to tell Inngest about your app:
 **Problem:** Events sent but functions not executing
 
 **Solution:**
+
 1. Check Inngest Dashboard → "Runs" → Look for errors
 2. Verify `NEXT_PUBLIC_APP_URL` matches your actual domain
 3. Check app logs for errors
@@ -1267,6 +1304,7 @@ After deployment, you need to tell Inngest about your app:
 **Problem:** "Function execution failed" errors
 
 **Solution:**
+
 1. Check app logs for detailed error messages
 2. Verify all required environment variables are set (database, AI keys, etc.)
 3. Test locally first with Inngest Dev Server
@@ -1278,6 +1316,7 @@ After deployment, you need to tell Inngest about your app:
 If you're using Stripe for billing:
 
 **1. Configure Webhook in Stripe Dashboard:**
+
 - Go to: [Stripe Dashboard](https://dashboard.stripe.com/webhooks)
 - Click "Add endpoint"
 - URL: `https://your-domain.com/api/v1/webhooks/stripe`
@@ -1289,6 +1328,7 @@ If you're using Stripe for billing:
   - `invoice.payment_failed`
 
 **2. Get Webhook Secret:**
+
 - After creating webhook, copy the "Signing secret" (starts with `whsec_...`)
 - Add to environment variables:
   ```env
@@ -1340,17 +1380,20 @@ docker exec -it document-chat-system npm run db:seed
 ### Step 8: Configure Custom Domain (Optional)
 
 #### Vercel:
+
 ```bash
 vercel domains add your-custom-domain.com
 # Follow DNS instructions to add CNAME record
 ```
 
 #### Railway:
+
 1. Go to Railway Dashboard → Your Project → Settings
 2. Click "Custom Domain"
 3. Add your domain and follow DNS instructions
 
 #### Render:
+
 1. Go to Dashboard → Your Service → Settings
 2. Click "Custom Domain"
 3. Add your domain and follow DNS instructions
@@ -1431,6 +1474,7 @@ Before going live:
 ### Deployment Costs (Estimated Monthly)
 
 **Free Tier (Fully Functional):**
+
 - Vercel: Free (Hobby plan)
 - Supabase: Free (2 projects, 500MB database, 1GB storage)
 - Clerk: Free (10,000 monthly active users)
@@ -1438,6 +1482,7 @@ Before going live:
 - **Total: $0/month** ✨
 
 **Production Tier (Recommended):**
+
 - Vercel: $20/month (Pro plan)
 - Supabase: $25/month (Pro plan)
 - Clerk: $25/month (Pro plan)
@@ -1446,6 +1491,7 @@ Before going live:
 - **Total: ~$160/month**
 
 **Enterprise Tier:**
+
 - Custom pricing based on usage
 - Contact providers for quotes
 

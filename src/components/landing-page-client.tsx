@@ -31,26 +31,43 @@ import {
   Cpu,
   HardDrive,
   Network,
-  Github
+  Github,
+  Menu,
+  X
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 export function LandingPageClient() {
   const [activeSection, setActiveSection] = useState<string>('')
   const [starCount, setStarCount] = useState<number | null>(null)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
-    // Fetch GitHub stars count
-    fetch('https://api.github.com/repos/watat83/document-chat-system')
-      .then(res => res.json())
-      .then(data => {
+    // Fetch GitHub stars count with proper error handling
+    const fetchStars = async () => {
+      try {
+        const res = await fetch('https://api.github.com/repos/watat83/document-chat-system', {
+          headers: {
+            'Accept': 'application/vnd.github.v3+json',
+          },
+        })
+
+        if (!res.ok) {
+          // Repository might be new or private, silently fail
+          return
+        }
+
+        const data = await res.json()
         if (data.stargazers_count !== undefined) {
           setStarCount(data.stargazers_count)
         }
-      })
-      .catch(err => {
-        console.error('Failed to fetch GitHub stars:', err)
-      })
+      } catch (err) {
+        // Silently fail - stars count is not critical
+        // Repository might be too new or API rate limited
+      }
+    }
+
+    fetchStars()
   }, [])
 
   return (
@@ -58,20 +75,21 @@ export function LandingPageClient() {
       {/* Sticky Header with Navigation */}
       <header className="sticky top-0 z-50 px-4 lg:px-6 h-14 flex items-center border-b bg-white/95 dark:bg-gray-950/95 backdrop-blur supports-[backdrop-filter]:bg-white/95 dark:supports-[backdrop-filter]:bg-gray-950/95">
         <Link className="flex items-center justify-center" href="/">
-          <Files className="h-6 w-6 mr-2 text-blue-600 dark:text-blue-400" />
-          <span className="font-bold text-lg">Document Chat System</span>
+          <Files className="h-6 w-6 text-blue-600 dark:text-blue-400 sm:mr-2" />
+          <span className="font-bold text-lg hidden sm:inline">Document Chat System</span>
         </Link>
-        <nav className="ml-auto flex gap-2 sm:gap-4 items-center">
-          <Link href="#features" className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors hidden md:inline-block">
+        {/* Desktop Navigation */}
+        <nav className="ml-auto hidden md:flex gap-2 sm:gap-4 items-center">
+          <Link href="#features" className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
             Features
           </Link>
-          <Link href="#how-it-works" className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors hidden md:inline-block">
+          <Link href="#how-it-works" className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
             How It Works
           </Link>
-          <Link href="#tech-stack" className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors hidden md:inline-block">
+          <Link href="#tech-stack" className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
             Tech Stack
           </Link>
-          <Link href="#monetization" className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors hidden md:inline-block">
+          <Link href="#monetization" className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
             Monetization
           </Link>
           <ThemeToggle />
@@ -98,7 +116,81 @@ export function LandingPageClient() {
             </Button>
           </Link>
         </nav>
+
+        {/* Mobile Navigation */}
+        <div className="ml-auto flex md:hidden items-center gap-2">
+          <ThemeToggle />
+          <Button
+            variant="ghost"
+            size="sm"
+            className="md:hidden"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+        </div>
       </header>
+
+      {/* Mobile Menu Dropdown */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-b bg-white dark:bg-gray-950 shadow-lg">
+          <nav className="flex flex-col p-4 space-y-3">
+            <Link
+              href="#features"
+              className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Features
+            </Link>
+            <Link
+              href="#how-it-works"
+              className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              How It Works
+            </Link>
+            <Link
+              href="#tech-stack"
+              className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Tech Stack
+            </Link>
+            <Link
+              href="#monetization"
+              className="text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Monetization
+            </Link>
+            <Link
+              href="https://github.com/watat83/document-chat-system"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <Button variant="outline" className="w-full gap-2 justify-center">
+                <Github className="h-4 w-4" />
+                <span>Star on GitHub</span>
+                {starCount !== null && (
+                  <Badge variant="secondary" className="ml-1 px-1.5 py-0.5 text-xs">
+                    {starCount.toLocaleString()}
+                  </Badge>
+                )}
+              </Button>
+            </Link>
+            <div className="flex gap-2 pt-2 border-t">
+              <Link href="/sign-in" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="outline" size="sm" className="w-full">Sign In</Button>
+              </Link>
+              <Link href="/sign-up" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
+                <Button size="sm" className="w-full">Get Started</Button>
+              </Link>
+            </div>
+          </nav>
+        </div>
+      )}
 
       {/* Hero Section */}
       <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-950">

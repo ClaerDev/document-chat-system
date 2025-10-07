@@ -107,7 +107,15 @@ const envSchema = z.object({
     ),
   OPENROUTER_SITE_URL: z
     .string()
-    .url()
+    .transform((val) => {
+      if (!val || val === '') return 'https://govmatch.ai'
+      try {
+        new URL(val)
+        return val
+      } catch {
+        return 'https://govmatch.ai'
+      }
+    })
     .default('https://govmatch.ai')
     .describe(
       'Site URL for OpenRouter requests. Used for provider attribution and analytics. Default: https://govmatch.ai'
@@ -199,15 +207,23 @@ const envSchema = z.object({
       'Enable intelligent model routing in OpenRouter. Used in ai-config.ts for cost and performance optimization. Default: true'
     ),
   OPENROUTER_COST_OPTIMIZATION: z
-    .enum(['aggressive', 'balanced', 'conservative'])
-    .optional()
+    .string()
+    .transform((val) => {
+      if (!val || val === '') return 'balanced'
+      if (['aggressive', 'balanced', 'conservative'].includes(val)) return val as 'aggressive' | 'balanced' | 'conservative'
+      return 'balanced'
+    })
     .default('balanced')
     .describe(
       'Cost optimization strategy for OpenRouter. Used in ai-config.ts for model selection based on cost priorities. Default: balanced'
     ),
   OPENROUTER_FALLBACK_STRATEGY: z
-    .enum(['internal', 'openrouter', 'hybrid'])
-    .optional()
+    .string()
+    .transform((val) => {
+      if (!val || val === '') return 'hybrid'
+      if (['internal', 'openrouter', 'hybrid'].includes(val)) return val as 'internal' | 'openrouter' | 'hybrid'
+      return 'hybrid'
+    })
     .default('hybrid')
     .describe(
       'Fallback strategy when primary providers fail. Used in ai-config.ts for resilient AI service architecture. Default: hybrid'
