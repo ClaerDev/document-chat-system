@@ -52,11 +52,6 @@ function ThemeToggleContent() {
           System
           {mounted && theme === 'system' && <div className="ml-auto h-2 w-2 rounded-full bg-primary" />}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('theme-govmatch')} className="gap-2">
-          <Building className="h-4 w-4" />
-          GovMatch (Dark)
-          {mounted && theme === 'theme-govmatch' && <div className="ml-auto h-2 w-2 rounded-full bg-primary" />}
-        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

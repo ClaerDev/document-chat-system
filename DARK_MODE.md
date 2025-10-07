@@ -2,7 +2,7 @@
 
 ## Overview
 
-The landing page now includes a complete dark mode implementation using the existing `next-themes` system. Users can toggle between light mode, dark mode, system preference, and a custom GovMatch theme.
+The landing page now includes a complete dark mode implementation using the existing `next-themes` system. Users can toggle between light mode, dark mode, and system preference.
 
 ## Features
 
@@ -13,7 +13,6 @@ The landing page now includes a complete dark mode implementation using the exis
   - ☀️ **Light Mode** - Clean, bright interface
   - 🌙 **Dark Mode** - Easy on the eyes for low-light environments
   - 💻 **System** - Automatically matches your OS preference
-  - 🏢 **GovMatch Theme** - Custom dark theme
 
 ### How to Use
 
@@ -71,9 +70,9 @@ To add a custom theme, edit `src/app/layout.tsx`:
 ```tsx
 <ThemeProvider
   attribute="class"
-  defaultTheme="light"
+  defaultTheme="system"
   enableSystem
-  themes={['light', 'dark', 'theme-govmatch', 'system', 'your-custom-theme']}
+  themes={['light', 'dark', 'system', 'your-custom-theme']}
   disableTransitionOnChange
 >
 ```
@@ -93,7 +92,7 @@ Then add the theme option to `src/components/ui/theme-toggle.tsx`:
 Define custom theme colors in `src/app/globals.css`:
 
 ```css
-.theme-govmatch {
+.your-custom-theme {
   --background: 222.2 84% 4.9%;
   --foreground: 210 40% 98%;
   /* Add more custom variables */

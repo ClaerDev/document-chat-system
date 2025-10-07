@@ -28,9 +28,9 @@ export default function RootLayout({
           <QueryProvider>
             <ThemeProvider
               attribute="class"
-              defaultTheme="light"
+              defaultTheme="system"
               enableSystem
-              themes={['light', 'dark', 'theme-govmatch', 'system']}
+              themes={['light', 'dark', 'system']}
               disableTransitionOnChange
             >
               <LoadingProvider>
