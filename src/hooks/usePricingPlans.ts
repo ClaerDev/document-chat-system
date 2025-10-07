@@ -14,7 +14,7 @@ export interface PricingPlan {
   }
   limits: {
     seats: number
-    savedFilters: number
+    documentsPerMonth: number
     aiCreditsPerMonth: number
     matchScoreCalculations: number
     apiCallsPerMonth?: number

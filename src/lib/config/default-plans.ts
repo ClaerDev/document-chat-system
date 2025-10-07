@@ -12,64 +12,63 @@ export const DEFAULT_PLANS = {
   STARTER: {
     id: 'starter',
     name: 'Starter',
-    description: 'Perfect for small contractors getting started',
+    description: 'Perfect for individuals getting started',
     price: 49, // In dollars (will be converted to cents)
     features: [
       '1 seat included',
-      '1 saved filter',
-      'Basic search and MatchScore viewing',
-      'Email alerts'
+      'Upload up to 10 documents/month',
+      'Basic document processing',
+      'AI-powered chat',
+      'Email support'
     ],
     limits: {
       seats: 1,
-      savedFilters: 1,
-      savedSearches: 1, // Alias for savedFilters
+      documentsPerMonth: 10,
       aiCreditsPerMonth: 0,
       aiCredits: 0, // Alias for aiCreditsPerMonth
-      matchScoreCalculations: 50
+      storageGB: 1
     }
   },
   PROFESSIONAL: {
     id: 'pro',
     name: 'Pro',
-    description: 'Advanced features for growing businesses',
+    description: 'Advanced features for professionals',
     price: 149,
     features: [
       '1 seat included',
-      '10 saved searches',
-      '10 AI credits/month',
-      'Email drafts and capability statements',
-      'CSV export'
+      'Upload up to 100 documents/month',
+      '50 AI credits/month',
+      'Advanced document analysis',
+      'Export capabilities',
+      'Priority support'
     ],
     limits: {
       seats: 1,
-      savedFilters: 10,
-      savedSearches: 10,
-      aiCreditsPerMonth: 10,
-      aiCredits: 10,
-      matchScoreCalculations: 200
+      documentsPerMonth: 100,
+      aiCreditsPerMonth: 50,
+      aiCredits: 50,
+      storageGB: 10
     }
   },
   AGENCY: {
     id: 'agency',
-    name: 'Agency',
-    description: 'Team collaboration for growing agencies',
+    name: 'Team',
+    description: 'Team collaboration for growing organizations',
     price: 349,
     features: [
       '5 seats included',
-      'Unlimited saved searches',
-      '50 AI credits/month',
-      'Chat Q&A functionality',
-      'Win-rate dashboard',
-      'Role permissions'
+      'Unlimited document uploads',
+      '200 AI credits/month',
+      'Advanced document analysis',
+      'Team folders and sharing',
+      'Priority support'
     ],
     limits: {
       seats: 5,
-      savedFilters: -1, // Unlimited
-      savedSearches: -1,
-      aiCreditsPerMonth: 50,
-      aiCredits: 50,
-      matchScoreCalculations: 500
+      documentsPerMonth: -1, // Unlimited
+      aiCreditsPerMonth: 200,
+      aiCredits: 200,
+      storageGB: 50
     }
   },
   ENTERPRISE: {
@@ -78,20 +77,21 @@ export const DEFAULT_PLANS = {
     description: 'Custom solution for large organizations',
     price: 0, // Custom pricing
     features: [
-      'Custom seats',
-      'Custom AI credits',
+      'Unlimited seats',
+      'Unlimited documents',
+      'Unlimited AI credits',
       'All features included',
-      'BI connector',
+      'Custom integrations',
       'SSO/SAML',
-      'GovCloud option'
+      'Dedicated support',
+      'SLA guarantee'
     ],
     limits: {
       seats: -1, // Unlimited
-      savedFilters: -1,
-      savedSearches: -1,
+      documentsPerMonth: -1,
       aiCreditsPerMonth: -1,
       aiCredits: -1,
-      matchScoreCalculations: -1
+      storageGB: -1
     }
   }
 } as const

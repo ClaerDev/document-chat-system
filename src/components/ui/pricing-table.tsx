@@ -273,7 +273,7 @@ export function PricingTable({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Saved Searches:</span>
-                  <span className="font-medium text-white">{formatLimit(plan.limits.savedFilters)}</span>
+                  <span className="font-medium text-white">{formatLimit(plan.limits.documentsPerMonth)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">AI Credits:</span>

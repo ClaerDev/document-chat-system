@@ -236,7 +236,7 @@ export function PlanSelectionCards({
                 <div className="flex justify-between">
                   <span>Saved Searches:</span>
                   <span className="font-medium">
-                    {plan.limits.savedFilters === -1 ? 'Unlimited' : plan.limits.savedFilters}
+                    {plan.limits.documentsPerMonth === -1 ? 'Unlimited' : plan.limits.documentsPerMonth}
                   </span>
                 </div>
                 <div className="flex justify-between">

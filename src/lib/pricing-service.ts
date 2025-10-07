@@ -17,7 +17,7 @@ export interface PricingPlan {
   }
   limits: {
     seats: number
-    savedFilters: number
+    documentsPerMonth: number
     aiCreditsPerMonth: number
     matchScoreCalculations: number
     apiCallsPerMonth?: number
@@ -267,7 +267,7 @@ export class PricingService {
    */
   static async recommendPlan(requirements: {
     seats: number
-    savedFilters: number
+    documentsPerMonth: number
     aiCreditsNeeded: boolean
     matchScoresPerMonth: number
   }): Promise<PricingPlan | null> {
@@ -278,7 +278,7 @@ export class PricingService {
       if (plan.planType === 'ENTERPRISE') return false // Don't auto-recommend enterprise
       
       const meetsSeats = plan.limits.seats === -1 || plan.limits.seats >= requirements.seats
-      const meetsFilters = plan.limits.savedFilters === -1 || plan.limits.savedFilters >= requirements.savedFilters
+      const meetsFilters = plan.limits.documentsPerMonth === -1 || plan.limits.documentsPerMonth >= requirements.documentsPerMonth
       const meetsAI = !requirements.aiCreditsNeeded || plan.limits.aiCreditsPerMonth > 0
       const meetsMatchScores = plan.limits.matchScoreCalculations === -1 || 
                                plan.limits.matchScoreCalculations >= requirements.matchScoresPerMonth
@@ -315,7 +315,7 @@ export class PricingService {
       },
       limits: {
         seats: plan.limits.seats,
-        savedFilters: plan.limits.savedSearches || plan.limits.savedFilters || 0,
+        documentsPerMonth: plan.limits.savedSearches || plan.limits.documentsPerMonth || 0,
         aiCreditsPerMonth: plan.limits.aiCredits || plan.limits.aiCreditsPerMonth || 0,
         matchScoreCalculations: plan.limits.matchScoreCalculations || 100,
         apiCallsPerMonth: -1,
@@ -393,7 +393,7 @@ export class PricingService {
   private static formatLimitKey(key: string): string {
     const formatMap: Record<string, string> = {
       seats: 'User Seats',
-      savedFilters: 'Saved Filters',
+      documentsPerMonth: 'Saved Filters',
       aiCreditsPerMonth: 'AI Credits/Month',
       matchScoreCalculations: 'Match Score Calculations',
       apiCallsPerMonth: 'API Calls/Month',

@@ -30,12 +30,28 @@ import {
   Server,
   Cpu,
   HardDrive,
-  Network
+  Network,
+  Github
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export function LandingPageClient() {
   const [activeSection, setActiveSection] = useState<string>('')
+  const [starCount, setStarCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    // Fetch GitHub stars count
+    fetch('https://api.github.com/repos/watat83/document-chat-system')
+      .then(res => res.json())
+      .then(data => {
+        if (data.stargazers_count !== undefined) {
+          setStarCount(data.stargazers_count)
+        }
+      })
+      .catch(err => {
+        console.error('Failed to fetch GitHub stars:', err)
+      })
+  }, [])
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -65,6 +81,22 @@ export function LandingPageClient() {
           <Link href="/sign-up">
             <Button size="sm">Get Started</Button>
           </Link>
+          <Link
+            href="https://github.com/watat83/document-chat-system"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden lg:inline-block"
+          >
+            <Button variant="outline" className="gap-2">
+              <Github className="h-4 w-4" />
+              <span>Star on GitHub</span>
+              {starCount !== null && (
+                <Badge variant="secondary" className="ml-1 px-1.5 py-0.5 text-xs">
+                  {starCount.toLocaleString()}
+                </Badge>
+              )}
+            </Button>
+          </Link>
         </nav>
       </header>
 
@@ -77,7 +109,7 @@ export function LandingPageClient() {
               Open Source • MIT Licensed
             </Badge>
             <div className="space-y-4">
-              <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+              <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 animate-gradient-text">
                 AI-Powered Document Chat System
               </h1>
               <p className="mx-auto max-w-[800px] text-gray-600 md:text-xl lg:text-2xl dark:text-gray-300">
@@ -877,9 +909,9 @@ export function LandingPageClient() {
 
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   Customize limits: <code className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded">seats</code>,
-                  {' '}<code className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded">savedFilters</code>,
+                  {' '}<code className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded">documentsPerMonth</code>,
                   {' '}<code className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded">aiCreditsPerMonth</code>,
-                  {' '}<code className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded">pagesPerMonth</code>
+                  {' '}<code className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded">storageGB</code>
                 </p>
               </CardContent>
             </Card>

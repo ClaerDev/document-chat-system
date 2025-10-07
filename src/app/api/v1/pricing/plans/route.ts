@@ -131,7 +131,7 @@ export async function GET(request: NextRequest) {
           features: plan.features.list,
           limits: {
             seats: plan.limits.seats,
-            savedSearches: plan.limits.savedFilters,
+            savedSearches: plan.limits.documentsPerMonth,
             aiCreditsPerMonth: plan.limits.aiCreditsPerMonth,
             matchScoreCalculations: plan.limits.matchScoreCalculations
           }

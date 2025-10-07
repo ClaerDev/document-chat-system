@@ -25,7 +25,7 @@ export interface UsageTrackingOptions {
 
 export interface UsageLimits {
   seats: number;
-  savedFilters: number;
+  documentsPerMonth: number;
   savedSearches: number;
   aiCreditsPerMonth: number;
   matchScoreCalculations: number;
@@ -121,7 +121,7 @@ export class UsageTrackingService {
         const plans = await getSubscriptionPlans();
         limits = plans.STARTER?.limits || {
           seats: 5,
-          savedFilters: 10,
+          documentsPerMonth: 10,
           savedSearches: 1,
           aiCreditsPerMonth: 100,
           matchScoreCalculations: 100
@@ -132,7 +132,7 @@ export class UsageTrackingService {
       const plans = await getSubscriptionPlans();
       limits = plans.STARTER?.limits || {
         seats: 5,
-        savedFilters: 10,
+        documentsPerMonth: 10,
         savedSearches: 1,
         aiCreditsPerMonth: 100,
         matchScoreCalculations: 100
@@ -505,7 +505,7 @@ export class UsageTrackingService {
       case UsageType.MATCH_SCORE_CALCULATION:
         return limits.matchScoreCalculations;
       case UsageType.SAVED_FILTER:
-        return limits.savedFilters;
+        return limits.documentsPerMonth;
       case UsageType.SAVED_SEARCH:
         return limits.savedSearches;
       case UsageType.USER_SEAT:

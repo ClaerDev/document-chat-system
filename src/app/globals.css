@@ -419,6 +419,12 @@ html {
     100% { background-position: 0% 50%; }
   }
 
+  /* Animated gradient text */
+  .animate-gradient-text {
+    background-size: 200% 200%;
+    animation: gradient 4s ease infinite;
+  }
+
   /* Glass morphism effect */
   .glass {
     @apply bg-background/80 backdrop-blur-md border border-border/20;

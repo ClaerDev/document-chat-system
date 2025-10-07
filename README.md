@@ -29,6 +29,9 @@
 - [Quick Start](#quick-start)
 - [Detailed Setup Guide](#detailed-setup-guide)
 - [Architecture](#architecture)
+- [Using the Application](#using-the-application)
+  - [Configuring Your API Keys (Settings Page)](#configuring-your-api-keys-settings-page)
+  - [Uploading and Managing Documents](#uploading-and-managing-documents)
 - [API Documentation](#api-documentation)
 - [Monetization (Optional)](#monetization-optional)
 - [Deployment](#deployment)
@@ -47,7 +50,7 @@
 
 - **🆓 100% Free & Open Source** - MIT licensed with no restrictions
 - **🤖 Multi-Provider AI** - OpenRouter (100+ models), OpenAI, ImageRouter
-- **📄 50+ File Formats** - PDFs, Office documents, images, and more
+- **📄 10+ File Formats** - PDFs, Office documents, images, and more
 - **🔍 Vector Search** - Semantic search with Pinecone or pgvector
 - **👥 Multi-Tenant** - Enterprise-grade organization isolation
 - **🔐 Enterprise Security** - Clerk auth, encrypted API keys, audit logs
@@ -62,7 +65,7 @@
 
 ### 📁 Document Management
 
-- **Multi-Format Support**: PDF, DOCX, XLSX, PPTX, TXT, MD, images, and 40+ more formats
+- **Multi-Format Support**: PDF, DOCX, TXT, MD, images, and more formats will be supported soon
 - **Intelligent Processing**: Automatic text extraction, OCR, metadata analysis
 - **Folder Organization**: Hierarchical folder structure with drag-and-drop
 - **Batch Operations**: Upload and process multiple files simultaneously
@@ -79,8 +82,6 @@
 - **Document Context**: AI understands and references your uploaded documents
 - **Source Citations**: Responses include references to source documents
 - **Streaming Responses**: Real-time token streaming for faster interactions
-- **Conversation History**: Persistent chat history with search
-- **Export Conversations**: Save chat transcripts as PDF or markdown
 
 ### 🔍 Advanced Search
 
@@ -88,23 +89,20 @@
 - **Hybrid Search**: Combines semantic similarity with keyword matching
 - **Full-Text Search**: Fast text search across all documents
 - **Filters**: Filter by date, type, folder, tags, and more
-- **Search Highlighting**: Visual highlighting of search matches
-- **Saved Searches**: Save and reuse common search queries
 
 ### 👥 Multi-Tenant Architecture
 
 - **Organization Isolation**: Complete data separation between organizations
-- **Role-Based Access Control (RBAC)**: Admin, member, and custom roles
-- **Team Collaboration**: Invite team members and manage permissions
 - **Per-Org Resource Limits**: Customizable limits per organization
-- **Shared Folders**: Collaborate on documents within organizations
 - **Activity Tracking**: Audit logs for compliance and security
 
 ### 🔐 Enterprise Security
 
 - **Clerk Authentication**: OAuth, SSO, multi-factor authentication
-- **Encrypted API Keys**: AES-256 encryption for stored API keys
-- **BYOK (Bring Your Own Key)**: Users manage their own AI provider keys
+- **Client-Side Key Encryption**: API keys are encrypted with AES-256 and stored in browser localStorage - **never sent to remote servers**
+- **Settings Page Configuration**: Users configure their AI provider keys via the Settings page (`/settings`)
+- **BYOK (Bring Your Own Key)**: Users manage their own AI provider keys with full control
+- **Privacy-First Design**: Your API keys stay on your device, encrypted and secure
 - **Audit Logging**: Comprehensive activity tracking
 - **Row-Level Security**: Database-level access controls
 - **GDPR & SOC2 Ready**: Compliance-ready data handling
@@ -154,7 +152,7 @@
 
 - **[OpenRouter](https://openrouter.ai/)** - Access to 100+ AI models
 - **[OpenAI](https://openai.com/)** - GPT-4 Turbo and embeddings
-- **[ImageRouter](https://imagerouter.com/)** - Visual AI processing
+- **[ImageRouter](https://imagerouter.com/)** - for Image Generation with over 50+ models to choose from
 - **[Pinecone](https://www.pinecone.io/)** - Vector database for semantic search
 - **[pgvector](https://github.com/pgvector/pgvector)** - PostgreSQL vector extension
 - **[LangChain](https://www.langchain.com/)** - AI workflow orchestration
@@ -237,6 +235,7 @@ npm install
 ```
 
 **Expected Output:**
+
 ```
 added 1247 packages, and audited 1248 packages in 45s
 ```
@@ -377,6 +376,7 @@ npm run db:seed
 ```
 
 **Expected Output:**
+
 ```
 ✅ Database schema pushed successfully
 ✅ Seeded 4 pricing plans
@@ -392,11 +392,18 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000)
 
 **First-time setup:**
+
 1. Click "Sign Up" to create an account
 2. You'll be redirected to Clerk's hosted sign-up page
 3. After signing up, you'll be redirected back to the app
 4. Complete your profile setup
-5. Start uploading documents!
+5. **Configure your API keys** (Important):
+   - Navigate to **Settings** (`/settings`) in the app
+   - Enter your AI provider API keys (OpenRouter, OpenAI, ImageRouter)
+   - Keys are **encrypted with AES-256** and stored in your browser's localStorage
+   - **Your keys never leave your device** - they are not sent to any remote server
+   - This ensures maximum privacy and security for your API credentials
+6. Start uploading documents and chatting with AI!
 
 ---
 
@@ -526,6 +533,61 @@ document-chat-system/
 
 ---
 
+## Using the Application
+
+### Configuring Your API Keys (Settings Page)
+
+After signing up, you'll need to configure your AI provider API keys to use the chat features:
+
+1. **Navigate to Settings**:
+   - Click on your profile icon in the top navigation
+   - Select **Settings** or go directly to `/settings`
+
+2. **Add Your API Keys**:
+   - Enter your OpenRouter API key (recommended - access to 100+ models)
+   - Optionally add OpenAI API key for direct GPT access
+   - Optionally add ImageRouter API key for visual AI capabilities
+
+3. **How Your Keys Are Secured**:
+   - **AES-256 Encryption**: All API keys are encrypted before storage
+   - **Local Storage Only**: Keys are stored in your browser's localStorage
+   - **Never Transmitted**: Your keys are **never sent to remote servers**
+   - **Client-Side Only**: Encryption and decryption happen entirely in your browser
+   - **Full Privacy**: Only you have access to your API credentials
+
+4. **Key Benefits of This Approach**:
+   - ✅ **Maximum Security**: No server-side storage means no data breach risk
+   - ✅ **Full Control**: You own and manage your own API keys
+   - ✅ **Cost Transparency**: You see your actual usage on your AI provider dashboard
+   - ✅ **No Middleman**: Direct API calls to your chosen provider
+   - ✅ **Privacy First**: Your conversations and keys stay completely private
+
+5. **Testing Your Configuration**:
+   - After adding keys, navigate to the Chat page
+   - Try sending a message to verify the connection
+   - Check your AI provider dashboard to confirm API calls
+
+### Uploading and Managing Documents
+
+1. **Upload Documents**:
+   - Click **Upload** in the Documents page
+   - Drag and drop files or click to browse
+   - Supported formats: PDF, DOCX, TXT, MD, and more
+   - Documents are automatically processed and indexed
+
+2. **Organize with Folders**:
+   - Create folders to organize your documents
+   - Use drag-and-drop to move documents between folders
+   - Set permissions for team collaboration
+
+3. **Chat with Documents**:
+   - Select one or more documents
+   - Click **Chat** to start an AI conversation
+   - AI has full context of your selected documents
+   - Get answers with source citations
+
+---
+
 ## API Documentation
 
 ### Documents API
@@ -545,6 +607,7 @@ Authorization: Bearer {clerk_token}
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -565,6 +628,7 @@ Authorization: Bearer {clerk_token}
 ```
 
 **Response:**
+
 ```json
 {
   "documents": [
@@ -602,6 +666,7 @@ Authorization: Bearer {clerk_token}
 ```
 
 **Response (streaming):**
+
 ```
 data: {"type":"token","content":"The key"}
 data: {"type":"token","content":" points"}
@@ -621,6 +686,7 @@ View the complete API documentation at `/api/docs` when running the application 
 ### For Developers Who Want to Charge Users
 
 The platform includes **optional Stripe integration** that allows you to:
+
 - Create subscription plans with custom pricing
 - Set usage limits per plan (AI credits, document pages, seats)
 - Automatically enforce limits
@@ -637,19 +703,19 @@ Open `scripts/seed-pricing-plans.ts` and customize the plans:
 ```typescript
 const plans = [
   {
-    id: 'starter-plan',
-    planType: 'STARTER',
-    displayName: 'Starter',
+    id: "starter-plan",
+    planType: "STARTER",
+    displayName: "Starter",
     monthlyPrice: 2900, // $29 in cents
-    yearlyPrice: 29000,  // $290/year (save ~17%)
+    yearlyPrice: 29000, // $290/year (save ~17%)
     features: {
       list: [
-        '3 user seats',
-        '500 AI credits per month',
-        '1,000 pages processed per month',
-        'Priority email support',
-        'All document formats',
-        'Vector search'
+        "3 user seats",
+        "500 AI credits per month",
+        "1,000 pages processed per month",
+        "Priority email support",
+        "All document formats",
+        "Vector search",
       ],
     },
     limits: {
@@ -663,7 +729,7 @@ const plans = [
     displayOrder: 1,
   },
   // Add more plans here...
-]
+];
 ```
 
 #### Step 2: Run the Seed Command
@@ -673,6 +739,7 @@ npx tsx scripts/seed-pricing-plans.ts
 ```
 
 This will:
+
 1. ✅ Create/update plans in your database
 2. ✅ Automatically sync products to Stripe
 3. ✅ Create price objects in Stripe
@@ -687,10 +754,9 @@ That's it! Your new pricing plans are live and Stripe is configured automaticall
 You can customize these limits for each plan:
 
 - `seats`: Number of user seats per organization
-- `savedFilters`: Number of saved search filters
+- `documentsPerMonth`: Documents that can be uploaded per month
 - `aiCreditsPerMonth`: AI API usage quota
-- `pagesPerMonth`: Document pages processed per month
-- `storageGB`: File storage quota
+- `storageGB`: File storage quota in gigabytes
 - `apiCallsPerMonth`: API rate limits
 
 ### Disabling Billing Completely
@@ -705,96 +771,683 @@ Don't want to charge users? Simply:
 
 ## Deployment
 
-### Docker Deployment
+This guide covers deploying your Document Chat System to production, including configuration for all services (Database, Authentication, File Storage, AI Providers, and Background Jobs).
 
-The easiest way to deploy is using the included Dockerfile:
+---
 
+### Pre-Deployment Checklist
+
+Before deploying, ensure you have:
+
+- ✅ PostgreSQL database (Supabase recommended for free hosting)
+- ✅ Clerk account with production keys
+- ✅ Supabase project for file storage
+- ✅ AI provider API keys (OpenRouter/OpenAI/ImageRouter)
+- ✅ Inngest account for background jobs
+- ✅ (Optional) Pinecone for vector search
+- ✅ (Optional) Upstash Redis for caching
+- ✅ (Optional) Stripe for billing
+
+---
+
+### Step 1: Prepare Production Environment Variables
+
+Create a production `.env` file with these values:
+
+```env
+# ============================================
+# REQUIRED: Core Configuration
+# ============================================
+NODE_ENV=production
+NEXT_PUBLIC_APP_URL=https://your-actual-domain.com  # ⚠️ Update with your real domain
+
+# ============================================
+# REQUIRED: Database
+# ============================================
+DATABASE_URL="postgresql://user:password@host:5432/dbname"
+# Get from Supabase: Project Settings → Database → Connection String → URI
+
+# ============================================
+# REQUIRED: Authentication (Clerk)
+# ============================================
+# ⚠️ Use PRODUCTION keys (pk_live_... and sk_live_...)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_live_xxxxx"
+CLERK_SECRET_KEY="sk_live_xxxxx"
+# Get from: https://dashboard.clerk.com → Your App → API Keys → Production
+
+# ============================================
+# REQUIRED: File Storage (Supabase)
+# ============================================
+NEXT_PUBLIC_SUPABASE_URL="https://xxxxx.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+# Get from: Supabase Project → Settings → API
+
+# ============================================
+# REQUIRED: AI Providers (At least one)
+# ============================================
+# Option 1: OpenRouter (Recommended - 100+ models)
+OPENROUTER_API_KEY="sk-or-v1-xxxxx"
+# Get from: https://openrouter.ai/keys
+
+# Option 2: OpenAI (Direct access)
+OPENAI_API_KEY="sk-xxxxx"
+# Get from: https://platform.openai.com/api-keys
+
+# Option 3: ImageRouter (Visual AI)
+IMAGEROUTER_API_KEY="xxxxx"
+# Get from: https://imagerouter.com/
+
+# ============================================
+# REQUIRED: Inngest Background Jobs
+# ============================================
+INNGEST_EVENT_KEY="your-inngest-event-key"
+# Get from: Inngest Dashboard → Your App → Keys → Event Key
+
+INNGEST_SIGNING_KEY="signkey_prod_xxxxx"
+# Get from: Inngest Dashboard → Your App → Keys → Signing Key
+
+# ⚠️ IMPORTANT: See "Step 4: Configure Inngest" below for complete setup
+
+# ============================================
+# REQUIRED: Security
+# ============================================
+# Generate with: openssl rand -base64 32
+ENCRYPTION_KEY="your-secure-32-char-encryption-key-here"
+
+# ============================================
+# RECOMMENDED: Vector Search (Pinecone)
+# ============================================
+PINECONE_API_KEY="your-pinecone-api-key"
+PINECONE_ENVIRONMENT="us-west1-gcp"
+PINECONE_INDEX_NAME="document-embeddings"
+# Get from: https://app.pinecone.io/ → API Keys
+
+# ============================================
+# RECOMMENDED: Caching (Upstash Redis)
+# ============================================
+UPSTASH_REDIS_REST_URL="https://xxxxx.upstash.io"
+UPSTASH_REDIS_REST_TOKEN="xxxxx"
+# Get from: https://console.upstash.com/ → Your Redis → REST API
+
+# ============================================
+# OPTIONAL: Billing (Stripe)
+# ============================================
+# ⚠️ Use PRODUCTION keys (sk_live_... and pk_live_...)
+STRIPE_SECRET_KEY="sk_live_xxxxx"
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_live_xxxxx"
+STRIPE_WEBHOOK_SECRET="whsec_xxxxx"
+# Get from: https://dashboard.stripe.com/apikeys
+
+# To disable billing entirely:
+# DISABLE_BILLING=true
+```
+
+---
+
+### Step 2: Choose Your Deployment Platform
+
+#### Option A: Vercel (Recommended - Easiest)
+
+**1. Install Vercel CLI:**
 ```bash
-# Build the image
-docker build -t document-chat-system .
+npm install -g vercel
+```
 
-# Run the container
-docker run -p 3000:3000 \
-  --env-file .env.local \
+**2. Login to Vercel:**
+```bash
+vercel login
+```
+
+**3. Deploy:**
+```bash
+# From your project directory
+vercel
+
+# Follow prompts:
+# - Set up and deploy? Yes
+# - Which scope? (Select your account)
+# - Link to existing project? No
+# - Project name? document-chat-system
+# - Directory? ./
+# - Override settings? No
+```
+
+**4. Add Environment Variables:**
+```bash
+# Option 1: Via CLI
+vercel env add NEXT_PUBLIC_APP_URL
+# Enter: https://your-app.vercel.app
+# Select: Production
+
+# Repeat for all environment variables...
+
+# Option 2: Via Dashboard (Easier)
+# 1. Go to: https://vercel.com/your-username/document-chat-system
+# 2. Click "Settings" → "Environment Variables"
+# 3. Add all variables from your .env file
+# 4. Select "Production" for each
+```
+
+**5. Configure Clerk Redirect URLs:**
+```bash
+# In Clerk Dashboard:
+# 1. Go to: https://dashboard.clerk.com
+# 2. Select your app → "Paths"
+# 3. Add these URLs:
+#    - Sign-in URL: https://your-app.vercel.app/sign-in
+#    - Sign-up URL: https://your-app.vercel.app/sign-up
+#    - After sign-in: https://your-app.vercel.app/documents
+#    - After sign-up: https://your-app.vercel.app/documents
+```
+
+**6. Redeploy with Environment Variables:**
+```bash
+vercel --prod
+```
+
+**7. Your app is live at:** `https://your-app.vercel.app`
+
+---
+
+#### Option B: Railway
+
+**1. Install Railway CLI:**
+```bash
+npm install -g @railway/cli
+```
+
+**2. Login:**
+```bash
+railway login
+```
+
+**3. Initialize Project:**
+```bash
+railway init
+# Project name: document-chat-system
+```
+
+**4. Add Environment Variables:**
+```bash
+# Add all variables from your .env file
+railway variables set NEXT_PUBLIC_APP_URL=https://your-app.up.railway.app
+railway variables set DATABASE_URL="postgresql://..."
+railway variables set NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_live_..."
+# ... repeat for all variables
+```
+
+**5. Deploy:**
+```bash
+railway up
+```
+
+**6. Get your URL:**
+```bash
+railway domain
+# Your app: https://your-app.up.railway.app
+```
+
+---
+
+#### Option C: Render
+
+**1. Create New Web Service:**
+- Go to: https://dashboard.render.com/
+- Click "New" → "Web Service"
+- Connect your GitHub repository
+
+**2. Configure Service:**
+```yaml
+Name: document-chat-system
+Environment: Node
+Region: (Choose closest to users)
+Branch: main
+Build Command: npm install && npm run build
+Start Command: npm start
+```
+
+**3. Add Environment Variables:**
+- Click "Environment" tab
+- Add all variables from your .env file
+- Click "Save Changes"
+
+**4. Deploy:**
+- Click "Create Web Service"
+- Wait for deployment (~5-10 minutes)
+
+**5. Your app is live at:** `https://your-app.onrender.com`
+
+---
+
+#### Option D: Docker (Self-Hosted)
+
+**For AWS, GCP, Azure, DigitalOcean, or any VPS:**
+
+**1. Install Docker on Server:**
+```bash
+curl -fsSL https://get.docker.com -o get-docker.sh
+sh get-docker.sh
+```
+
+**2. Clone Repository:**
+```bash
+git clone https://github.com/watat83/document-chat-system.git
+cd document-chat-system
+```
+
+**3. Create Production Environment File:**
+```bash
+cp .env.example .env.production
+nano .env.production
+# Add all production environment variables
+```
+
+**4. Build Docker Image:**
+```bash
+docker build -t document-chat-system .
+```
+
+**5. Run Container:**
+```bash
+docker run -d \
+  --name document-chat-system \
+  -p 3000:3000 \
+  --env-file .env.production \
+  --restart unless-stopped \
   document-chat-system
 ```
 
-### Docker Compose (Recommended for Local Development)
-
+**6. Set Up Reverse Proxy (Nginx):**
 ```bash
-# Start all services
-docker-compose up -d
+# Install Nginx
+sudo apt update && sudo apt install nginx certbot python3-certbot-nginx
 
-# View logs
-docker-compose logs -f
-
-# Stop all services
-docker-compose down
+# Create Nginx config
+sudo nano /etc/nginx/sites-available/document-chat-system
 ```
 
-### Cloud Platforms
+Add this configuration:
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
 
-#### Railway
-
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template)
-
-1. Click "Deploy on Railway"
-2. Add environment variables from `.env.local`
-3. Deploy!
-
-#### Render
-
-1. Create a new Web Service
-2. Connect your GitHub repository
-3. Set build command: `npm install && npm run build`
-4. Set start command: `npm start`
-5. Add environment variables
-6. Deploy
-
-#### DigitalOcean App Platform
-
-1. Create new app from GitHub
-2. Select this repository
-3. Configure environment variables
-4. Deploy
-
-#### AWS/GCP/Azure
-
-Deploy using Docker on any cloud VM:
-
-```bash
-# Install Docker
-curl -fsSL https://get.docker.com -o get-docker.sh
-sh get-docker.sh
-
-# Clone and run
-git clone https://github.com/watat83/document-chat-system.git
-cd document-chat-system
-cp .env.example .env.local
-# Edit .env.local with production values
-docker-compose up -d
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
 ```
 
-### Environment Variables for Production
+Enable and start:
+```bash
+sudo ln -s /etc/nginx/sites-available/document-chat-system /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
 
-Make sure to set these in production:
+# Get SSL certificate
+sudo certbot --nginx -d your-domain.com
+```
+
+---
+
+### Step 3: Configure Clerk for Production
+
+**1. Update Redirect URLs in Clerk Dashboard:**
+
+Go to: [Clerk Dashboard](https://dashboard.clerk.com) → Your App → "Paths"
+
+Add these URLs (replace with your actual domain):
+```
+Sign-in URL: https://your-domain.com/sign-in
+Sign-up URL: https://your-domain.com/sign-up
+After sign-in: https://your-domain.com/documents
+After sign-up: https://your-domain.com/documents
+Home URL: https://your-domain.com
+```
+
+**2. Add Allowed Origins:**
+
+Go to: "Settings" → "Advanced" → "Allowed origins"
+```
+https://your-domain.com
+```
+
+**3. Switch to Production Keys:**
+
+Make sure you're using **Production** API keys (not Test keys):
+- `pk_live_...` (not `pk_test_...`)
+- `sk_live_...` (not `sk_test_...`)
+
+---
+
+### Step 4: Configure Inngest for Background Jobs
+
+**⚠️ CRITICAL: Without this, document processing will not work!**
+
+Inngest handles all background jobs (document processing, vectorization, AI analysis). Follow these steps carefully:
+
+#### Understanding Inngest in Production
+
+In production, Inngest Cloud needs to:
+1. **Discover your functions** by calling your `/api/inngest` endpoint
+2. **Execute functions** when events are triggered
+3. **Monitor and retry** failed jobs automatically
+
+---
+
+#### Step 4.1: Get Your Inngest Keys
+
+1. **Go to Inngest Dashboard:** [app.inngest.com](https://app.inngest.com)
+2. **Sign in** or create a free account
+3. **Select your app** (or create one named "document-chat-system")
+4. **Go to "Keys" section**
+5. **Copy these two keys:**
+   - **Event Key**: Used to send events TO Inngest (format: `inngest_event_key_xxx`)
+   - **Signing Key**: Used to verify requests FROM Inngest (format: `signkey_prod_xxx`)
+
+---
+
+#### Step 4.2: Add Keys to Your Environment
+
+In your deployment platform (Vercel/Railway/Render/Docker), add:
 
 ```env
-NODE_ENV=production
-NEXT_PUBLIC_APP_URL=https://yourdomain.com
-
-# Use production Clerk keys (pk_live_... and sk_live_...)
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_...
-CLERK_SECRET_KEY=sk_live_...
-
-# Use production Stripe keys (optional)
-STRIPE_SECRET_KEY=sk_live_...
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-
-# Generate a secure encryption key
-ENCRYPTION_KEY=$(openssl rand -base64 32)
+INNGEST_EVENT_KEY="your-event-key-from-step-4.1"
+INNGEST_SIGNING_KEY="signkey_prod_from-step-4.1"
 ```
+
+**Redeploy** your app after adding these variables.
+
+---
+
+#### Step 4.3: Sync Your Functions with Inngest
+
+After deployment, you need to tell Inngest about your app:
+
+1. **Go to Inngest Dashboard:** [app.inngest.com](https://app.inngest.com)
+2. **Select your app**
+3. **Click "Apps" tab** in the sidebar
+4. **Click "Sync" or "Create App Sync"**
+5. **Enter your deployed app URL:**
+   ```
+   https://your-actual-domain.com/api/inngest
+   ```
+   **Important:** Must be the full URL with `/api/inngest` endpoint
+
+6. **Click "Sync Now"**
+
+**What happens:**
+- Inngest makes a GET request to your app
+- Your app returns a list of all available functions
+- Inngest registers these functions
+
+**You should see 7 functions appear:**
+- ✅ `process-document-basic` - Extract text from documents
+- ✅ `process-document-full` - Complete document analysis
+- ✅ `vectorize-document` - Create embeddings for search
+- ✅ `score-document` - Calculate document scores
+- ✅ `batch-process-documents` - Process multiple documents
+- ✅ `analyze-document` - AI-powered analysis
+- ✅ `cancel-document-processing` - Cancel running jobs
+
+---
+
+#### Step 4.4: Verify Inngest Integration
+
+**Test the integration:**
+
+1. **Upload a document** in your deployed app
+2. **Go to Inngest Dashboard** → "Runs" tab
+3. **You should see:**
+   - Event: `document/process-basic.requested`
+   - Status: Running or Completed
+   - Duration: ~2-10 seconds
+   - Result: Success
+
+**If you DON'T see any runs:**
+- ❌ Check that `INNGEST_EVENT_KEY` is set correctly
+- ❌ Verify you synced functions in Step 4.3
+- ❌ Check browser console for errors
+- ❌ Verify app URL is correct and publicly accessible
+
+---
+
+#### Step 4.5: How Inngest Works in Production
+
+**Event Flow:**
+```
+1. User uploads document
+   ↓
+2. Your app sends event to Inngest Cloud:
+   inngest.send({ name: "document/process-basic.requested", ... })
+   ↓
+3. Inngest Cloud receives event
+   ↓
+4. Inngest makes POST request to your app:
+   POST https://your-domain.com/api/inngest
+   ↓
+5. Your app processes document and returns result
+   ↓
+6. Inngest logs completion in dashboard
+```
+
+**Security:**
+- All requests from Inngest are signed with `INNGEST_SIGNING_KEY`
+- Your app automatically verifies the signature
+- Only Inngest can trigger your functions
+
+---
+
+#### Troubleshooting Inngest
+
+**Problem:** Functions not showing up after sync
+
+**Solution:**
+1. Verify `/api/inngest` endpoint is publicly accessible:
+   ```bash
+   curl https://your-domain.com/api/inngest
+   # Should return JSON with function definitions
+   ```
+2. Check `INNGEST_SIGNING_KEY` is set in environment variables
+3. Re-sync in Inngest Dashboard
+
+**Problem:** Events sent but functions not executing
+
+**Solution:**
+1. Check Inngest Dashboard → "Runs" → Look for errors
+2. Verify `NEXT_PUBLIC_APP_URL` matches your actual domain
+3. Check app logs for errors
+4. Ensure app is not behind authentication that blocks Inngest
+
+**Problem:** "Function execution failed" errors
+
+**Solution:**
+1. Check app logs for detailed error messages
+2. Verify all required environment variables are set (database, AI keys, etc.)
+3. Test locally first with Inngest Dev Server
+
+---
+
+### Step 5: Set Up Stripe Webhooks (Optional - Only if Using Billing)
+
+If you're using Stripe for billing:
+
+**1. Configure Webhook in Stripe Dashboard:**
+- Go to: [Stripe Dashboard](https://dashboard.stripe.com/webhooks)
+- Click "Add endpoint"
+- URL: `https://your-domain.com/api/v1/webhooks/stripe`
+- Events to send:
+  - `customer.subscription.created`
+  - `customer.subscription.updated`
+  - `customer.subscription.deleted`
+  - `invoice.payment_succeeded`
+  - `invoice.payment_failed`
+
+**2. Get Webhook Secret:**
+- After creating webhook, copy the "Signing secret" (starts with `whsec_...`)
+- Add to environment variables:
+  ```env
+  STRIPE_WEBHOOK_SECRET="whsec_xxxxx"
+  ```
+
+**3. Redeploy your app**
+
+---
+
+### Step 6: Initialize Database
+
+After deployment, initialize your database:
+
+```bash
+# If using Vercel
+vercel env pull .env.local
+npx prisma generate
+npx prisma db push
+npm run db:seed
+
+# If using Railway
+railway run npx prisma generate
+railway run npx prisma db push
+railway run npm run db:seed
+
+# If using Docker
+docker exec -it document-chat-system npx prisma generate
+docker exec -it document-chat-system npx prisma db push
+docker exec -it document-chat-system npm run db:seed
+```
+
+---
+
+### Step 7: Post-Deployment Verification
+
+**Verify everything is working:**
+
+1. ✅ **App loads:** Visit `https://your-domain.com`
+2. ✅ **Sign up works:** Create a new account
+3. ✅ **Authentication works:** Sign in with your account
+4. ✅ **Upload works:** Upload a test document
+5. ✅ **Processing works:** Check Inngest Dashboard for successful runs
+6. ✅ **Chat works:** Try chatting with a document
+7. ✅ **Settings work:** Configure API keys in Settings page
+
+---
+
+### Step 8: Configure Custom Domain (Optional)
+
+#### Vercel:
+```bash
+vercel domains add your-custom-domain.com
+# Follow DNS instructions to add CNAME record
+```
+
+#### Railway:
+1. Go to Railway Dashboard → Your Project → Settings
+2. Click "Custom Domain"
+3. Add your domain and follow DNS instructions
+
+#### Render:
+1. Go to Dashboard → Your Service → Settings
+2. Click "Custom Domain"
+3. Add your domain and follow DNS instructions
+
+---
+
+### Production Monitoring
+
+**Monitor your app with:**
+
+1. **Inngest Dashboard:** [app.inngest.com](https://app.inngest.com)
+   - View function execution metrics
+   - Monitor failed jobs
+   - Track processing times
+
+2. **Vercel Analytics:** (if using Vercel)
+   - Real-time traffic
+   - Performance metrics
+   - Error tracking
+
+3. **Supabase Dashboard:**
+   - Database performance
+   - API usage
+   - Storage usage
+
+4. **Clerk Dashboard:**
+   - User registrations
+   - Authentication metrics
+   - Active sessions
+
+5. **Stripe Dashboard:** (if using billing)
+   - Revenue tracking
+   - Subscription metrics
+   - Payment failures
+
+---
+
+### Scaling Considerations
+
+**As your app grows:**
+
+1. **Database:**
+   - Upgrade Supabase plan for more connections
+   - Enable connection pooling
+   - Add database indexes for common queries
+
+2. **Background Jobs:**
+   - Inngest auto-scales automatically
+   - No configuration needed
+
+3. **File Storage:**
+   - Supabase storage auto-scales
+   - Consider CDN for faster file delivery
+
+4. **Vercel/Railway:**
+   - Auto-scales with traffic
+   - Upgrade plan for higher limits
+
+---
+
+### Security Checklist
+
+Before going live:
+
+- ✅ Use production API keys (not test keys)
+- ✅ Enable HTTPS (automatic on Vercel/Railway/Render)
+- ✅ Set strong `ENCRYPTION_KEY` (32+ characters)
+- ✅ Enable Clerk MFA for admin accounts
+- ✅ Set up Stripe webhook signature verification
+- ✅ Configure CORS if using custom domain
+- ✅ Review and limit database permissions
+- ✅ Enable rate limiting (built-in with Next.js)
+- ✅ Set up monitoring and alerts
+- ✅ Regular backups of database (Supabase auto-backups)
+
+---
+
+### Deployment Costs (Estimated Monthly)
+
+**Free Tier (Fully Functional):**
+- Vercel: Free (Hobby plan)
+- Supabase: Free (2 projects, 500MB database, 1GB storage)
+- Clerk: Free (10,000 monthly active users)
+- Inngest: Free (5,000 function runs/month)
+- **Total: $0/month** ✨
+
+**Production Tier (Recommended):**
+- Vercel: $20/month (Pro plan)
+- Supabase: $25/month (Pro plan)
+- Clerk: $25/month (Pro plan)
+- Inngest: $20/month (Pro plan)
+- Pinecone: $70/month (Standard plan)
+- **Total: ~$160/month**
+
+**Enterprise Tier:**
+- Custom pricing based on usage
+- Contact providers for quotes
 
 ---
 
@@ -827,11 +1480,13 @@ npx tsx scripts/seed-pricing-plans.ts  # Update pricing tiers
 ### Code Style
 
 This project uses:
+
 - **ESLint** for code linting
 - **Prettier** for code formatting (coming soon)
 - **TypeScript strict mode** for type safety
 
 Run before committing:
+
 ```bash
 npm run lint
 npm run type-check
@@ -861,6 +1516,7 @@ npm run test:coverage
 **Problem:** `Can't reach database server`
 
 **Solution:**
+
 1. Make sure PostgreSQL is running: `pg_isready`
 2. Check your `DATABASE_URL` in `.env.local`
 3. Verify network connectivity if using Supabase
@@ -870,6 +1526,7 @@ npm run test:coverage
 **Problem:** `Prisma Client not generated`
 
 **Solution:**
+
 ```bash
 npx prisma generate
 npm run dev
@@ -880,6 +1537,7 @@ npm run dev
 **Problem:** `Module not found` or type errors
 
 **Solution:**
+
 ```bash
 # Clean install
 rm -rf node_modules package-lock.json
@@ -892,6 +1550,7 @@ npm run build
 **Problem:** Files not uploading or processing
 
 **Solution:**
+
 1. Check Supabase bucket permissions (should be private)
 2. Verify `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 3. Check file size limits in Supabase settings
@@ -902,6 +1561,7 @@ npm run build
 **Problem:** Chat responses failing or empty
 
 **Solution:**
+
 1. Verify you have at least one AI provider API key configured
 2. Check API key permissions and billing status
 3. Monitor browser console for errors
@@ -912,6 +1572,7 @@ npm run build
 **Problem:** Semantic search not finding relevant documents
 
 **Solution:**
+
 1. Ensure Pinecone index is created and configured
 2. Check that embeddings are being generated (inspect document metadata)
 3. Verify `PINECONE_INDEX_NAME` matches your Pinecone dashboard
@@ -977,7 +1638,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ✅ Distribution allowed  
 ✅ Private use allowed  
 ❌ No liability  
-❌ No warranty  
+❌ No warranty
 
 ---
 

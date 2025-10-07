@@ -17,7 +17,7 @@ interface Subscription {
   features: string[];
   limits: {
     seats: number;
-    savedFilters: number;
+    documentsPerMonth: number;
     aiCreditsPerMonth: number;
     matchScoreCalculations: number;
   };

@@ -167,16 +167,16 @@ Use the backup-preservation.sh script in the root directory to manage these back
       interval: 'month',
       features: [
         '1 seat included',
-        '10 saved filters', 
-        '10 AI credits/month',
-        'Email drafts and capability statements',
-        'CSV export',
+        'Upload up to 100 documents/month',
+        '50 AI credits/month',
+        'Advanced document analysis',
+        'Export capabilities',
       ],
       limits: {
         seats: 1,
-        savedFilters: 10,
-        aiCreditsPerMonth: 10,
-        matchScoreCalculations: 200,
+        documentsPerMonth: 100,
+        aiCreditsPerMonth: 50,
+        storageGB: 10,
       },
       metadata: {
         primaryUser: 'Chris Doe',

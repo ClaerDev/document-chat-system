@@ -18,7 +18,7 @@ export interface PricingPlan {
   features: string[];
   limits: {
     seats: number;
-    savedFilters: number;
+    documentsPerMonth: number;
     aiCredits: number;
   };
 }
@@ -46,7 +46,7 @@ export const PLANS: PricingPlans = {
     ],
     limits: {
       seats: pricing.starter.seats,
-      savedFilters: pricing.starter.savedFilters,
+      documentsPerMonth: pricing.starter.documentsPerMonth,
       aiCredits: pricing.starter.aiCredits,
     },
   },
@@ -63,7 +63,7 @@ export const PLANS: PricingPlans = {
     ],
     limits: {
       seats: pricing.professional.seats,
-      savedFilters: pricing.professional.savedFilters,
+      documentsPerMonth: pricing.professional.documentsPerMonth,
       aiCredits: pricing.professional.aiCredits,
     },
   },
@@ -81,7 +81,7 @@ export const PLANS: PricingPlans = {
     ],
     limits: {
       seats: pricing.enterprise.seats,
-      savedFilters: pricing.enterprise.savedFilters, // -1 for unlimited
+      documentsPerMonth: pricing.enterprise.documentsPerMonth, // -1 for unlimited
       aiCredits: pricing.enterprise.aiCredits,
     },
   },
