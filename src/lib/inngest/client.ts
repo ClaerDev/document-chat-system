@@ -8,6 +8,13 @@ export const inngest = new Inngest({
    * This is used to send events to Inngest
    */
   eventKey: process.env.INNGEST_EVENT_KEY,
+  /**
+   * Explicitly set environment for production
+   * This helps Inngest match the correct app environment
+   */
+  ...(process.env.NODE_ENV === 'production' && {
+    env: 'production'
+  })
 });
 
 // Define event schemas for type safety
