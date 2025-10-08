@@ -145,22 +145,22 @@ export default function Dashboard() {
 
   return (
     <AppLayout>
-      <div className="flex-1 space-y-4 p-8 pt-6">
-        <div className="flex items-center justify-between space-y-2">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-            <p className="text-muted-foreground">
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-1">
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h2>
+            <p className="text-sm md:text-base text-muted-foreground">
               Welcome back, {user?.firstName || 'User'}! Here&apos;s your document chat activity overview.
             </p>
           </div>
-          <div className="flex items-center space-x-2">
-            <Link href="/documents" prefetch={true}>
-              <Button variant="outline">
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Link href="/documents" prefetch={true} className="flex-1 sm:flex-initial">
+              <Button variant="outline" className="w-full sm:w-auto">
                 View Documents
               </Button>
             </Link>
-            <Link href="/chat" prefetch={true}>
-              <Button>Start Chat</Button>
+            <Link href="/chat" prefetch={true} className="flex-1 sm:flex-initial">
+              <Button className="w-full sm:w-auto">Start Chat</Button>
             </Link>
           </div>
         </div>

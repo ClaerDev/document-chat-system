@@ -38,7 +38,7 @@ export interface CacheResult<T> {
 
 class CacheManager {
   private defaultTTL = 3600; // 1 hour
-  private keyPrefix = 'govmatch:';
+  private keyPrefix = 'document-chat:';
 
   private generateKey(key: string, prefix?: string): string {
     const finalPrefix = prefix || this.keyPrefix;

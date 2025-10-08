@@ -1,4 +1,4 @@
-// Integration examples for key GovMatch AI application areas
+// Integration examples for key Document Chat System application areas
 import { auditLogger } from './audit-logger';
 import { AuditUserAction, AuditDataAccess, AuditSecurityEvent } from './decorators';
 import { useAuditLog, useFormAudit } from './hooks';

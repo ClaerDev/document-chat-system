@@ -13,11 +13,11 @@ export { DeleteConfirmationModal } from './delete-confirmation-modal'
 export { FolderDeleteConfirmationModal } from './folder-delete-confirmation-modal'
 export { FolderDeleteInfoModal } from './folder-delete-info-modal'
 // Real store hooks (no more mock data)
-export { 
+export {
   useTree,
-  useTreeNavigation, 
+  useTreeNavigation,
   useFolderOperations,
   useDocumentOperations,
-  useGovMatchStore
+  useDocumentChatStore
 } from '@/stores/document-chat-store'
 export * from './file-type-utils'

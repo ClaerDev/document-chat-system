@@ -81,7 +81,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs'
+import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 
@@ -193,7 +193,7 @@ export async function POST(request: NextRequest) {
 
     // Upload to Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('govmatch-files')
+      .from('document-chat-files')
       .upload(storagePath, fileBuffer, {
         contentType: file.type,
         cacheControl: '3600',
@@ -215,7 +215,7 @@ export async function POST(request: NextRequest) {
 
     // Get public URL
     const { data: urlData } = supabase.storage
-      .from('govmatch-files')
+      .from('document-chat-files')
       .getPublicUrl(storagePath)
 
     if (!urlData?.publicUrl) {

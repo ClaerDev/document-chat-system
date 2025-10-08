@@ -28,13 +28,13 @@ interface ContactSalesModalProps {
 
 const getPrefilledContent = (context: string = 'general', planName?: string) => {
   const subjects = {
-    enterprise: 'Enterprise Plan Inquiry - GovMatch AI',
-    pricing: `${planName ? `${planName} Plan` : 'Pricing'} Inquiry - GovMatch AI`,
-    general: 'Sales Inquiry - GovMatch AI'
+    enterprise: 'Enterprise Plan Inquiry - Document Chat System',
+    pricing: `${planName ? `${planName} Plan` : 'Pricing'} Inquiry - Document Chat System`,
+    general: 'Sales Inquiry - Document Chat System'
   }
 
   const messages = {
-    enterprise: `Hello GovMatch AI Sales Team,
+    enterprise: `Hello Document Chat System Sales Team,
 
 I'm interested in learning more about the Enterprise plan for my organization.
 
@@ -51,11 +51,11 @@ Organization Details:
 • Industry: [Your industry]
 • Current Contracting Volume: [Annual contract volume]
 
-I would appreciate the opportunity to schedule a demo and discuss how GovMatch AI can help streamline our government contracting processes.
+I would appreciate the opportunity to schedule a demo and discuss how Document Chat System can help streamline our document management processes.
 
 Best regards,`,
     
-    pricing: `Hello GovMatch AI Sales Team,
+    pricing: `Hello Document Chat System Sales Team,
 
 I'm interested in learning more about ${planName ? `the ${planName} plan` : 'your pricing options'} for my organization.
 
@@ -72,13 +72,13 @@ Organization Details:
 • Industry: [Your industry]
 • Current Contracting Volume: [Annual contract volume]
 
-I would like to schedule a demo to see how GovMatch AI can help with our government contracting needs.
+I would like to schedule a demo to see how Document Chat System can help with our document management needs.
 
 Best regards,`,
     
-    general: `Hello GovMatch AI Sales Team,
+    general: `Hello Document Chat System Sales Team,
 
-I'm interested in learning more about GovMatch AI for my organization.
+I'm interested in learning more about Document Chat System for my organization.
 
 Please provide information about:
 • Available plans and pricing
@@ -91,7 +91,7 @@ Organization Details:
 • Industry: [Your industry]
 • Current Contracting Volume: [Annual contract volume]
 
-I would appreciate the opportunity to discuss how GovMatch AI can help with our government contracting processes.
+I would appreciate the opportunity to discuss how Document Chat System can help with our document management processes.
 
 Best regards,`
   }
@@ -233,7 +233,7 @@ export function ContactSalesModal({ isOpen, onClose, context = 'general', planNa
               <div className="space-y-2">
                 <h3 className="text-2xl font-bold text-gray-900">Successfully Submitted!</h3>
                 <p className="text-base text-gray-600 max-w-md mx-auto">
-                  Thank you for your interest in GovMatch AI. Our sales team is excited to connect with you.
+                  Thank you for your interest in Document Chat System. Our sales team is excited to connect with you.
                 </p>
               </div>
             </div>

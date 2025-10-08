@@ -227,7 +227,7 @@ export class ProviderManager {
       metadata: {
         description: 'Demo provider - Always available as final fallback',
         benefits: ['Always available', 'No cost', 'Fast responses', 'Government contracting focused'],
-        website: 'https://govmatch.ai',
+        website: 'https://document-chat-system.vercel.app',
         isDemo: true,
         uiVisible: false // Hide from main UI selection but show in status
       }

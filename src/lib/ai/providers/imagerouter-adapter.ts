@@ -840,7 +840,7 @@ export class ImageRouterAdapter extends AIProviderAdapter {
           headers: {
             'Authorization': `Bearer ${this.config.apiKey}`,
             'Content-Type': 'application/json',
-            'User-Agent': 'GovMatch-AI/1.0'
+            'User-Agent': 'Document-Chat-System/1.0'
           },
           body: body ? JSON.stringify(body) : undefined,
           signal: AbortSignal.timeout(this.config.timeout)
@@ -866,7 +866,7 @@ export class ImageRouterAdapter extends AIProviderAdapter {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${this.config.apiKey}`,
-            'User-Agent': 'GovMatch-AI/1.0'
+            'User-Agent': 'Document-Chat-System/1.0'
             // Don't set Content-Type for FormData - browser will set it with boundary
           },
           body: formData,

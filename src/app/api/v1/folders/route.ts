@@ -406,24 +406,24 @@ export async function POST(request: NextRequest) {
 async function ensureDefaultFolders(organizationId: string, userId: string) {
   const defaultFolders = [
     {
-      name: 'Active Proposals',
-      description: 'Currently active government contract proposals',
+      name: 'My Documents',
+      description: 'Your personal document collection',
       color: '#3b82f6',
-      folderType: 'PROPOSALS',
+      folderType: 'DOCUMENTS',
       icon: 'file-text'
     },
     {
-      name: 'Compliance Documents', 
-      description: 'Security and compliance documentation',
-      color: '#f59e0b',
-      folderType: 'CERTIFICATIONS',
-      icon: 'shield'
+      name: 'Shared Documents',
+      description: 'Documents shared with your team',
+      color: '#10b981',
+      folderType: 'DOCUMENTS',
+      icon: 'users'
     },
     {
-      name: 'Contract Templates',
-      description: 'Reusable contract and proposal templates', 
-      color: '#10b981',
-      folderType: 'OTHER',
+      name: 'Templates',
+      description: 'Document templates for quick access',
+      color: '#8b5cf6',
+      folderType: 'TEMPLATES',
       icon: 'template'
     }
   ]

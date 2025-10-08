@@ -9,7 +9,7 @@ import { z } from 'zod'
 import DOMPurify from 'isomorphic-dompurify'
 import type {
   TimeUnit,
-  GovernmentLevel,
+  OrganizationLevel,
   CertificationPriority,
   CertificationStatus,
   VerificationStatus,
@@ -90,7 +90,7 @@ export const TimeUnitSchema = z
     'Time unit for certification validity periods. Used for expiration and renewal timing calculations.'
   )
 
-export const GovernmentLevelSchema = z
+export const OrganizationLevelSchema = z
   .enum(['federal', 'state', 'local', 'international', 'private'])
   .describe(
     'Government level that issues or recognizes the certification. Used for filtering and matching opportunities at appropriate government levels.'
@@ -186,7 +186,7 @@ export const GovCertificationDefinitionSchema = z
       ),
     
     governmentLevel: z
-      .array(GovernmentLevelSchema)
+      .array(OrganizationLevelSchema)
       .min(1, 'At least one government level required')
       .max(5, 'Too many government levels')
       .describe(
@@ -280,7 +280,7 @@ export const GovCertificationCategorySchema = z
     ),
     
     governmentLevel: z
-      .array(GovernmentLevelSchema)
+      .array(OrganizationLevelSchema)
       .min(1, 'At least one government level required')
       .max(5, 'Too many government levels')
       .describe(
@@ -651,8 +651,8 @@ export const CertificationSearchFiltersSchema = z
         'Filter certifications by applicable industries. Maximum 20 industries for performance.'
       ),
     
-    governmentLevels: z
-      .array(GovernmentLevelSchema)
+    organizationLevels: z
+      .array(OrganizationLevelSchema)
       .max(5, 'Too many government levels selected')
       .optional()
       .describe(

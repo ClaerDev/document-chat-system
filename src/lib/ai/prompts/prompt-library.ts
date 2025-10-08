@@ -16,7 +16,6 @@ import {
   PromptComplexity,
   PromptLibraryConfig
 } from './types'
-import { GOVERNMENT_CONTRACTING_TEMPLATES } from './templates/government-contracting'
 import { DOCUMENT_PROCESSING_TEMPLATES } from './templates/document-processing'
 import { ai as aiConfig } from '@/lib/config/env'
 
@@ -49,7 +48,6 @@ export class PromptLibrary {
    */
   private loadTemplates(): void {
     const allTemplates = [
-      ...GOVERNMENT_CONTRACTING_TEMPLATES,
       ...DOCUMENT_PROCESSING_TEMPLATES
     ]
 

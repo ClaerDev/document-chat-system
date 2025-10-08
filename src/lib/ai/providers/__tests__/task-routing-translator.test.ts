@@ -2,7 +2,7 @@
  * TaskRoutingTranslator Unit Tests
  * 
  * Tests the task routing translation logic that converts
- * GovMatch AI's task-based routing to OpenRouter provider preferences.
+ * Document Chat System's task-based routing to OpenRouter provider preferences.
  */
 
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
@@ -22,8 +22,8 @@ describe('TaskRoutingTranslator', () => {
 
   const mockConfig = {
     apiKey: 'sk-test-key',
-    appName: 'GovMatch-AI-Test',
-    siteUrl: 'https://test.govmatch.ai',
+    appName: 'Document-Chat-System-Test',
+    siteUrl: 'https://test.document-chat-system.vercel.app',
     enableSmartRouting: true,
     costOptimization: 'balanced' as const,
     fallbackStrategy: 'hybrid' as const,

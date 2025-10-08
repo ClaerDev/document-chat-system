@@ -216,7 +216,7 @@ function calculateProfileCompleteness(profile: any): number {
     // Capabilities and preferences (20% weight - reduced to make room for SAM.gov)
     { field: 'coreCompetencies', weight: 7 }, // Reduced from 8
     { field: 'pastPerformance', weight: 4 }, // Reduced from 5
-    { field: 'governmentLevels', weight: 5 }, // Reduced from 6
+    { field: 'organizationLevels', weight: 5 }, // Reduced from 6
     { field: 'geographicPreferences', weight: 4 } // Reduced from 6
   ]
 
@@ -274,7 +274,7 @@ function calculateProfileCompleteness(profile: any): number {
       isComplete = Array.isArray(value) && value.length > 0
     } else if (field === 'pastPerformance') {
       isComplete = value && typeof value === 'object' && (value.description || value.keyProjects?.length > 0)
-    } else if (field === 'governmentLevels') {
+    } else if (field === 'organizationLevels') {
       isComplete = Array.isArray(value) && value.length > 0
     } else if (field === 'geographicPreferences') {
       if (value && typeof value === 'object') {
@@ -620,9 +620,9 @@ export const PATCH = asyncHandler(async (request: NextRequest) => {
     // Transform old format data to new format (for existing users)
     const transformedBody = { ...body }
     
-    // Transform governmentLevels to uppercase if present
-    if (transformedBody.governmentLevels && Array.isArray(transformedBody.governmentLevels)) {
-      transformedBody.governmentLevels = transformedBody.governmentLevels.map((level: string) => 
+    // Transform organizationLevels to uppercase if present
+    if (transformedBody.organizationLevels && Array.isArray(transformedBody.organizationLevels)) {
+      transformedBody.organizationLevels = transformedBody.organizationLevels.map((level: string) => 
         level.toUpperCase()
       )
     }

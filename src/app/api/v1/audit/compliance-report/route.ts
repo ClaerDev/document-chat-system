@@ -196,23 +196,23 @@ export async function GET(request: NextRequest) {
             reportPeriod: report.reportPeriod,
             format: formatParam.toUpperCase(),
             soc2RequirementsCompliant: Object.values(report.soc2Requirements).filter(Boolean).length
+          },
+          ipAddress: request.headers.get('x-forwarded-for') ||
+                    request.headers.get('x-real-ip') ||
+                    'unknown',
+          userAgent: request.headers.get('user-agent') || 'unknown',
+          metadata: {
+            endpoint: '/api/v1/audit/compliance-report',
+            method: 'GET',
+            organizationId: user.organizationId,
+            targetOrganization: targetOrganizationId,
+            reportFormat: formatParam.toUpperCase(),
+            complianceScore: report.complianceScore
           }
         },
-        'AUDIT_MANAGEMENT' as any,
-        'COMPLIANCE_REPORT_GENERATED' as any,
-        'INFO' as any,
-        {
-          endpoint: '/api/v1/audit/compliance-report',
-          method: 'GET',
-          organizationId: user.organizationId,
-          userAgent: request.headers.get('user-agent'),
-          ipAddress: request.headers.get('x-forwarded-for') || 
-                    request.headers.get('x-real-ip') || 
-                    'unknown',
-          targetOrganization: targetOrganizationId,
-          reportFormat: formatParam.toUpperCase(),
-          complianceScore: report.complianceScore
-        }
+        AuditCategory.AUDIT_MANAGEMENT,
+        AuditEventType.COMPLIANCE_REPORT_GENERATED,
+        AuditSeverity.INFO
       );
     } catch (auditError) {
       console.error('Failed to create compliance report audit log:', auditError);
@@ -255,20 +255,20 @@ export async function GET(request: NextRequest) {
             entityId: 'failed-report',
             entityName: 'Failed Compliance Report',
             previousData: null,
-            currentData: null
+            currentData: null,
+            ipAddress: request.headers.get('x-forwarded-for') ||
+                      request.headers.get('x-real-ip') ||
+                      'unknown',
+            userAgent: request.headers.get('user-agent') || 'unknown',
+            metadata: {
+              endpoint: '/api/v1/audit/compliance-report',
+              method: 'GET',
+              error: (error as Error).message
+            }
           },
-          'AUDIT_MANAGEMENT' as any,
-          'ERROR' as any,
-          'CRITICAL' as any,
-          {
-            endpoint: '/api/v1/audit/compliance-report',
-            method: 'GET',
-            error: (error as Error).message,
-            userAgent: request.headers.get('user-agent'),
-            ipAddress: request.headers.get('x-forwarded-for') || 
-                      request.headers.get('x-real-ip') || 
-                      'unknown'
-          }
+          AuditCategory.AUDIT_MANAGEMENT,
+          AuditEventType.ERROR,
+          AuditSeverity.CRITICAL
         );
       }
     } catch (auditError) {

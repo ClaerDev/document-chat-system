@@ -40,31 +40,6 @@ export interface AuditLogWithUser extends BaseAuditLog {
   } | null;
 }
 
-// Profile-specific audit interfaces
-export interface ProfileAuditData {
-  companyName?: string;
-  primaryContactEmail?: string;
-  primaryContactPhone?: string;
-  uei?: string;
-  cageCode?: string;
-  duns?: string;
-  annualRevenue?: number;
-  profileCompleteness?: number;
-}
-
-export interface ProfileAuditLog extends BaseAuditLog {
-  entityType: 'Profile';
-  previousData?: ProfileAuditData | null;
-  currentData?: ProfileAuditData | null;
-  sensitiveFields?: Array<
-    'primaryContactEmail' | 
-    'primaryContactPhone' | 
-    'annualRevenue' | 
-    'duns' | 
-    'cageCode' | 
-    'uei'
-  >;
-}
 
 // Billing/Subscription audit interfaces
 export interface BillingAuditData {
@@ -156,78 +131,6 @@ export interface APIKeyAuditLog extends BaseAuditLog {
   metadata?: APIKeyAuditMetadata;
 }
 
-// Opportunity lifecycle audit interfaces
-export interface OpportunityAuditData {
-  status?: string;
-  priority?: string;
-  tags?: string[];
-  notes?: string;
-  proposalValue?: number;
-  winProbability?: number;
-  competitorCount?: number;
-  title?: string;
-  agency?: string;
-  dueDate?: Date;
-}
-
-export interface OpportunityAuditMetadata {
-  actionType?: 'SAVE' | 'APPLY' | 'NOTE' | 'ASSIGN';
-  lifecycleAction?: string;
-  sourceSystem?: string;
-  externalId?: string;
-  statusChange?: {
-    from: string;
-    to: string;
-  };
-  opportunityStatusChange?: {
-    from: string;
-    to: string;
-  };
-  noteType?: string;
-  isPrivate?: boolean;
-  contentLength?: number;
-  changedFields?: string[];
-  isOwnNote?: boolean;
-  endpoint?: string;
-  method?: string;
-}
-
-export interface OpportunityAuditLog extends BaseAuditLog {
-  entityType: 'Opportunity_SAVE' | 'Opportunity_APPLY' | 'Opportunity_NOTE' | 'Opportunity_ASSIGN';
-  previousData?: OpportunityAuditData | null;
-  currentData?: OpportunityAuditData | null;
-  metadata?: OpportunityAuditMetadata;
-}
-
-// AI/Match Score audit interfaces
-export interface AIAuditData {
-  score: number;
-  algorithm: string;
-  confidence?: number;
-  factors?: any;
-  model?: string;
-  provider?: string;
-}
-
-export interface AIAuditMetadata {
-  algorithm: string;
-  score: number;
-  isAIDecision: true;
-  model?: string;
-  provider?: string;
-  profileName?: string;
-  opportunityTitle?: string;
-  confidence?: number;
-  factors?: any;
-  endpoint?: string;
-  method?: string;
-}
-
-export interface AIAuditLog extends BaseAuditLog {
-  entityType: 'MatchScore';
-  currentData?: AIAuditData | null;
-  metadata?: AIAuditMetadata;
-}
 
 // Compliance report audit interfaces
 export interface ComplianceReportAuditData {
@@ -372,28 +275,20 @@ export interface AuditLogStore {
 }
 
 // Export utility types
-export type AuditLogType = 
-  | ProfileAuditLog 
-  | BillingAuditLog 
-  | DocumentAuditLog 
-  | APIKeyAuditLog 
-  | OpportunityAuditLog 
-  | AIAuditLog 
+export type AuditLogType =
+  | BillingAuditLog
+  | DocumentAuditLog
+  | APIKeyAuditLog
   | ComplianceReportAuditLog;
 
-export type AuditDataType = 
-  | ProfileAuditData 
-  | BillingAuditData 
-  | DocumentAuditData 
-  | APIKeyAuditData 
-  | OpportunityAuditData 
-  | AIAuditData 
+export type AuditDataType =
+  | BillingAuditData
+  | DocumentAuditData
+  | APIKeyAuditData
   | ComplianceReportAuditData;
 
-export type AuditMetadataType = 
-  | BillingAuditMetadata 
-  | DocumentAuditMetadata 
-  | APIKeyAuditMetadata 
-  | OpportunityAuditMetadata 
-  | AIAuditMetadata 
+export type AuditMetadataType =
+  | BillingAuditMetadata
+  | DocumentAuditMetadata
+  | APIKeyAuditMetadata
   | ComplianceReportAuditMetadata;

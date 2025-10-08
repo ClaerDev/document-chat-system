@@ -226,7 +226,7 @@ export class ApiDocsGenerator {
         bearer: [
           {
             key: 'token',
-            value: '{{GOVMATCH_API_TOKEN}}',
+            value: '{{API_TOKEN}}',
             type: 'string'
           }
         ]
@@ -335,13 +335,13 @@ export class ApiDocsGenerator {
     const spec = {
       openapi: '3.0.0',
       info: {
-        title: 'GovMatch AI API',
+        title: 'Document Chat System API',
         description: 'Complete API for government contracting opportunities discovery and AI-powered matching',
         version: '1.0.0',
         contact: {
-          name: 'GovMatch AI Support',
-          url: 'https://govmatch.ai/support',
-          email: 'support@govmatch.ai'
+          name: 'Document Chat System Support',
+          url: 'https://document-chat-system.vercel.app/support',
+          email: 'support@document-chat-system.vercel.app'
         },
         license: {
           name: 'MIT',
@@ -350,11 +350,11 @@ export class ApiDocsGenerator {
       },
       servers: [
         {
-          url: 'https://api.govmatch.ai',
+          url: 'https://api.document-chat-system.vercel.app',
           description: 'Production server'
         },
         {
-          url: 'https://staging-api.govmatch.ai',
+          url: 'https://staging-api.document-chat-system.vercel.app',
           description: 'Staging server'
         },
         {
@@ -574,11 +574,11 @@ export class ApiDocsGenerator {
   private generateTypeScriptSDK(endpoint: ApiEndpoint): string {
     return `
 // TypeScript SDK for ${endpoint.method} ${endpoint.path}
-import { ApiClient } from '@govmatch/api-client';
+import { ApiClient } from '@document-chat-system/api-client';
 
 const client = new ApiClient({
   baseUrl: '${this.baseUrl}',
-  apiKey: process.env.GOVMATCH_API_KEY
+  apiKey: process.env.API_KEY
 });
 
 try {
@@ -593,11 +593,11 @@ try {
   private generatePythonSDK(endpoint: ApiEndpoint): string {
     return `
 # Python SDK for ${endpoint.method} ${endpoint.path}
-from govmatch_api import GovMatchClient
+from document_chat_api import DocumentChatClient
 
-client = GovMatchClient(
+client = DocumentChatClient(
     base_url='${this.baseUrl}',
-    api_key=os.getenv('GOVMATCH_API_KEY')
+    api_key=os.getenv('API_KEY')
 )
 
 try:
@@ -613,7 +613,7 @@ except Exception as error:
     curl += ` \\\n  -H "Content-Type: application/json"`
     
     if (endpoint.auth) {
-      curl += ` \\\n  -H "Authorization: Bearer $GOVMATCH_API_TOKEN"`
+      curl += ` \\\n  -H "Authorization: Bearer $API_TOKEN"`
     }
     
     if (endpoint.example && ['POST', 'PUT', 'PATCH'].includes(endpoint.method)) {

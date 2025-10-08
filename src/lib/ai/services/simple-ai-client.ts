@@ -199,8 +199,8 @@ export class SimpleAIClient {
 
       // Add OpenRouter-specific headers
       if (isOpenRouter) {
-        headers['HTTP-Referer'] = 'https://govmatch.ai'
-        headers['X-Title'] = 'GovMatch AI'
+        headers['HTTP-Referer'] = 'https://document-chat-system.vercel.app'
+        headers['X-Title'] = 'Document Chat System'
       }
 
       console.log(

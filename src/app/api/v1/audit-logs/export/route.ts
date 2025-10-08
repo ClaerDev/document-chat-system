@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import { z } from 'zod';
 import { AuditQueryService } from '@/lib/audit/query-service';
 import { AuditEventType, AuditCategory, AuditSeverity } from '@prisma/client';

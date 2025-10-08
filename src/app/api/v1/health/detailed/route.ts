@@ -452,9 +452,12 @@ export async function GET() {
     const queries = [
       { name: 'Simple Count', fn: () => prisma.organization.count() },
       { name: 'User Query', fn: () => prisma.user.findMany({ take: 10 }) },
-      { name: 'Complex Join', fn: () => prisma.matchScore.findMany({ 
-        take: 5, 
-        include: { profile: true, opportunity: true } 
+      { name: 'Complex Join', fn: () => prisma.document.findMany({
+        take: 5,
+        include: {
+          folder: true,
+          uploadedBy: true
+        }
       }) }
     ]
 

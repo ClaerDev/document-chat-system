@@ -422,7 +422,7 @@ Here's how I can help you move forward:
 - Developing teaming strategies
 - Analyzing market trends
 
-*Note: This is a demonstration of GovMatch AI's capabilities. Connect your API keys for real-time data and comprehensive analysis.*`;
+*Note: This is a demonstration of Document Chat System's capabilities. Connect your API keys for real-time data and comprehensive analysis.*`;
   }
 
   private calculateUsage(request: UnifiedCompletionRequest | UnifiedStreamRequest, content: string): any {

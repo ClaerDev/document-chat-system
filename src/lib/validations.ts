@@ -3,7 +3,7 @@ import DOMPurify from 'isomorphic-dompurify'
 import { 
   BrandVoice, 
   BrandTone, 
-  GovernmentLevel, 
+  OrganizationLevel, 
   TravelWillingness,
   GeographicPreferenceType 
 } from '@/types/profile'
@@ -1299,8 +1299,8 @@ export const ProfileUpdateSchema = z
       ),
 
     // Government Level Preferences
-    governmentLevels: z
-      .array(z.nativeEnum(GovernmentLevel))
+    organizationLevels: z
+      .array(z.nativeEnum(OrganizationLevel))
       .optional()
       .describe(
         'Target government levels for contract opportunities (Federal, State, Local). Used for filtering and prioritizing relevant opportunities based on government entity type.'

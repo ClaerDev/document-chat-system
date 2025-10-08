@@ -826,10 +826,10 @@ export function BillingDashboard() {
               <Crown className="h-8 w-8 text-blue-600" />
             </div>
             <h1 className="text-3xl font-bold text-foreground mb-4">
-              Welcome to GovMatch AI
+              Welcome to Document Chat System
             </h1>
             <p className="text-lg text-muted-foreground mb-8">
-              Choose a plan to unlock AI-powered government contracting insights and grow your business
+              Choose a plan to unlock AI-powered document chat and analysis features
             </p>
             <div className="flex items-center justify-center space-x-6 text-sm text-muted-foreground">
               <div className="flex items-center">

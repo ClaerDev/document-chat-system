@@ -76,7 +76,7 @@ The API uses standard HTTP status codes and returns consistent error responses:
       },
       license: {
         name: 'Proprietary',
-        url: 'https://govmatch.ai/license'
+        url: 'https://document-chat-system.vercel.app/license'
       }
     },
     servers: [

@@ -119,8 +119,8 @@ export async function GET(
       case 'openrouter':
         adapter = new CleanOpenRouterAdapter({
           apiKey: ai.openrouterApiKey,
-          appName: 'GovMatch AI',
-          siteUrl: 'https://govmatch.ai',
+          appName: 'Document Chat System',
+          siteUrl: 'https://document-chat-system.vercel.app',
           enableSmartRouting: true,
           costOptimization: 'balanced',
           maxRetries: 1,
@@ -289,8 +289,8 @@ export async function POST(
       case 'openrouter':
         adapter = new CleanOpenRouterAdapter({
           apiKey: ai.openrouterApiKey,
-          appName: 'GovMatch AI',
-          siteUrl: 'https://govmatch.ai',
+          appName: 'Document Chat System',
+          siteUrl: 'https://document-chat-system.vercel.app',
           enableSmartRouting: true,
           costOptimization: 'balanced',
           maxRetries: 1,

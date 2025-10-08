@@ -9,7 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, RefreshCw, Zap, Clock, DollarSign, Star, ChevronRight, Eye, Globe, Search as SearchIcon, Image, Code, Layers, MessageSquare, Video, Edit3 } from 'lucide-react';
-import { useGovMatchStore } from '@/stores/document-chat-store';
+import { useDocumentChatStore } from '@/stores/document-chat-store';
 
 interface ModelInfo {
   id?: string;
@@ -66,7 +66,7 @@ export function ModelSelectionModal({
     clearSearch,
     refreshModels: storeRefreshModels,
     forceRefreshModels
-  } = useGovMatchStore((state) => state.ai);
+  } = useDocumentChatStore((state) => state.ai);
 
   // Load models when modal opens or provider changes
   useEffect(() => {
@@ -79,7 +79,7 @@ export function ModelSelectionModal({
         }
       } else {
         // Use store's refresh models if no models are loaded
-        const storeModels = useGovMatchStore.getState().ai.models;
+        const storeModels = useDocumentChatStore.getState().ai.models;
         if (storeModels.length === 0) {
           storeRefreshModels();
         }
@@ -122,7 +122,7 @@ export function ModelSelectionModal({
 
   // Get filtered models for current mode
   const currentModeModels = getFilteredModelsForMode(filteredModels);
-  const allStoreModeModels = getFilteredModelsForMode(useGovMatchStore.getState().ai.models);
+  const allStoreModeModels = getFilteredModelsForMode(useDocumentChatStore.getState().ai.models);
   
   // Debug logging
   console.log(`🔍 Modal Debug - Mode: ${mode}, All models: ${filteredModels.length}, Current mode: ${currentModeModels.length}`);

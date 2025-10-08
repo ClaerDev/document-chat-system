@@ -4,16 +4,16 @@ import React, { useState } from 'react'
 import { useParams } from 'next/navigation'
 import { DocumentDetailsView } from '@/components/documents/document-details-view'
 import { DocumentChatInterface, ChatToggleButton } from '@/components/documents/document-chat-interface'
-import { useGovMatchStore } from '@/stores/document-chat-store'
+import { useDocumentChatStore } from '@/stores/document-chat-store'
 import { FileManagerProvider } from '@/lib/providers/file-manager-provider'
 
 export default function DocumentDetailsPage() {
   const params = useParams()
   const documentId = params.id as string
   const [isChatOpen, setIsChatOpen] = useState(false)
-  
+
   // Get document from store using findDocument method
-  const findDocument = useGovMatchStore((state) => state.findDocument)
+  const findDocument = useDocumentChatStore((state) => state.findDocument)
   const document = findDocument(documentId)
 
   const toggleChat = () => {

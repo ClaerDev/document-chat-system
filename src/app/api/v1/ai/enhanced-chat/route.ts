@@ -783,8 +783,8 @@ async function handleExistingSystem(
               method: 'POST',
               headers: {
                 'Authorization': `Bearer ${openrouterApiKey}`,
-                'HTTP-Referer': 'https://govmatch.ai',
-                'X-Title': 'GovMatch AI',
+                'HTTP-Referer': 'https://document-chat-system.vercel.app',
+                'X-Title': 'Document Chat System',
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify(openrouterRequest)

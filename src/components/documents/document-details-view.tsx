@@ -138,7 +138,7 @@ import { FileViewerModal } from './file-viewer-modal'
 import { DocumentChatInterface, ChatToggleButton } from './document-chat-interface'
 import { EditableBadgeInput } from '@/components/ui/editable-badge-input'
 import { useFileManager } from '@/lib/providers/file-manager-provider'
-import { useTree, useDocumentOperations, useTreeNavigation, useGovMatchStore } from '@/stores/document-chat-store'
+import { useTree, useDocumentOperations, useTreeNavigation, useDocumentChatStore } from '@/stores/document-chat-store'
 import { UI_CONSTANTS } from '@/lib/constants'
 import type { Document, DocumentEmbeddings } from '@/types/documents'
 import { DocumentType, EntityType } from '@/types/documents'
@@ -487,7 +487,7 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
   // Notification and sound hooks
   const notify = useNotify()
   const { play: playSound } = useSoundEffects()
-  const setDocuments = useGovMatchStore((state) => state.documents.setDocuments)
+  const setDocuments = useDocumentChatStore((state) => state.documents.setDocuments)
   
   // Loading state
   const [isLoading, setIsLoading] = useState(true)

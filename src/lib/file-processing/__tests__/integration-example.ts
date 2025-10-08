@@ -42,7 +42,7 @@ const createGovernmentDocument = () => {
 
 // Simulate processing different file types
 async function demonstrateFileProcessing() {
-  console.log('🚀 GovMatch AI File Processing Integration Demo\n');
+  console.log('🚀 Document Chat System File Processing Integration Demo\n');
   
   // Process a government solicitation document
   console.log('📄 Processing Government Solicitation...');

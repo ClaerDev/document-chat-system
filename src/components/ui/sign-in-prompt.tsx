@@ -13,9 +13,9 @@ interface SignInPromptProps {
   feature?: string
 }
 
-export function SignInPrompt({ 
+export function SignInPrompt({
   title = "Authentication Required",
-  description = "Please sign in to access government contracting features",
+  description = "Please sign in to access document chat features",
   feature = "this feature"
 }: SignInPromptProps) {
   const { theme } = useTheme()
@@ -35,17 +35,17 @@ export function SignInPrompt({
       </CardHeader>
       <CardContent className="space-y-6 pt-0">
         <SignInButton mode="modal" forceRedirectUrl="/dashboard">
-          <Button 
-            className="w-full bg-primary-700 hover:bg-primary-800 dark:bg-primary-600 dark:hover:bg-primary-700 text-white font-medium transition-all duration-150 hover:shadow-lg" 
+          <Button
+            className="w-full bg-primary-700 hover:bg-primary-800 dark:bg-primary-600 dark:hover:bg-primary-700 text-white font-medium transition-all duration-150 hover:shadow-lg"
             size="lg"
           >
             <LogIn className="h-4 w-4 mr-2" />
-            Sign In to GovMatch AI
+            Sign In to Document Chat System
           </Button>
         </SignInButton>
         
         <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-          New to government contracting?{' '}
+          New user?{' '}
           <SignInButton mode="modal" forceRedirectUrl="/dashboard">
             <button className="text-primary-700 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 hover:underline font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 rounded">
               Start your free trial
@@ -55,7 +55,7 @@ export function SignInPrompt({
 
         <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
           <p className="text-xs text-gray-500 dark:text-gray-400 text-center leading-relaxed">
-            Secure access to federal contracting opportunities with enterprise-grade authentication.
+            Secure access to your documents with enterprise-grade authentication.
           </p>
         </div>
       </CardContent>

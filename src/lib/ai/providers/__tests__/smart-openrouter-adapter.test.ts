@@ -40,8 +40,8 @@ describe('SmartOpenRouterAdapter', () => {
 
   const mockConfig = {
     apiKey: 'sk-test-key',
-    appName: 'GovMatch-AI-Test',
-    siteUrl: 'https://test.govmatch.ai',
+    appName: 'Document-Chat-System-Test',
+    siteUrl: 'https://test.document-chat-system.vercel.app',
     enableSmartRouting: true,
     costOptimization: 'balanced' as const,
     fallbackStrategy: 'hybrid' as const,
@@ -87,7 +87,7 @@ describe('SmartOpenRouterAdapter', () => {
         expect.objectContaining({
           headers: expect.objectContaining({
             'Authorization': 'Bearer sk-test-key',
-            'X-Title': 'GovMatch-AI-Test'
+            'X-Title': 'Document-Chat-System-Test'
           })
         })
       );

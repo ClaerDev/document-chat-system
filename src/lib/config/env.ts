@@ -480,11 +480,11 @@ const envSchema = z.object({
     ),
 
   // API Configuration
-  GOVMATCH_API_KEY: z
+  EXTERNAL_API_KEY: z
     .string()
     .optional()
     .describe(
-      'API key for GovMatch services. Used in api-docs-generator.ts and external API integrations for authentication.'
+      'API key for external services. Used in api-docs-generator.ts and external API integrations for authentication.'
     ),
   NEXT_PUBLIC_BASE_URL: z
     .string()
@@ -1402,7 +1402,7 @@ function validateEnv() {
         ...process.env,
         DATABASE_URL:
           process.env.DATABASE_URL ||
-          'postgresql://postgres:password@localhost:5432/govmatch_dev',
+          'postgresql://postgres:password@localhost:5432/document_chat_dev',
         NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
           process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
           'pk_test_development',
@@ -1646,7 +1646,7 @@ export const webhooks = {
 } as const
 
 export const api = {
-  govmatchApiKey: env.GOVMATCH_API_KEY,
+  apiKey: env.EXTERNAL_API_KEY,
   baseUrl: env.NEXT_PUBLIC_BASE_URL,
 } as const
 

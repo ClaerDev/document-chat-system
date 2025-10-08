@@ -7,6 +7,6 @@ export default function Documents() {
 }
 
 export const metadata = {
-  title: 'Documents | GovMatch AI',
-  description: 'Manage your government contracting documents, proposals, and compliance files.',
+  title: 'Documents | Document Chat System',
+  description: 'Manage your documents with AI-powered chat and analysis.',
 }

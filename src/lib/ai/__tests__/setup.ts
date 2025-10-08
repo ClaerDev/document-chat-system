@@ -9,8 +9,8 @@ import { jest } from '@jest/globals';
 // Mock environment variables
 process.env.NODE_ENV = 'test';
 process.env.OPENROUTER_API_KEY = 'sk-test-key';
-process.env.OPENROUTER_APP_NAME = 'GovMatch-AI-Test';
-process.env.OPENROUTER_SITE_URL = 'https://test.govmatch.ai';
+process.env.OPENROUTER_APP_NAME = 'Document-Chat-System-Test';
+process.env.OPENROUTER_SITE_URL = 'https://test.document-chat-system.vercel.app';
 process.env.OPENROUTER_SMART_ROUTING = 'true';
 process.env.OPENROUTER_COST_OPTIMIZATION = 'balanced';
 process.env.OPENROUTER_FALLBACK_STRATEGY = 'hybrid';
@@ -133,8 +133,8 @@ global.testUtils = {
   
   createMockConfig: (overrides = {}) => ({
     apiKey: 'sk-test-key',
-    appName: 'GovMatch-AI-Test',
-    siteUrl: 'https://test.govmatch.ai',
+    appName: 'Document-Chat-System-Test',
+    siteUrl: 'https://test.document-chat-system.vercel.app',
     enableSmartRouting: true,
     costOptimization: 'balanced' as const,
     fallbackStrategy: 'hybrid' as const,

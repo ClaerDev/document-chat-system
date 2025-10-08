@@ -110,8 +110,8 @@ describe('Anthropic Adapter Contract Validation', () => {
 describe('OpenRouter Adapter Contract Validation', () => {
   const createAdapter = () => new SmartOpenRouterAdapter({
     apiKey: 'sk-or-test-key',
-    appName: 'GovMatch-AI-Test',
-    siteUrl: 'https://test.govmatch.ai',
+    appName: 'Document-Chat-System-Test',
+    siteUrl: 'https://test.document-chat-system.vercel.app',
     enableSmartRouting: true,
     costOptimization: 'balanced',
     fallbackStrategy: 'hybrid',
@@ -167,8 +167,8 @@ describe('Cross-Adapter Compatibility Tests', () => {
 
     openrouterAdapter = new SmartOpenRouterAdapter({
       apiKey: 'sk-or-test-key',
-      appName: 'GovMatch-AI-Test',
-      siteUrl: 'https://test.govmatch.ai',
+      appName: 'Document-Chat-System-Test',
+      siteUrl: 'https://test.document-chat-system.vercel.app',
       enableSmartRouting: true,
       costOptimization: 'balanced',
       fallbackStrategy: 'hybrid',
@@ -386,8 +386,8 @@ describe('Adapter Interchangeability Tests', () => {
 
     const openrouterAdapter = new SmartOpenRouterAdapter({
       apiKey: 'sk-or-test-key',
-      appName: 'GovMatch-AI-Test',
-      siteUrl: 'https://test.govmatch.ai',
+      appName: 'Document-Chat-System-Test',
+      siteUrl: 'https://test.document-chat-system.vercel.app',
       enableSmartRouting: true,
       costOptimization: 'balanced',
       fallbackStrategy: 'hybrid',
@@ -435,8 +435,8 @@ describe('Adapter Regression Tests', () => {
 
     const openrouterAdapter = new SmartOpenRouterAdapter({
       apiKey: 'sk-or-test-key',
-      appName: 'GovMatch-AI-Test',
-      siteUrl: 'https://test.govmatch.ai'
+      appName: 'Document-Chat-System-Test',
+      siteUrl: 'https://test.document-chat-system.vercel.app'
     });
 
     // Should create without errors

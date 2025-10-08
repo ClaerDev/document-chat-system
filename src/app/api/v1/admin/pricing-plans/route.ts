@@ -59,7 +59,7 @@ async function isAdmin(userId: string): Promise<boolean> {
   })
   
   // Allow OWNER and ADMIN roles, or specific admin emails
-  const adminEmails = ['yourpersonalmarketer123@gmail.com', 'admin@govmatch.ai']
+  const adminEmails = ['yourpersonalmarketer123@gmail.com']
   return user?.role === 'OWNER' || user?.role === 'ADMIN' || adminEmails.includes(user?.email || '')
 }
 

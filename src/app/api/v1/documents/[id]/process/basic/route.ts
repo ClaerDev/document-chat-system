@@ -439,8 +439,7 @@ export async function POST(
       },
       include: {
         folder: { select: { id: true, name: true } },
-        uploadedBy: { select: { id: true, firstName: true, lastName: true, email: true } },
-        opportunity: { select: { id: true, title: true, solicitationNumber: true } }
+        uploadedBy: { select: { id: true, firstName: true, lastName: true, email: true } }
       }
     })
 

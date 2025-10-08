@@ -3,14 +3,14 @@
 import React, { useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import DocumentsPage from '@/components/documents/documents-page'
-import { useGovMatchStore } from '@/stores/document-chat-store'
+import { useDocumentChatStore } from '@/stores/document-chat-store'
 
 export default function FolderPage() {
   const params = useParams()
   const folderId = params.folderId as string
-  
+
   // Set folder state without navigation (since we're already at the URL)
-  const setCurrentFolderId = useGovMatchStore((state) => state.documents.setCurrentFolderId)
+  const setCurrentFolderId = useDocumentChatStore((state) => state.documents.setCurrentFolderId)
   
   useEffect(() => {
     if (folderId) {

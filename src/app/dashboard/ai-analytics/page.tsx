@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Activity, BarChart3, Brain, DollarSign, Zap } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'AI Analytics Dashboard - GovMatch AI',
+  title: 'AI Analytics Dashboard - Document Chat System',
   description: 'Comprehensive analytics and monitoring for AI routing decisions, provider performance, and cost optimization',
 };
 

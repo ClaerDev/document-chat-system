@@ -13,8 +13,8 @@ import { UnifiedCompletionRequest } from '../interfaces';
 // Example configuration
 const config = {
   apiKey: process.env.OPENROUTER_API_KEY!,
-  appName: 'GovMatch AI',
-  siteUrl: 'https://govmatch.ai',
+  appName: 'Document Chat System',
+  siteUrl: 'https://document-chat-system.vercel.app',
   enableSmartRouting: true,
   costOptimization: 'balanced' as const,
   maxRetries: 3,

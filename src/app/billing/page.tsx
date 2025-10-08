@@ -6,7 +6,7 @@ import { BillingDashboard } from '@/components/billing';
 
 
 export const metadata = {
-  title: 'Billing & Subscription | GovMatch AI',
+  title: 'Billing & Subscription | Document Chat System',
   description: 'Manage your subscription, view usage, and billing information.',
 };
 

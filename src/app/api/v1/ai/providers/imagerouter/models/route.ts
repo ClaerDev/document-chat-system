@@ -194,7 +194,7 @@ export async function GET(request: NextRequest) {
         headers: {
           'Authorization': `Bearer ${imageRouter.apiKey}`,
           'Content-Type': 'application/json',
-          'User-Agent': 'GovMatch-AI/1.0'
+          'User-Agent': 'Document-Chat-System/1.0'
         }
       });
 

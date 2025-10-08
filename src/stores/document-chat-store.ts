@@ -1866,8 +1866,8 @@ const createDocumentsSlice = (set: any, get: any): DocumentsSlice => ({
   },
 
   importState: (state: Partial<DocumentsState>) => {
-    set((govMatchState: DocumentChatSystemStore) => {
-      Object.assign(govMatchState.documents, state)
+    set((documentChatState: DocumentChatSystemStore) => {
+      Object.assign(documentChatState.documents, state)
     })
   },
 })
@@ -2771,7 +2771,7 @@ export const useDocumentChatSystemStore = create<DocumentChatSystemStore>()(
         }
       }),
       {
-        name: 'govmatch-store-devtools',
+        name: 'document-chat-store-devtools',
         enabled: process.env.NODE_ENV === 'development',
       }
     )
@@ -2997,6 +2997,9 @@ export const initializeDocumentChatSystemStore = (initialData: {
   store._initializeStore(initialData)
 }
 
+// Modern naming alias
+export const initializeDocumentChatStore = initializeDocumentChatSystemStore
+
 // Backward compatibility alias
 export const initializeTreeStore = (
   folders: Folder[],
@@ -3040,8 +3043,8 @@ export type { DocumentChatSystemStore, DocumentsSlice, DocumentsState }
 // BACKWARD COMPATIBILITY
 // =============================================
 
-// Backward compatibility alias for old imports
-export const useGovMatchStore = useDocumentChatSystemStore
+// Primary export - modern naming
+export const useDocumentChatStore = useDocumentChatSystemStore
 
 // =============================================
 // DEVELOPMENT UTILITIES
@@ -3049,5 +3052,5 @@ export const useGovMatchStore = useDocumentChatSystemStore
 
 // Debug helper for development
 if (process.env.NODE_ENV === 'development') {
-  ;(globalThis as any).__GOVMATCH_STORE__ = useDocumentChatSystemStore
+  ;(globalThis as any).__DOCUMENT_CHAT_STORE__ = useDocumentChatSystemStore
 }

@@ -10,7 +10,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Core models for GovMatch AI platform
+// Core models for Document Chat System
 
 model Organization {
   id        String    @id @default(cuid())
@@ -28,21 +28,13 @@ model Organization {
 
   // Relations
   users           User[]
-  profiles        Profile[]
-  opportunities   Opportunity[]
-  matchScores     MatchScore[]
   documents       Document[]
   folders         Folder[]
-  pipelines       Pipeline[]
   subscriptions   Subscription[]
   usageRecords    UsageRecord[]
   usageMigrations UsageMigration[]
   apiKeys         ApiKey[]
-  contacts        Contact[]
-
-  // User-Opportunity Interactions
-  savedOpportunities      SavedOpportunity[]
-  opportunityApplications OpportunityApplication[]
+  profiles        Profile[]
 
   // Account Deletion
   accountDeletions AccountDeletion[]
@@ -72,9 +64,6 @@ model Organization {
   auditLogExports      AuditLogExport[]
   securityIncidents    SecurityIncident[]
 
-  // Saved Searches
-  savedSearches SavedSearch[]
-
   @@map("organizations")
 }
 
@@ -97,20 +86,11 @@ model User {
   lastActiveAt DateTime?
 
   // Relations
-  organization          Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  createdProfiles       Profile[]               @relation("ProfileCreatedBy")
-  updatedProfiles       Profile[]               @relation("ProfileUpdatedBy")
-  createdFolders        Folder[]                @relation("FolderCreatedBy")
-  assignedOpportunities OpportunityAssignment[]
-  activities            Activity[]
-  documents             Document[]
-  apiKeys               ApiKey[]
-
-  // User-Opportunity Interactions
-  savedOpportunities      SavedOpportunity[]
-  opportunityApplications OpportunityApplication[]
-  opportunityNotes        OpportunityNote[]
-  matchScores             MatchScore[]
+  organization             Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdFolders           Folder[]                @relation("FolderCreatedBy")
+  activities               Activity[]
+  documents                Document[]
+  apiKeys                  ApiKey[]
 
   // Notifications
   notifications            Notification[]
@@ -123,308 +103,15 @@ model User {
   // Background Processing
   batchProcessingJobs BatchProcessing[]
 
-  // Contact/CRM Relations
-  createdContacts     Contact[]            @relation("ContactCreatedBy")
-  updatedContacts     Contact[]            @relation("ContactUpdatedBy")
-  contactInteractions ContactInteraction[] @relation("ContactInteractions")
-  communications      Communication[]      @relation("Communications")
-
   // Audit and Security Relations
   auditLogs       AuditLog[] @relation("AuditLogUser")
   auditLogExports AuditLogExport[] @relation("AuditLogExportUser")
 
-  // Saved Searches
-  savedSearches SavedSearch[]
+  // Profile Relations
+  createdProfiles Profile[] @relation("ProfileCreatedBy")
+  updatedProfiles Profile[] @relation("ProfileUpdatedBy")
 
   @@map("users")
-}
-
-model Profile {
-  id             String    @id @default(cuid())
-  organizationId String
-  createdById    String
-  updatedById    String?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  deletedAt      DateTime?
-
-  // Company Information
-  companyName String
-  dbaName     String?
-  uei         String?
-  duns        String?
-  cageCode    String?
-
-  // Business Address
-  addressLine1 String?
-  addressLine2 String?
-  city         String?
-  state        String?
-  zipCode      String?
-  country      String  @default("USA")
-
-  // Contact Information
-  primaryContactName  String?
-  primaryContactEmail String?
-  primaryContactPhone String?
-  website             String?
-
-  // Profile Images
-  logoUrl                String?
-  bannerUrl              String?
-  contactProfileImageUrl String?
-
-  // Business Classification
-  businessType    String?
-  yearEstablished Int?
-  employeeCount   String?
-  annualRevenue   String?
-
-  // NAICS Codes
-  primaryNaics   String?
-  secondaryNaics String[]
-
-  // Certifications
-  certifications Json? // Store as JSON for flexibility
-
-  // Capabilities and Experience
-  coreCompetencies  String[]
-  competencyDetails Json? // Store detailed competency information with skill levels
-  pastPerformance   Json? // Store structured past performance data
-  securityClearance String?
-
-  // Brand Voice and Communication
-  brandVoice BrandVoice? // Brand voice preference using enum
-  brandTone  BrandTone? // Communication tone using enum
-
-  // Geographic and Government Level Preferences  
-  geographicPreferences Json? // Preferred geographic markets and regions
-  governmentLevels      GovernmentLevel[] // Preferred government levels using enum
-
-  // System fields
-  profileCompleteness Int       @default(0) // Percentage 0-100
-  samGovSyncedAt      DateTime?
-  samGovData          Json?
-
-  // Profile vectorization for AI matching
-  profileEmbeddings Json? // Profile embedding vectors for intelligent matching
-
-  // Relations
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  createdBy    User         @relation("ProfileCreatedBy", fields: [createdById], references: [id])
-  updatedBy    User?        @relation("ProfileUpdatedBy", fields: [updatedById], references: [id])
-  matchScores  MatchScore[]
-
-  @@map("profiles")
-}
-
-model Opportunity {
-  id             String    @id @default(cuid())
-  organizationId String
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  deletedAt      DateTime?
-
-  // Core Opportunity Information
-  solicitationNumber String  @unique
-  title              String
-  description        String?
-  summary            String? // AI-generated summary for quick viewing
-
-  // Agency Information (structured for agencies.json compatibility)
-  agency Json // Agency object from agencies.json with code, name, type, etc.
-  office String?
-  
-  // SAM.gov Organization Hierarchy (all optional for backward compatibility)
-  fullParentPathName String? // Complete organization hierarchy names
-  fullParentPathCode String? // Complete organization hierarchy codes
-  organizationType   String? // Organization type (department/sub-tier/office)
-
-  // Dates and Timeline
-  postedDate           DateTime?
-  responseDeadline     DateTime?
-  performanceStartDate DateTime?
-  performanceEndDate   DateTime?
-  lastModifiedDate     DateTime? // When opportunity was last modified at source
-
-  // Opportunity Classification (Using Global Enums)
-  opportunityType OpportunityType @default(SOLICITATION)
-  contractType    ContractType?
-  setAsideType    SetAsideType    @default(NONE)
-  competitionType CompetitionType @default(FULL_AND_OPEN)
-  
-  // SAM.gov Classification Extensions (all optional for backward compatibility)
-  baseType            String? // Original opportunity type before changes
-  archiveType         String? // Archive classification
-  archiveDate         DateTime? // When opportunity was archived
-  setAsideDescription String? // Human-readable set aside description
-  setAsideCode        String? // SAM.gov set aside code
-  classificationCode  String? // Additional classification code
-  active              Boolean @default(true) // SAM.gov active status
-
-  // Financial Information (Multi-source compatible)
-  estimatedValue Decimal?
-  minimumValue   Decimal?
-  maximumValue   Decimal?
-  currency       String   @default("USD")
-  fundingAmount  Decimal? // For grants from Grants.gov
-  awardCeiling   Decimal? // Maximum award amount
-
-  // Award Information (for USA Spending & FPDS-NG data)
-  awardType   AwardType?
-  awardStatus AwardStatus?
-  awardee     String? // Winning contractor name
-  awardeeUei  String? // Winner's UEI
-  awardDate   DateTime?
-  awardAmount Decimal?
-
-  // Geographic Information - structured location objects
-  placeOfPerformance Json? // Address object for where work will be performed
-  contractorLocation Json? // Address object for where contractor must be located
-  
-  // Legacy fields for backward compatibility and search optimization
-  performanceCountry String? @default("USA")
-  performanceState   String?
-  performanceCity    String?
-  performanceZipCode String?
-
-  // Classification Codes
-  naicsCodes String[] // NAICS codes for industry classification
-  pscCodes   String[] // Product and Service Codes
-  cfda       String? // Catalog of Federal Domestic Assistance (grants)
-
-  // Requirements and Specifications
-  securityClearanceRequired SecurityClearanceLevel @default(NONE)
-  procurementMethod         ProcurementMethod?
-  contractDuration          ContractDuration?
-  competencies              String[] // Required competencies/skills
-
-  // Special Requirements
-  smallBusinessSetAside Boolean @default(false)
-  facilityClearanceReq  Boolean @default(false)
-  personnelClearanceReq Int     @default(0) // Number of cleared personnel required
-
-  // Content and Documents
-  fullText      String? // Full searchable text
-  attachments   Json? // Attachment metadata and URLs
-  solicDocument String? // URL to main solicitation document
-  qaDocument    String? // Q&A document URL
-  amendments    Json? // Array of amendments with dates and changes
-  
-  // SAM.gov Enhanced Content (all optional for backward compatibility)
-  pointOfContact      Json? // Array of contact objects (ExternalContact format)
-  links               Json? // Array of link objects (Link format)
-  descriptionLink     String? // Link to opportunity description
-  additionalInfoLink  String? // Additional information links
-  uiLink             String? // Direct SAM.gov UI link
-  resourceLinks      String[] // Direct download URLs
-
-  // Data Source and Synchronization
-  sourceSystem SourceSystem // Which system this came from
-  sourceId     String? // Original ID from source system  
-  sourceUrl    String? // Link to original opportunity
-  lastSyncedAt DateTime? // When data was last synced
-  dataHash     String? // Hash to detect changes
-
-  // Status and Lifecycle
-  status        OpportunityStatus @default(ACTIVE)
-  isArchived    Boolean           @default(false)
-  archiveReason String?
-
-  // Search and Analytics
-  viewCount        Int @default(0)
-  saveCount        Int @default(0)
-  applicationCount Int @default(0)
-  matchCount       Int @default(0) // How many profiles matched this
-
-  // AI Enhancement Fields
-  confidenceScore Float? // Data quality/confidence score (0.0-1.0)
-  relevanceScore  Float? // AI-determined relevance score
-  embeddings      Json? // Text embeddings for similarity search
-  tags            String[] // AI-generated tags for categorization
-
-  // Historical Award Data (for USA Spending integration)
-  historicalAwards   Json? // Previous awards for this or similar opportunities
-  competitorAnalysis Json? // Analysis of who typically wins these
-
-  // Relations
-  organization         Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  matchScores          MatchScore[]
-  assignments          OpportunityAssignment[]
-  activities           Activity[]
-  documents            Document[]
-  pipelineItems        PipelineItem[]
-
-  @@index([agency])
-  @@index([opportunityType, status])
-  @@index([responseDeadline, status])
-  @@index([sourceSystem, lastSyncedAt])
-  @@index([naicsCodes])
-  @@index([setAsideType, status])
-  @@index([performanceState, status])
-  @@index([awardStatus, awardType])
-  @@index([contractType, estimatedValue])
-  @@unique([sourceId, sourceSystem])
-  @@map("opportunities")
-}
-
-model MatchScore {
-  id             String   @id @default(cuid())
-  organizationId String
-  profileId      String
-  opportunityId  String
-  userId         String? // User who calculated the score
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  // Core Scoring (aligned with 4-category algorithm v4.0)
-  overallScore Decimal // 0-100 overall match score
-  confidence   Decimal // 0-100 confidence level
-
-  // 4-Category Scores (Research-Based Algorithm v4.0)
-  pastPerformanceScore          Decimal // 35% weight - Contract history and agency experience
-  technicalCapabilityScore     Decimal // 35% weight - NAICS, certifications, competencies
-  strategicFitRelationshipsScore Decimal // 15% weight - Geographic, government level, scale
-  credibilityMarketPresenceScore Decimal // 15% weight - SAM.gov, contact info, professional presence
-
-  // Detailed Scoring Data
-  algorithmVersion String // e.g., "v4.0-research-based", "v5.0-llm-enhanced"
-  scoringMethod    String // "calculation" | "llm" | "hybrid"
-  factors          Json   // Detailed scoring factors breakdown with sub-factors
-  detailedFactors  Json?  // Enhanced factor breakdown for modal display
-  
-  // LLM-Enhanced Features (when applicable)
-  semanticAnalysis      Json?   // Implicit requirements, hidden preferences, competitive landscape
-  strategicInsights     Json?   // Win probability, competitive advantages, recommendations
-  recommendations       String[] // Action recommendations
-  processingTimeMs      Int?    // Time taken to calculate score
-  costUsd              Decimal? // Cost of LLM calls (if applicable)
-
-  // User Experience
-  userFeedback       String?  @db.Text // 'positive' | 'negative' | detailed feedback
-  feedbackComment    String?  @db.Text // User's detailed feedback
-  userRating         Int?     // 1-5 user rating of score accuracy
-  markedAsReviewed   Boolean  @default(false) // User has reviewed this score
-  
-  // Performance Tracking
-  actualOutcome      String?  // 'won' | 'lost' | 'no_bid' | 'withdrawn' (for learning)
-  winProbabilityEst  Decimal? // Estimated win probability (0-100)
-  actualWinRate      Boolean? // Whether opportunity was actually won
-  
-  // Relations
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  profile      Profile      @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  opportunity  Opportunity  @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
-  user         User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
-
-  // Indexes for performance
-  @@index([organizationId, createdAt])
-  @@index([profileId, createdAt])
-  @@index([opportunityId, createdAt])
-  @@index([algorithmVersion, createdAt])
-  @@index([overallScore, createdAt])
-  @@unique([profileId, opportunityId, algorithmVersion]) // Allow multiple versions per pair
-  @@map("match_scores")
 }
 
 model Folder {
@@ -448,7 +135,7 @@ model Folder {
 
   // System Folders (cannot be deleted)
   isSystemFolder Boolean @default(false)
-  folderType     String? // OPPORTUNITIES, PROPOSALS, CERTIFICATIONS, OTHER
+  folderType     String? // DOCUMENTS, TEMPLATES, OTHER
 
   // Permissions and Settings
   isPublic Boolean @default(false)
@@ -493,13 +180,11 @@ model Document {
   // User metadata
   description  String?
   tags         String[]
-  setAsideType String? // 8(a), HUBZone, SDVOSB, WOSB, etc.
-  naicsCodes   String[] // NAICS classification codes
   isEditable   Boolean  @default(true)
 
   // JSON fields (consolidated data replacing 14+ models)
   content    Json // DocumentContent - sections, tables, images
-  embeddings Json // DocumentEmbeddings - vectors  
+  embeddings Json // DocumentEmbeddings - vectors
   entities   Json // DocumentEntities - extracted entities
   sharing    Json // DocumentSharing - permissions, shares, comments
   revisions  Json // DocumentRevisions - version control
@@ -511,12 +196,10 @@ model Document {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  // Relations (keep these)
+  // Relations
   organization  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   uploadedBy    User         @relation(fields: [uploadedById], references: [id])
   folder        Folder?      @relation(fields: [folderId], references: [id])
-  opportunity   Opportunity? @relation(fields: [opportunityId], references: [id])
-  opportunityId String?
 
   @@index([organizationId, uploadedById])
   @@index([organizationId, folderId])
@@ -525,72 +208,17 @@ model Document {
   @@map("documents")
 }
 
-model Pipeline {
-  id             String    @id @default(cuid())
-  organizationId String
-  name           String
-  description    String?
-  stages         Json // Pipeline stages configuration
-  isDefault      Boolean   @default(false)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  deletedAt      DateTime?
-
-  // Relations
-  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  items        PipelineItem[]
-
-  @@map("pipelines")
-}
-
-model PipelineItem {
-  id            String           @id @default(cuid())
-  pipelineId    String
-  opportunityId String
-  stage         String // Current pipeline stage
-  assignedToId  String?
-  priority      PipelinePriority @default(MEDIUM)
-  notes         String?
-  dueDate       DateTime?
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-
-  // Relations
-  pipeline    Pipeline    @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
-  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
-
-  @@unique([pipelineId, opportunityId])
-  @@map("pipeline_items")
-}
-
-model OpportunityAssignment {
-  id            String   @id @default(cuid())
-  opportunityId String
-  userId        String
-  role          String // Lead, Contributor, Reviewer, etc.
-  assignedAt    DateTime @default(now())
-
-  // Relations
-  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([opportunityId, userId])
-  @@map("opportunity_assignments")
-}
-
 model Activity {
-  id            String       @id @default(cuid())
-  userId        String
-  opportunityId String?
-  activityType  ActivityType
-  title         String
-  description   String?
-  metadata      Json? // Additional activity-specific data
-  createdAt     DateTime     @default(now())
+  id           String       @id @default(cuid())
+  userId       String
+  activityType ActivityType
+  title        String
+  description  String?
+  metadata     Json? // Additional activity-specific data
+  createdAt    DateTime     @default(now())
 
   // Relations
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  opportunity Opportunity? @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("activities")
 }
@@ -653,7 +281,7 @@ model UsageRecord {
 
   // Resource Identification
   resourceId   String? // ID of the resource being tracked
-  resourceType String? // Type of resource (opportunity, ai_query, document, etc.)
+  resourceType String? // Type of resource (ai_query, document, etc.)
 
   // Metadata
   metadata Json? // Additional usage context
@@ -751,106 +379,6 @@ model UsageEvent {
   @@map("usage_events")
 }
 
-// User-Opportunity Interactions (for external opportunities)
-model SavedOpportunity {
-  id             String   @id @default(cuid())
-  organizationId String
-  userId         String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  // External Opportunity Reference
-  externalOpportunityId String // ID from external source (HigherGov, SAM.gov)
-  sourceSystem          String // 'HIGHERGOV', 'SAM_GOV', etc.
-  sourceUrl             String? // URL to external opportunity
-
-  // Cached Opportunity Data (for quick display)
-  title          String
-  agency         String
-  solicitation   String
-  dueDate        DateTime
-  estimatedValue Json? // { min, max, currency }
-
-  // User Organization Data
-  tags     String[] // User-defined tags
-  notes    String? // User notes
-  priority String? // HIGH, MEDIUM, LOW
-  status   String   @default("SAVED") // SAVED, REVIEWING, PURSUING, APPLIED, AWARDED, LOST
-
-  // Relations
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // Related records
-  application  OpportunityApplication?
-  notes_detail OpportunityNote[]
-
-  @@unique([userId, externalOpportunityId, sourceSystem])
-  @@index([organizationId, status])
-  @@index([userId, createdAt])
-  @@map("saved_opportunities")
-}
-
-model OpportunityApplication {
-  id                 String   @id @default(cuid())
-  organizationId     String
-  userId             String
-  savedOpportunityId String   @unique
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-
-  // Application Details
-  status           String    @default("PREPARING") // PREPARING, SUBMITTED, UNDER_REVIEW, AWARDED, REJECTED
-  submissionDate   DateTime?
-  proposalDocument String? // File path or URL
-
-  // Tracking
-  proposalValue   Decimal? // Proposed contract value
-  winProbability  Int? // 0-100 estimated win probability
-  competitorCount Int? // Number of known competitors
-
-  // Timeline
-  responseDeadline DateTime?
-  expectedDecision DateTime?
-
-  // Notes and Strategy
-  strategy    String? // Application strategy notes
-  teamMembers String[] // Team member IDs or names
-
-  // Relations
-  organization     Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  savedOpportunity SavedOpportunity @relation(fields: [savedOpportunityId], references: [id], onDelete: Cascade)
-
-  @@index([organizationId, status])
-  @@index([submissionDate])
-  @@map("opportunity_applications")
-}
-
-model OpportunityNote {
-  id                 String   @id @default(cuid())
-  savedOpportunityId String
-  userId             String
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-
-  // Note Content
-  content   String // Note text
-  type      String  @default("GENERAL") // GENERAL, STRATEGY, CONTACT, REQUIREMENT
-  isPrivate Boolean @default(false) // Private to user vs shared with org
-
-  // Metadata
-  tags String[] // Note tags
-
-  // Relations
-  savedOpportunity SavedOpportunity @relation(fields: [savedOpportunityId], references: [id], onDelete: Cascade)
-  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([savedOpportunityId, createdAt])
-  @@index([userId, createdAt])
-  @@map("opportunity_notes")
-}
-
 // Enums
 enum UserRole {
   OWNER
@@ -859,19 +387,10 @@ enum UserRole {
   VIEWER
 }
 
-enum OpportunityStatus {
-  ACTIVE
-  CLOSED
-  CANCELLED
-  AWARDED
-  DRAFT
-  AMENDED
-}
-
 enum DocumentType {
   // Interface-aligned values (maps to interface documentType field)
   PROPOSAL // Government proposal documents - aligns with interface 'proposal'
-  CONTRACT // Contract and solicitation documents - aligns with interface 'contract' 
+  CONTRACT // Contract and solicitation documents - aligns with interface 'contract'
   CERTIFICATION // Certification and capability statements - aligns with interface 'certification'
   COMPLIANCE // Compliance and regulatory documents - aligns with interface 'compliance'
   TEMPLATE // Reusable templates - aligns with interface 'template'
@@ -888,7 +407,7 @@ enum ProcessingStatus {
   PENDING // File uploaded, not yet processed (was UPLOADED) - aligns with interface 'pending'
   QUEUED // Queued for processing - aligns with interface 'queued'
   PROCESSING // Being processed for text extraction - aligns with interface 'processing'
-  COMPLETED // Successfully processed and ready for chat (was PROCESSED) - aligns with interface 'completed' 
+  COMPLETED // Successfully processed and ready for chat (was PROCESSED) - aligns with interface 'completed'
   FAILED // Processing failed - aligns with interface 'failed'
 }
 
@@ -907,18 +426,8 @@ enum WorkflowStatus {
   ARCHIVED // Archived documents - aligns with interface 'archived'
 }
 
-enum PipelinePriority {
-  LOW
-  MEDIUM
-  HIGH
-  URGENT
-}
-
 enum ActivityType {
-  OPPORTUNITY_VIEWED
-  OPPORTUNITY_SAVED
   DOCUMENT_UPLOADED
-  PROPOSAL_SUBMITTED
   EMAIL_SENT
   MEETING_SCHEDULED
   NOTE_ADDED
@@ -937,14 +446,11 @@ enum SubscriptionStatus {
 }
 
 enum UsageType {
-  OPPORTUNITY_MATCH
   AI_QUERY
   DOCUMENT_PROCESSING
   API_CALL
   EXPORT
   USER_SEAT
-  MATCH_SCORE_CALCULATION
-  SAVED_SEARCH
   AI_REQUESTS
 }
 
@@ -1132,7 +638,6 @@ enum DeletionAction {
 // Notification Enums
 
 enum NotificationType {
-  OPPORTUNITY // New opportunity matches
   SYSTEM // System updates and maintenance
   UPDATE // Product updates and features
   WARNING // Important warnings
@@ -1142,13 +647,9 @@ enum NotificationType {
 }
 
 enum NotificationCategory {
-  NEW_OPPORTUNITY // New opportunity discovered
-  MATCH_SCORE // Match score updates
   SYSTEM_UPDATE // System maintenance/updates
   BILLING // Billing notifications
-  PROFILE // Profile updates/validation
   TEAM // Team collaboration
-  DEADLINE // Deadlines and reminders
   GENERAL // General notifications
 }
 
@@ -1165,215 +666,6 @@ enum NotificationFrequency {
   DAILY // Daily digest
   WEEKLY // Weekly digest
   DISABLED // No notifications
-}
-
-// Profile-related enums for brand voice, communication, and preferences
-
-enum BrandVoice {
-  PROFESSIONAL
-  FRIENDLY
-  TECHNICAL
-  AUTHORITATIVE
-  CREATIVE
-  COLLABORATIVE
-}
-
-enum BrandTone {
-  FORMAL
-  CONVERSATIONAL
-  DIRECT
-  COLLABORATIVE
-  CONSULTATIVE
-  RESULTS_DRIVEN
-}
-
-enum GovernmentLevel {
-  FEDERAL
-  STATE
-  LOCAL
-}
-
-// =============================================
-// OPPORTUNITY GLOBAL ENUMS
-// =============================================
-
-enum SourceSystem {
-  SAM_GOV // SAM.gov - Active opportunities and contractor validation
-  HIGHERGOV // HigherGov - Primary opportunity aggregator  
-  USA_SPENDING // USA Spending - Historical awards and contract data
-  FPDS_NG // FPDS-NG - Contract awards and performance data
-  GRANTS_GOV // Grants.gov - Federal grant opportunities
-  MANUAL // Manually created opportunities
-  IMPORT // Imported from other sources
-}
-
-enum OpportunityType {
-  // Active Procurement Types
-  SOLICITATION
-  PRESOLICITATION
-  AMENDMENT
-  NOTICE
-
-  // Request Types
-  RFP
-  RFQ
-  RFI
-  IFB
-
-  // Special Notice Types
-  SOURCES_SOUGHT
-  SPECIAL_NOTICE
-  AWARD_NOTICE
-  JUSTIFICATION
-
-  // Grant Types
-  GRANT
-  COOPERATIVE_AGREEMENT
-}
-
-enum ContractType {
-  // Fixed Price Types
-  FFP // Firm Fixed Price
-  FPI // Fixed Price Incentive
-
-  // Cost Types
-  CPFF // Cost Plus Fixed Fee
-  CPIF // Cost Plus Incentive Fee
-  CPAF // Cost Plus Award Fee
-
-  // Time-based Types
-  TIME_AND_MATERIALS
-  LABOR_HOUR
-
-  // Contract Vehicle Types
-  IDIQ // Indefinite Delivery/Indefinite Quantity
-  GSA_SCHEDULE
-  BPA // Blanket Purchase Agreement
-  OASIS
-  CIO_SP3
-  SEWP
-
-  // Special Types
-  DEFINITIVE
-  REQUIREMENTS
-  GRANT
-  OTHER
-}
-
-enum SetAsideType {
-  // No Set-aside
-  NONE
-
-  // Small Business Set-asides
-  SBA // Total Small Business Set-Aside
-  SBP // Partial Small Business Set-Aside
-
-  // 8(a) Program
-  SBA_8A // 8(a) Competitive
-  SBA_8AN // 8(a) Non-competitive
-
-  // HUBZone
-  HUBZONE_COMPETITIVE
-  HUBZONE_SOLE_SOURCE
-
-  // Service-Disabled Veteran-Owned
-  SDVOSB_COMPETITIVE
-  SDVOSB_SOLE_SOURCE
-
-  // Women-Owned Small Business
-  WOSB
-  WOSB_SOLE_SOURCE
-  EDWOSB
-  EDWOSB_SOLE_SOURCE
-
-  // Geographic/Special Programs
-  LOCAL_AREA
-  INDIAN_ECONOMIC
-  INDIAN_SMALL
-
-  // VA-Specific
-  VOSB_COMPETITIVE
-  VOSB_SOLE_SOURCE
-
-  // Legacy/Other
-  ABILITY_ONE
-  ANE
-  HIE
-  HBCU
-  MI
-}
-
-enum CompetitionType {
-  FULL_AND_OPEN
-  FULL_AND_OPEN_AFTER_EXCLUSION
-  SET_ASIDE_ONLY
-  SOLE_SOURCE
-  LIMITED_SOURCES
-  FOLLOW_ON
-  BRAND_NAME
-  ARCHITECT_ENGINEER
-  GSA_FEDERAL_SUPPLY
-}
-
-enum SecurityClearanceLevel {
-  NONE
-  PUBLIC_TRUST
-  SECRET
-  TOP_SECRET
-  TS_SCI
-  NOT_REQUIRED
-  Q_CLEARANCE
-  L_CLEARANCE
-}
-
-enum ProcurementMethod {
-  SEALED_BID
-  COMPETITIVE_PROPOSALS
-  GSA_SCHEDULE
-  OASIS
-  SEWP
-  CIO_SP3
-  NITAAC
-  MICRO_PURCHASE
-  SIMPLIFIED_ACQUISITION
-  COMMERCIAL_ITEM
-  EMERGENCY
-  BRIDGE_CONTRACT
-  GRANT_APPLICATION
-}
-
-enum ContractDuration {
-  UNDER_1_YEAR
-  ONE_YEAR
-  TWO_YEARS
-  THREE_YEARS
-  FOUR_YEARS
-  FIVE_YEARS
-  OVER_5_YEARS
-  INDEFINITE
-  OPTION_YEARS
-}
-
-enum AwardType {
-  CONTRACT
-  GRANT
-  COOPERATIVE_AGREEMENT
-  PURCHASE_ORDER
-  DELIVERY_ORDER
-  TASK_ORDER
-  BPA_CALL
-  MODIFICATION
-}
-
-enum AwardStatus {
-  PENDING
-  AWARDED
-  CANCELLED
-  TERMINATED
-  COMPLETED
-  ACTIVE
-  CLOSED
-  SUSPENDED
 }
 
 model UsageMigration {
@@ -1425,7 +717,7 @@ model PricingPlan {
 
   // Features and Limits
   features Json // Array of feature flags and descriptions
-  limits   Json // Usage limits (opportunities, users, API calls, etc.)
+  limits   Json // Usage limits (users, API calls, etc.)
 
   // Display Settings
   isActive     Boolean @default(true) // Whether to show in pricing table
@@ -1767,215 +1059,6 @@ model BatchProcessing {
 }
 
 // =============================================
-// CONTACT/CRM SYSTEM (Task 2.13)
-// =============================================
-
-model Contact {
-  id             String    @id @default(cuid())
-  organizationId String
-  createdById    String
-  updatedById    String?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  deletedAt      DateTime?
-
-  // Basic Contact Information (structured fields for indexing)
-  firstName      String
-  lastName       String
-  email          String?
-  phone          String?
-  title          String? // Job title
-  alternateEmail String?
-  alternatePhone String?
-  profilePhoto   String? // URL to profile photo in Supabase storage
-
-  // JSON Fields for flexible data storage
-  agencyInfo             Json? // Agency, office, department, etc.
-  addressInfo            Json? // Complete address information
-  professionalInfo       Json? // Role, importance, authority levels, etc.
-  contactPreferences     Json? // Communication preferences and timing
-  professionalBackground Json? // Years in role, experience, specialties
-  socialNetworks         Json? // LinkedIn, social media, professional networks
-  aiEnhancements         Json? // AI analysis, insights, scoring
-  activityTracking       Json? // Last contacted, response rates, patterns
-  notesAndTags           Json? // Notes, tags, priority, status
-
-  // Contact Source and Validation (structured for indexing)
-  source         ContactSource @default(MANUAL)
-  sourceUrl      String?
-  sourceDocument String?
-  verified       Boolean       @default(false)
-  verifiedAt     DateTime?
-  verifiedBy     String?
-
-  // Relations
-  organization   Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  createdBy      User                 @relation("ContactCreatedBy", fields: [createdById], references: [id])
-  updatedBy      User?                @relation("ContactUpdatedBy", fields: [updatedById], references: [id])
-  opportunities  ContactOpportunity[]
-  interactions   ContactInteraction[]
-  communications Communication[]
-
-  @@index([organizationId, createdAt])
-  @@index([organizationId, email]) // For duplicate detection
-  @@index([firstName, lastName, organizationId])
-  @@index([source, createdAt])
-  @@index([verified])
-  @@map("contacts")
-}
-
-model ContactOpportunity {
-  id             String   @id @default(cuid())
-  contactId      String
-  solicitationNumber String
-  opportunityId  String? // Fallback parameter for when solicitation number is not available
-  organizationId String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  // Opportunity metadata (cached from external sources)
-  opportunityTitle     String?
-  opportunityAgency    String?
-  opportunityStatus    String? // Cached opportunity status
-  estimatedValue       Decimal? // Cached estimated value
-  responseDeadline     DateTime? // Cached response deadline
-  sourceSystem         String? // 'MANUAL', 'SAM_GOV', 'HIGHERGOV', etc.
-  sourceUrl            String? // URL to external opportunity
-  externalId           String? // Original opportunity ID from external source
-
-  // Relationship details
-  relationship String  @default("POINT_OF_CONTACT") // POINT_OF_CONTACT, CONTRACTING_OFFICER, PROGRAM_MANAGER, TECHNICAL_LEAD
-  isPrimary    Boolean @default(false)
-
-  // Context
-  notes      String?
-  addedBy    String?
-  confidence Float?  @default(0.8)
-
-  // Relations
-  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
-
-  @@unique([contactId, solicitationNumber])
-  @@index([organizationId, createdAt])
-  @@index([solicitationNumber, isPrimary])
-  @@index([opportunityId])
-  @@map("contact_opportunities")
-}
-
-model ContactInteraction {
-  id             String   @id @default(cuid())
-  contactId      String
-  organizationId String
-  userId         String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  // Interaction Details
-  type          InteractionType
-  subject       String?
-  content       String?
-  outcome       String?
-  followUpDate  DateTime?
-  followUpNotes String?
-
-  // Context and metadata stored as JSON
-  interactionContext Json? // opportunity, contract value, duration, etc.
-  sentimentAnalysis  Json? // sentiment, action items, next steps
-  attachments        Json? // files, meeting links, locations
-
-  // Relations
-  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  user    User    @relation("ContactInteractions", fields: [userId], references: [id])
-
-  @@index([contactId, createdAt])
-  @@index([organizationId, type, createdAt])
-  @@index([userId, createdAt])
-  @@map("contact_interactions")
-}
-
-model Communication {
-  id             String   @id @default(cuid())
-  contactId      String
-  organizationId String
-  userId         String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  // Communication Details
-  type      String  @default("EMAIL")
-  direction String  @default("OUTBOUND")
-  subject   String?
-  content   String?
-
-  // Status and tracking
-  status CommunicationStatus @default(DRAFT)
-  sentAt DateTime?
-
-  // AI and metadata stored as JSON
-  aiGeneration Json? // AI model, template, prompt context
-  trackingData Json? // delivery, opens, clicks, replies
-  metadata     Json? // attachments, campaign, additional context
-
-  // Relations  
-  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  user    User    @relation("Communications", fields: [userId], references: [id])
-
-  @@index([contactId, createdAt])
-  @@index([organizationId, status, createdAt])
-  @@index([userId, createdAt])
-  @@index([status, sentAt])
-  @@map("communications")
-}
-
-// Contact System Enums (only essential ones for Prisma)
-
-enum ContactSource {
-  MANUAL
-  EXTRACTED
-  SAM_GOV
-  LINKEDIN
-  WEBSITE
-  OPPORTUNITY_DOC
-  REFERRAL
-  CONFERENCE
-  COLD_OUTREACH
-  IMPORT
-}
-
-enum InteractionType {
-  EMAIL
-  PHONE_CALL
-  VIDEO_CALL
-  IN_PERSON_MEETING
-  CONFERENCE
-  WEBINAR
-  SITE_VISIT
-  PROPOSAL_PRESENTATION
-  FOLLOW_UP
-  INTRODUCTION
-  NETWORKING
-  CONTRACT_NEGOTIATION
-  KICKOFF_MEETING
-  STATUS_UPDATE
-  OTHER
-}
-
-enum CommunicationStatus {
-  DRAFT
-  SCHEDULED
-  SENDING
-  SENT
-  DELIVERED
-  OPENED
-  CLICKED
-  REPLIED
-  FAILED
-  BOUNCED
-  SPAM
-  CANCELLED
-}
-
-// =============================================
 // AUDIT AND COMPLIANCE LOGGING SYSTEM
 // =============================================
 
@@ -1990,14 +1073,14 @@ model AuditLog {
   category     AuditCategory
   severity     AuditSeverity @default(INFO)
   source       String // Application component or module
-  
+
   // Event Details
   action       String // Specific action performed (CREATE, READ, UPDATE, DELETE, LOGIN, etc.)
-  resource     String? // Resource type affected (USER, PROFILE, OPPORTUNITY, etc.)
+  resource     String? // Resource type affected (USER, DOCUMENT, etc.)
   resourceId   String? // Specific resource ID
   entityType   String? // Entity type for structured logging
   entityId     String? // Entity ID for tracking
-  
+
   // Session and Request Context
   sessionId    String? // User session identifier
   requestId    String? // Request correlation ID
@@ -2006,41 +1089,41 @@ model AuditLog {
   endpoint     String? // API endpoint or page accessed
   httpMethod   String? // HTTP method (GET, POST, etc.)
   statusCode   Int? // HTTP response status code
-  
+
   // Event Content and Context
   message      String // Human-readable audit message
   description  String? // Detailed description of the event
   oldValues    Json? // Previous state (for updates/deletes)
   newValues    Json? // New state (for creates/updates)
   metadata     Json? // Additional context data
-  
+
   // Compliance and Retention
   retentionPeriod String @default("7_YEARS") // Retention period requirement
   complianceFlag  Boolean @default(false) // Mark for compliance-specific events
   tags           String[] // Tags for categorization and search
-  
+
   // Performance and Debugging
   duration       Int? // Operation duration in milliseconds
   errorMessage   String? // Error details if applicable
   stackTrace     String? @db.Text // Full stack trace for errors
-  
+
   // Data Integrity and Security
   checksum       String? // Checksum for tamper detection
   encrypted      Boolean @default(false) // Whether sensitive data is encrypted
-  
+
   // Geographic and Regulatory
   dataLocation   String? // Where data is processed/stored
   jurisdiction   String? // Legal jurisdiction for compliance
-  
+
   // Relations
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   user         User?        @relation("AuditLogUser", fields: [userId], references: [id], onDelete: SetNull)
-  
+
   // Related audit events for correlation
   parentLogId  String? // Parent audit event for grouped operations
   parentLog    AuditLog? @relation("AuditLogHierarchy", fields: [parentLogId], references: [id])
   childLogs    AuditLog[] @relation("AuditLogHierarchy")
-  
+
   @@index([organizationId, createdAt])
   @@index([organizationId, eventType, createdAt])
   @@index([organizationId, category, createdAt])
@@ -2061,29 +1144,29 @@ model AuditLogRetention {
   organizationId String
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-  
+
   // Retention Policy
   policyName     String
   category       AuditCategory
   retentionDays  Int // Number of days to retain logs
   archiveAfter   Int? // Days before archiving to cold storage
-  
+
   // Compliance Requirements
   complianceFramework String[] // SOC2, FedRAMP, NIST, etc.
   legalBasis         String? // Legal requirement for retention
-  
+
   // Policy Settings
   isActive       Boolean @default(true)
   autoDelete     Boolean @default(false) // Auto-delete after retention period
   archiveEnabled Boolean @default(true) // Enable archiving to cold storage
-  
+
   // Metadata
   description    String?
   createdBy      String // User who created the policy
-  
+
   // Relations
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  
+
   @@unique([organizationId, category])
   @@index([organizationId, isActive])
   @@index([category, retentionDays])
@@ -2096,45 +1179,45 @@ model AuditLogExport {
   userId         String
   createdAt      DateTime @default(now())
   completedAt    DateTime?
-  
+
   // Export Parameters
   startDate      DateTime
   endDate        DateTime
   categories     AuditCategory[]
   eventTypes     AuditEventType[]
   format         ExportFormat @default(JSON)
-  
+
   // Export Status
   status         ExportStatus @default(PENDING)
   progress       Int @default(0) // 0-100 percentage
   totalRecords   Int?
   exportedRecords Int @default(0)
-  
+
   // File Information
   fileName       String?
   filePath       String? // Storage path in Supabase
   fileSize       Int? // File size in bytes
   downloadUrl    String? // Signed URL for download
   expiresAt      DateTime? // When download URL expires
-  
+
   // Security and Integrity
   checksum       String? // File checksum for integrity
   encrypted      Boolean @default(true)
   accessedBy     String[] // Users who accessed the export
   accessCount    Int @default(0)
-  
+
   // Error Handling
   errorMessage   String?
   retryCount     Int @default(0)
-  
+
   // Compliance
   purpose        String? // Business purpose for export
   approvedBy     String? // Approval for sensitive data export
-  
+
   // Relations
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   user         User         @relation("AuditLogExportUser", fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@index([organizationId, createdAt])
   @@index([organizationId, status])
   @@index([userId, createdAt])
@@ -2149,44 +1232,44 @@ model SecurityIncident {
   detectedAt     DateTime @default(now())
   reportedAt     DateTime?
   resolvedAt     DateTime?
-  
+
   // Incident Classification
   incidentType   SecurityIncidentType
   severity       SecuritySeverity
   status         SecurityIncidentStatus @default(DETECTED)
   confidence     Float @default(0.8) // 0.0-1.0 confidence score
-  
+
   // Incident Details
   title          String
   description    String @db.Text
   source         String // Detection source (manual, automated, etc.)
   affectedSystems String[] // Systems impacted
-  
+
   // Investigation and Response
   investigatedBy String[] // User IDs of investigators
   responseActions Json? // Actions taken to respond
   rootCause      String? @db.Text
   lessons        String? @db.Text
-  
+
   // Impact Assessment
   dataCompromised Boolean @default(false)
   usersAffected   Int @default(0)
   estimatedCost   Decimal?
-  
+
   // External Reporting
   reportedToAuthorities Boolean @default(false)
   regulatoryReporting   Json? // Details of regulatory reporting
-  
+
   // Related Audit Logs
   relatedLogIds  String[] // IDs of related audit logs
-  
+
   // Metadata
   tags           String[]
   attachments    Json? // Evidence and documentation
-  
+
   // Relations
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  
+
   @@index([organizationId, detectedAt])
   @@index([organizationId, incidentType, severity])
   @@index([status, detectedAt])
@@ -2198,7 +1281,7 @@ model SecurityIncident {
 
 enum AuditEventType {
   // =============================================
-  // AUTHENTICATION & AUTHORIZATION (Phase 1)
+  // AUTHENTICATION & AUTHORIZATION
   // =============================================
   USER_LOGIN
   USER_LOGOUT
@@ -2210,11 +1293,9 @@ enum AuditEventType {
   MFA_CHALLENGE_FAILED
   SESSION_EXPIRED
   SESSION_TERMINATED
-  IMPERSONATION_STARTED
-  IMPERSONATION_ENDED
-  
+
   // =============================================
-  // USER & ACCOUNT MANAGEMENT (Phase 1)
+  // USER & ACCOUNT MANAGEMENT
   // =============================================
   USER_CREATED
   USER_UPDATED
@@ -2225,9 +1306,9 @@ enum AuditEventType {
   USER_INVITED
   USER_INVITATION_ACCEPTED
   USER_INVITATION_EXPIRED
-  
+
   // =============================================
-  // ORGANIZATION MANAGEMENT (Phase 1)
+  // ORGANIZATION MANAGEMENT
   // =============================================
   ORGANIZATION_CREATED
   ORGANIZATION_UPDATED
@@ -2238,55 +1319,9 @@ enum AuditEventType {
   ORGANIZATION_PLAN_CHANGED
   ORGANIZATION_SUSPENDED
   ORGANIZATION_REACTIVATED
-  
+
   // =============================================
-  // PROFILE MANAGEMENT (Phase 1)
-  // =============================================
-  PROFILE_CREATED
-  PROFILE_UPDATED
-  PROFILE_DELETED
-  PROFILE_COMPLETED
-  PROFILE_SAM_GOV_SYNCED
-  PROFILE_NAICS_UPDATED
-  PROFILE_CERTIFICATIONS_UPDATED
-  PROFILE_COMPETENCIES_UPDATED
-  PROFILE_PAST_PERFORMANCE_UPDATED
-  PROFILE_BRAND_SETTINGS_UPDATED
-  PROFILE_GEOGRAPHIC_PREFERENCES_UPDATED
-  
-  // =============================================
-  // OPPORTUNITY MANAGEMENT (Phase 1-3)
-  // =============================================
-  OPPORTUNITY_CREATED
-  OPPORTUNITY_UPDATED
-  OPPORTUNITY_DELETED
-  OPPORTUNITY_VIEWED
-  OPPORTUNITY_SAVED
-  OPPORTUNITY_UNSAVED
-  OPPORTUNITY_STATUS_CHANGED
-  OPPORTUNITY_ASSIGNED
-  OPPORTUNITY_UNASSIGNED
-  OPPORTUNITY_EXPORTED
-  OPPORTUNITY_SHARED
-  OPPORTUNITY_IMPORTED
-  OPPORTUNITY_SYNCED
-  OPPORTUNITY_DUPLICATED
-  OPPORTUNITY_MERGED
-  
-  // =============================================
-  // MATCH SCORE SYSTEM (Phase 1-2)
-  // =============================================
-  MATCH_SCORE_CALCULATED
-  MATCH_SCORE_RECALCULATED
-  MATCH_SCORE_FEEDBACK_PROVIDED
-  MATCH_SCORE_ALGORITHM_UPDATED
-  MATCH_SCORE_WEIGHTS_CHANGED
-  MATCH_SCORE_BULK_CALCULATED
-  MATCH_SCORE_CACHED
-  MATCH_SCORE_CACHE_INVALIDATED
-  
-  // =============================================
-  // DOCUMENT MANAGEMENT (Phase 2)
+  // DOCUMENT MANAGEMENT
   // =============================================
   DOCUMENT_UPLOADED
   DOCUMENT_PROCESSED
@@ -2300,9 +1335,9 @@ enum AuditEventType {
   DOCUMENT_MOVED_TO_FOLDER
   DOCUMENT_VERSION_CREATED
   DOCUMENT_EXPORTED
-  
+
   // =============================================
-  // AI SERVICES (Phase 2)
+  // AI SERVICES
   // =============================================
   AI_REQUEST_INITIATED
   AI_REQUEST_COMPLETED
@@ -2317,9 +1352,9 @@ enum AuditEventType {
   AI_RATE_LIMIT_EXCEEDED
   AI_BUDGET_EXCEEDED
   AI_OPTIMIZATION_APPLIED
-  
+
   // =============================================
-  // DOCUMENT CHAT & RAG (Phase 2)
+  // DOCUMENT CHAT & RAG
   // =============================================
   CHAT_SESSION_STARTED
   CHAT_SESSION_ENDED
@@ -2330,36 +1365,9 @@ enum AuditEventType {
   CHAT_FEEDBACK_PROVIDED
   CHAT_CONVERSATION_EXPORTED
   CHAT_HISTORY_CLEARED
-  
+
   // =============================================
-  // CONTENT GENERATION (Phase 2)
-  // =============================================
-  EMAIL_GENERATED
-  EMAIL_SENT
-  EMAIL_OPENED
-  EMAIL_CLICKED
-  CAPABILITY_STATEMENT_GENERATED
-  PROPOSAL_SUMMARY_GENERATED
-  TEMPLATE_CREATED
-  TEMPLATE_USED
-  CONTENT_APPROVED
-  CONTENT_REJECTED
-  
-  // =============================================
-  // SEARCH & FILTERING (Phase 1-3)
-  // =============================================
-  SEARCH_PERFORMED
-  SEARCH_SAVED
-  SEARCH_DELETED
-  SEARCH_SHARED
-  FILTER_APPLIED
-  FILTER_CLEARED
-  SEARCH_ALERT_CREATED
-  SEARCH_ALERT_TRIGGERED
-  SEARCH_EXPORT_REQUESTED
-  
-  // =============================================
-  // BILLING & SUBSCRIPTIONS (Phase 1)
+  // BILLING & SUBSCRIPTIONS
   // =============================================
   SUBSCRIPTION_CREATED
   SUBSCRIPTION_UPDATED
@@ -2374,9 +1382,9 @@ enum AuditEventType {
   USAGE_LIMIT_REACHED
   USAGE_LIMIT_EXCEEDED
   BILLING_WEBHOOK_RECEIVED
-  
+
   // =============================================
-  // NOTIFICATIONS (Phase 1)
+  // NOTIFICATIONS
   // =============================================
   NOTIFICATION_CREATED
   NOTIFICATION_SENT
@@ -2386,9 +1394,9 @@ enum AuditEventType {
   NOTIFICATION_BATCH_SENT
   NOTIFICATION_FAILED
   NOTIFICATION_EXPIRED
-  
+
   // =============================================
-  // API USAGE (Phase 1-4)
+  // API USAGE
   // =============================================
   API_KEY_CREATED
   API_KEY_USED
@@ -2399,75 +1407,9 @@ enum AuditEventType {
   API_RATE_LIMIT_HIT
   API_ENDPOINT_ACCESSED
   API_AUTHENTICATION_FAILED
-  
+
   // =============================================
-  // GOVERNMENT INTEGRATIONS (Phase 3)
-  // =============================================
-  SAM_GOV_API_CALLED
-  SAM_GOV_SYNC_STARTED
-  SAM_GOV_SYNC_COMPLETED
-  SAM_GOV_SYNC_FAILED
-  HIGHERGOV_WEBHOOK_RECEIVED
-  HIGHERGOV_SYNC_STARTED
-  HIGHERGOV_SYNC_COMPLETED
-  HIGHERGOV_SYNC_FAILED
-  GOVERNMENT_DATA_ENRICHED
-  GOVERNMENT_API_ERROR
-  
-  // =============================================
-  // DATA QUALITY & DEDUPLICATION (Phase 3)
-  // =============================================
-  DUPLICATE_DETECTED
-  DUPLICATE_MERGED
-  DATA_QUALITY_CHECK_RUN
-  DATA_ENRICHMENT_APPLIED
-  DATA_VALIDATION_FAILED
-  DATA_CLEANUP_PERFORMED
-  
-  // =============================================
-  // TEAM COLLABORATION (Phase 4)
-  // =============================================
-  PIPELINE_CREATED
-  PIPELINE_UPDATED
-  PIPELINE_DELETED
-  PIPELINE_ITEM_MOVED
-  PIPELINE_ITEM_ASSIGNED
-  TEAM_MEMBER_INVITED
-  TEAM_MEMBER_REMOVED
-  REAL_TIME_COLLABORATION_STARTED
-  REAL_TIME_COLLABORATION_ENDED
-  ACTIVITY_FEED_VIEWED
-  
-  // =============================================
-  // THIRD-PARTY INTEGRATIONS (Phase 4)
-  // =============================================
-  CRM_SYNC_STARTED
-  CRM_SYNC_COMPLETED
-  CRM_SYNC_FAILED
-  EMAIL_INTEGRATION_CONNECTED
-  EMAIL_INTEGRATION_DISCONNECTED
-  SLACK_NOTIFICATION_SENT
-  TEAMS_NOTIFICATION_SENT
-  WEBHOOK_SENT
-  WEBHOOK_FAILED
-  INTEGRATION_ERROR
-  
-  // =============================================
-  // CONTACT & CRM SYSTEM (Phase 2-4)
-  // =============================================
-  CONTACT_CREATED
-  CONTACT_UPDATED
-  CONTACT_DELETED
-  CONTACT_EXTRACTED
-  CONTACT_MERGED
-  CONTACT_INTERACTION_RECORDED
-  CONTACT_EMAIL_SENT
-  CONTACT_FOLLOW_UP_SCHEDULED
-  CONTACT_RELATIONSHIP_MAPPED
-  CONTACT_NETWORK_ANALYZED
-  
-  // =============================================
-  // SECURITY & COMPLIANCE (Phase 4)
+  // SECURITY & COMPLIANCE
   // =============================================
   SECURITY_ALERT_TRIGGERED
   SECURITY_INCIDENT_CREATED
@@ -2476,14 +1418,16 @@ enum AuditEventType {
   PRIVILEGE_ESCALATION_DETECTED
   SUSPICIOUS_ACTIVITY_DETECTED
   COMPLIANCE_VIOLATION_DETECTED
+  COMPLIANCE_REPORT_GENERATED
   AUDIT_LOG_ACCESSED
   AUDIT_LOG_EXPORTED
   DATA_BREACH_DETECTED
   VULNERABILITY_DETECTED
   SECURITY_SCAN_COMPLETED
-  
+  SECURITY_VIOLATION
+
   // =============================================
-  // SYSTEM & ADMINISTRATION (Phase 1-5)
+  // SYSTEM & ADMINISTRATION
   // =============================================
   SYSTEM_STARTUP
   SYSTEM_SHUTDOWN
@@ -2497,92 +1441,6 @@ enum AuditEventType {
   BACKUP_RESTORED
   DATABASE_MIGRATION_STARTED
   DATABASE_MIGRATION_COMPLETED
-  
-  // =============================================
-  // PERFORMANCE & MONITORING (Phase 3-4)
-  // =============================================
-  PERFORMANCE_THRESHOLD_EXCEEDED
-  HEALTH_CHECK_FAILED
-  HEALTH_CHECK_RECOVERED
-  MONITORING_ALERT_TRIGGERED
-  MONITORING_ALERT_RESOLVED
-  METRICS_COLLECTED
-  ANALYTICS_REPORT_GENERATED
-  CAPACITY_LIMIT_REACHED
-  SCALING_EVENT_TRIGGERED
-  
-  // =============================================
-  // PLATFORM ADMINISTRATION (Phase 5)
-  // =============================================
-  PLATFORM_ADMIN_LOGIN
-  PLATFORM_CONFIG_UPDATED
-  PLATFORM_THEME_CHANGED
-  PLATFORM_PLAN_CREATED
-  PLATFORM_PLAN_MODIFIED
-  PLATFORM_USER_IMPERSONATED
-  PLATFORM_ANALYTICS_VIEWED
-  PLATFORM_HEALTH_CHECKED
-  CROSS_TENANT_DATA_ACCESSED
-  PLATFORM_MAINTENANCE_PERFORMED
-  
-  // =============================================
-  // WHITE LABEL & THEMING (Phase 5)
-  // =============================================
-  THEME_CREATED
-  THEME_APPLIED
-  THEME_PREVIEWED
-  BRANDING_UPDATED
-  CUSTOM_DOMAIN_CONFIGURED
-  WHITE_LABEL_ENABLED
-  WHITE_LABEL_DISABLED
-  LOGO_UPLOADED
-  BRAND_GUIDELINES_APPLIED
-  
-  // =============================================
-  // ADVANCED ANALYTICS (Phase 3-5)
-  // =============================================
-  MARKET_INTELLIGENCE_GENERATED
-  COMPETITION_ANALYSIS_RUN
-  WIN_RATE_CALCULATED
-  TREND_ANALYSIS_PERFORMED
-  FORECAST_GENERATED
-  BUSINESS_INTELLIGENCE_ACCESSED
-  EXECUTIVE_REPORT_GENERATED
-  CUSTOM_REPORT_CREATED
-  
-  // =============================================
-  // ADVANCED AI FEATURES (Phase 2-3)
-  // =============================================
-  SEMANTIC_SEARCH_PERFORMED
-  VECTOR_SIMILARITY_CALCULATED
-  EMBEDDING_GENERATED
-  ML_MODEL_TRAINED
-  ML_MODEL_DEPLOYED
-  AI_RECOMMENDATION_GENERATED
-  AI_INSIGHT_CREATED
-  NATURAL_LANGUAGE_QUERY_PROCESSED
-  
-  // =============================================
-  // ENTERPRISE FEATURES (Phase 4-5)
-  // =============================================
-  SSO_LOGIN_ATTEMPTED
-  SSO_LOGIN_SUCCEEDED
-  SSO_LOGIN_FAILED
-  SAML_ASSERTION_PROCESSED
-  ENTERPRISE_POLICY_APPLIED
-  COMPLIANCE_REPORT_GENERATED
-  AUDIT_TRAIL_REQUESTED
-  DATA_RETENTION_POLICY_APPLIED
-  GDPR_REQUEST_PROCESSED
-  
-  // =============================================
-  // MOBILE & ACCESSIBILITY (Future Phases)
-  // =============================================
-  MOBILE_APP_LOGIN
-  MOBILE_PUSH_NOTIFICATION_SENT
-  ACCESSIBILITY_FEATURE_USED
-  OFFLINE_MODE_ACTIVATED
-  SYNC_CONFLICT_RESOLVED
 }
 
 enum AuditCategory {
@@ -2593,30 +1451,15 @@ enum AuditCategory {
   USER_MANAGEMENT
   ORGANIZATION_MANAGEMENT
   PROFILE_MANAGEMENT
-  OPPORTUNITY_MANAGEMENT
-  MATCH_SCORING
   DOCUMENT_MANAGEMENT
   AI_SERVICES
-  CONTENT_GENERATION
-  SEARCH_FILTERING
   BILLING
   NOTIFICATIONS
   API_USAGE
-  GOVERNMENT_INTEGRATIONS
-  DATA_QUALITY
-  TEAM_COLLABORATION
-  THIRD_PARTY_INTEGRATIONS
-  CONTACT_MANAGEMENT
   SECURITY
   COMPLIANCE
+  AUDIT_MANAGEMENT
   SYSTEM_ADMINISTRATION
-  PERFORMANCE_MONITORING
-  PLATFORM_ADMINISTRATION
-  THEMING_BRANDING
-  ANALYTICS
-  ADVANCED_AI
-  ENTERPRISE_FEATURES
-  MOBILE_ACCESSIBILITY
   ERROR
   BUSINESS_LOGIC
 }
@@ -2678,88 +1521,111 @@ enum SecurityIncidentStatus {
 }
 
 // =============================================
-// SAVED SEARCHES SYSTEM
+// PROFILE MODEL AND ENUMS
 // =============================================
 
-model SavedSearch {
-  id             String   @id @default(cuid())
+model Profile {
+  id             String    @id @default(cuid())
   organizationId String
-  userId         String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdById    String
+  updatedById    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
   deletedAt      DateTime?
 
-  // Search Metadata
-  name        String // User-friendly name for the search
-  description String? // Optional description
-  category    String? // Optional category for organization (e.g., "Federal Contracts", "Grants", "IT Services")
+  // Company Information
+  companyName String
+  dbaName     String?
+  uei         String?
+  duns        String?
+  cageCode    String?
 
-  // Search Configuration
-  filters Json // SearchFilters object serialized as JSON
+  // Business Address
+  addressLine1 String?
+  addressLine2 String?
+  city         String?
+  state        String?
+  zipCode      String?
+  country      String  @default("USA")
 
-  // Usage and Analytics
-  lastUsedAt   DateTime? // When this search was last executed
-  usageCount   Int       @default(0) // How many times this search has been used
-  isDefault    Boolean   @default(false) // Whether this is the user's default search
-  isShared     Boolean   @default(false) // Whether this search is shared with organization
-  sharedBy     String? // User ID who shared this search (if shared)
+  // Contact Information
+  primaryContactName  String?
+  primaryContactEmail String?
+  primaryContactPhone String?
+  website             String?
 
-  // Display Settings
-  color    String? // Hex color for visual organization
-  icon     String? // Icon identifier for visual organization
-  isFavorite Boolean @default(false) // Whether user has favorited this search
+  // Profile Images
+  logoUrl                String?
+  bannerUrl              String?
+  contactProfileImageUrl String?
 
-  // Notification Settings (future enhancement)
-  alertEnabled Boolean @default(false) // Whether to send alerts for new matches
-  alertFrequency String? // 'daily', 'weekly', 'immediate'
-  lastAlertSent DateTime? // When last alert was sent
+  // Business Classification
+  businessType    String?
+  yearEstablished Int?
+  employeeCount   String?
+  annualRevenue   String?
+
+  // NAICS Codes
+  primaryNaics   String?
+  secondaryNaics String[]
+
+  // Certifications
+  certifications Json? // Store as JSON for flexibility
+
+  // Capabilities and Experience
+  coreCompetencies  String[]
+  competencyDetails Json? // Store detailed competency information with skill levels
+  pastPerformance   Json? // Store structured past performance data
+  securityClearance String?
+
+  // Brand Voice and Communication
+  brandVoice BrandVoice? // Brand voice preference using enum
+  brandTone  BrandTone? // Communication tone using enum
+
+  // Geographic and Organization Level Preferences
+  geographicPreferences Json? // Preferred geographic markets and regions
+  organizationLevels    OrganizationLevel[] // Preferred organization levels using enum
+
+  // System fields
+  profileCompleteness Int       @default(0) // Percentage 0-100
+  samGovSyncedAt      DateTime?
+  samGovData          Json?
+
+  // Profile vectorization for AI matching
+  profileEmbeddings Json? // Profile embedding vectors for intelligent matching
 
   // Relations
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("ProfileCreatedBy", fields: [createdById], references: [id])
+  updatedBy    User?        @relation("ProfileUpdatedBy", fields: [updatedById], references: [id])
 
-  @@index([organizationId, userId])
-  @@index([organizationId, isShared])
-  @@index([userId, isDefault])
-  @@index([userId, lastUsedAt])
-  @@index([organizationId, category])
-  @@map("saved_searches")
+  @@map("profiles")
 }
 
-// =============================================
-// DATA PROVIDER SYNCHRONIZATION SYSTEM
-// =============================================
+enum BrandVoice {
+  PROFESSIONAL
+  FRIENDLY
+  TECHNICAL
+  AUTHORITATIVE
+  CREATIVE
+  COLLABORATIVE
+}
 
-model SyncLog {
-  id           String    @id @default(cuid())
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  startedAt    DateTime
-  completedAt  DateTime?
+enum BrandTone {
+  FORMAL
+  CONVERSATIONAL
+  DIRECT
+  COLLABORATIVE
+  CONSULTATIVE
+  RESULTS_DRIVEN
+}
 
-  // Provider Information
-  provider     String // 'SAM_GOV', 'FPDS_NG', 'USASPENDING', 'GRANTS_GOV'
-  providerName String? // Human-readable provider name
-
-  // Sync Configuration
-  fullSync Boolean @default(false) // Whether this was a full or incremental sync
-  syncType String? // 'opportunities', 'profiles', 'awards', etc.
-
-  // Status and Results
-  status    String // 'IN_PROGRESS', 'SUCCESS', 'ERROR', 'CANCELLED'
-  processed Int    @default(0) // Number of records processed
-  created   Int    @default(0) // Number of new records created
-  updated   Int    @default(0) // Number of existing records updated
-  errors    Int    @default(0) // Number of errors encountered
-  duration  Int? // Duration in milliseconds
-
-  // Error Details and Metadata
-  errorDetails Json? // Array of error details with sourceId and error message
-  metadata     Json? // Additional sync metadata (filters, organizationId, etc.)
-
-  // Indexing for performance
-  @@index([provider, status])
-  @@index([provider, completedAt])
-  @@index([status, startedAt])
-  @@map("sync_logs")
+enum OrganizationLevel {
+  FEDERAL
+  STATE
+  LOCAL
+  MUNICIPAL
+  COUNTY
+  ENTERPRISE
+  DEPARTMENT
 }

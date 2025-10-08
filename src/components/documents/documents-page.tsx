@@ -20,6 +20,13 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
 import { 
   Search, 
   Upload, 
@@ -75,7 +82,7 @@ import {
 import { DeleteConfirmationModal } from './delete-confirmation-modal'
 import { FolderDeleteConfirmationModal } from './folder-delete-confirmation-modal'
 import { FolderDeleteInfoModal } from './folder-delete-info-modal'
-import { useTree, useTreeNavigation, useFolderOperations, useDocumentOperations, useGovMatchStore } from '@/stores/document-chat-store'
+import { useTree, useTreeNavigation, useFolderOperations, useDocumentOperations, useDocumentChatStore } from '@/stores/document-chat-store'
 import { useFileManager, FileManagerProvider } from '@/lib/providers/file-manager-provider'
 import { useNotify } from '@/contexts/notification-context'
 import type { Document, AIProcessingStatus } from '@/types/documents'
@@ -158,16 +165,16 @@ const DocumentsPageContent = () => {
   
   // Tree state and operations - MOVED UP: Must be called before conditional returns
   const { state, createDocument } = useTree()
-  const store = useGovMatchStore()
+  const store = useDocumentChatStore()
   const { currentFolderId, currentFolder, folderPath, navigateToFolder: storeNavigateToFolder, navigateToRoot } = useTreeNavigation()
   const { createFolder, updateFolder, deleteFolder, moveFolder, getFolderChildren, findFolder } = useFolderOperations()
   const { updateDocument, moveDocument, deleteDocument, getFolderDocuments, findDocument, searchDocuments } = useDocumentOperations()
   
   // Store setter functions for data loading
-  const setFolders = useGovMatchStore((state) => state.documents.setFolders)
-  const setDocuments = useGovMatchStore((state) => state.documents.setDocuments)
-  const setLoading = useGovMatchStore((state) => state.documents.setLoading)
-  const setError = useGovMatchStore((state) => state.documents.setError)
+  const setFolders = useDocumentChatStore((state) => state.documents.setFolders)
+  const setDocuments = useDocumentChatStore((state) => state.documents.setDocuments)
+  const setLoading = useDocumentChatStore((state) => state.documents.setLoading)
+  const setError = useDocumentChatStore((state) => state.documents.setError)
   
   // Sound effects
   const { play: playSound } = useSoundEffects()
@@ -184,6 +191,7 @@ const DocumentsPageContent = () => {
   // All useState hooks  
   const [viewMode, setViewMode] = useState('grid');
   const [showRecursive, setShowRecursive] = useState(false);
+  const [mobileControlsOpen, setMobileControlsOpen] = useState(false);
   const [showNewFolderDialog, setShowNewFolderDialog] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
   const [newFolderDescription, setNewFolderDescription] = useState('');
@@ -1167,7 +1175,7 @@ const DocumentsPageContent = () => {
         
         // Add the document to the store immediately
         // Use Zustand's immer-style update for proper reactivity
-        useGovMatchStore.setState((state) => {
+        useDocumentChatStore.setState((state) => {
           state.documents.documents.push(realDocument)
         })
         
@@ -1181,7 +1189,7 @@ const DocumentsPageContent = () => {
         
         // Debug: Check what's actually in the store after adding
         setTimeout(() => {
-          const currentStore = useGovMatchStore.getState()
+          const currentStore = useDocumentChatStore.getState()
           const lastDoc = currentStore.documents.documents[currentStore.documents.documents.length - 1]
           console.log('🔍 Store state after upload:', {
             documentsCount: currentStore.documents.documents.length,
@@ -1289,7 +1297,7 @@ const DocumentsPageContent = () => {
               console.log('✅ Got updated document data:', updatedDocumentData)
               
               // Update the document in the store with the processed data
-              useGovMatchStore.setState((state) => {
+              useDocumentChatStore.setState((state) => {
                 const docIndex = state.documents.documents.findIndex(d => d.id === realDocument.id)
                 if (docIndex !== -1) {
                   // Merge the processed data while keeping the UI structure
@@ -1338,7 +1346,7 @@ const DocumentsPageContent = () => {
     if (uploadedFiles.length > 0) {
       console.log('✅ Upload complete, store should be updated')
       // The store is already updated by the code above, but we can verify
-      const currentStore = useGovMatchStore.getState()
+      const currentStore = useDocumentChatStore.getState()
       console.log('📊 Current store state after upload:', {
         documentsCount: currentStore.documents.documents.length,
         lastDocument: currentStore.documents.documents[currentStore.documents.documents.length - 1]
@@ -1747,7 +1755,7 @@ const DocumentsPageContent = () => {
         };
         
         // Add to store immediately using proper Immer methods
-        useGovMatchStore.setState((state) => {
+        useDocumentChatStore.setState((state) => {
           state.documents.documents.push(newDocument);
         });
         
@@ -1821,7 +1829,7 @@ const DocumentsPageContent = () => {
         };
         
         // Add to store immediately using proper Immer methods
-        useGovMatchStore.setState((state) => {
+        useDocumentChatStore.setState((state) => {
           state.documents.documents.push(newDocument);
         });
         
@@ -2757,130 +2765,58 @@ const DocumentsPageContent = () => {
 
       <div className="space-y-6">
           {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Documents</h1>
-            <p className="text-muted-foreground">
-              Organize and manage your government contracting documents
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Documents</h1>
+            <p className="text-sm md:text-base text-muted-foreground">
+              Organize and manage your documents with AI-powered analysis
               {!isBulkActionMode && currentDocuments.length > 0 && (
-                <span className="ml-2 text-sm">• {currentDocuments.length} {currentDocuments.length === 1 ? 'document' : 'documents'}</span>
+                <span className="ml-2 text-xs md:text-sm">• {currentDocuments.length} {currentDocuments.length === 1 ? 'document' : 'documents'}</span>
               )}
             </p>
           </div>
-          
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+
+          <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+            <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+              <div className="w-2 h-2 md:w-3 md:h-3 bg-green-500 rounded-full"></div>
               <span>{stats.totalSize}</span>
             </div>
-            
-            <Button 
+
+            <Button
               variant="outline"
               size="sm"
               onClick={() => setShowNewFolderDialog(true)}
+              className="h-8 w-8 md:h-9 md:w-9 p-0"
             >
-              <FolderPlus size={18} />
+              <FolderPlus size={16} className="md:w-[18px] md:h-[18px]" />
             </Button>
-            
-            <Button 
+
+            <Button
               variant="outline"
               size="sm"
               onClick={() => {
                 setShowCreateDocumentModal(true);
                 playSound(SoundEffect.CLICK);
               }}
+              className="h-8 md:h-9 px-2 md:px-3"
             >
-              <Plus size={18} />
-              New Document
+              <Plus size={16} className="md:w-[18px] md:h-[18px]" />
+              <span className="hidden sm:inline ml-1">New Document</span>
             </Button>
-            
-            
-            {/* Bulk Actions */}
-            <div className="flex items-center gap-2 ml-4 border-l pl-4">
-              <Button
-                variant={isBulkActionMode ? "default" : "outline"}
-                size="sm"
-                onClick={toggleBulkActionMode}
-                className={`transition-all duration-200 ${!isBulkActionMode && currentDocuments.length > 0 ? 'ring-2 ring-primary/20 hover:ring-primary/40' : ''}`}
-                title={!isBulkActionMode ? 'Batch AI analysis mode - select processed documents (Cmd+A to select all)' : 'Exit batch analysis mode (Esc)'}
-              >
-                {isBulkActionMode ? (
-                  <>
-                    <X size={18} className="mr-2" />
-                    Cancel
-                  </>
-                ) : (
-                  <>
-                    <SlidersHorizontal size={18} className="mr-2" />
-                    Batch Analysis
-                  </>
-                )}
-              </Button>
-              
-              {isBulkActionMode && selectedDocuments.size > 0 && (
-                <>
-                  <Badge variant="secondary" className="ml-2 animate-in slide-in-from-left duration-200">
-                    {selectedDocuments.size} selected
-                  </Badge>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={selectAllDocuments}
-                    title="Select all processed documents ready for analysis"
-                  >
-                    Select All Ready
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={clearSelection}
-                  >
-                    Clear
-                  </Button>
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={handleBulkAIAnalysis}
-                    className="ml-2 animate-in slide-in-from-left duration-300"
-                    disabled={isAnalyzing || processedSelectedCount === 0}
-                    title={
-                      processedSelectedCount === 0 
-                        ? "No processed documents selected for analysis" 
-                        : `Analyze ${processedSelectedCount} processed documents with AI (Cmd+Shift+A)`
-                    }
-                  >
-                    {isAnalyzing ? (
-                      <>
-                        <Loader2 size={18} className="mr-2 animate-spin" />
-                        Analyzing...
-                      </>
-                    ) : (
-                      <>
-                        <SlidersHorizontal size={18} className="mr-2" />
-                        Analyze Selected
-                        {processedSelectedCount !== selectedDocuments.size && selectedDocuments.size > 0 && (
-                          <span className="ml-1 text-xs opacity-75">
-                            ({processedSelectedCount}/{selectedDocuments.size})
-                          </span>
-                        )}
-                      </>
-                    )}
-                  </Button>
-                </>
-              )}
-            </div>
+
           </div>
         </div>
 
         {/* Controls Bar */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
+            <div className="flex items-center gap-2 min-w-0">
               {renderBreadcrumbs()}
             </div>
           </div>
-          
-          <div className="flex items-center gap-4">
+
+          {/* Desktop controls - hidden on mobile */}
+          <div className="hidden md:flex items-center gap-4">
             <div className="relative">
               <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -3108,7 +3044,7 @@ const DocumentsPageContent = () => {
               </Button>
               
               <div className="flex items-center border rounded-lg">
-                <Button 
+                <Button
                   variant={viewMode === 'grid' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setViewMode('grid')}
@@ -3116,7 +3052,7 @@ const DocumentsPageContent = () => {
                 >
                   <Grid3X3 size={18} />
                 </Button>
-                <Button 
+                <Button
                   variant={viewMode === 'list' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setViewMode('list')}
@@ -3126,6 +3062,171 @@ const DocumentsPageContent = () => {
                 </Button>
               </div>
             </div>
+          </div>
+
+          {/* Mobile controls button - only visible on mobile */}
+          <div className="md:hidden flex-shrink-0">
+            <Sheet open={mobileControlsOpen} onOpenChange={setMobileControlsOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9 w-9 p-0">
+                  <SlidersHorizontal size={16} />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[320px] sm:w-[400px]">
+                <SheetHeader>
+                  <SheetTitle>Search & Controls</SheetTitle>
+                </SheetHeader>
+                <div className="mt-6 space-y-6">
+                  {/* Search */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Search Documents</label>
+                    <div className="relative">
+                      <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        type="text"
+                        placeholder="Search..."
+                        value={searchQuery}
+                        onChange={handleSearchInput}
+                        className="pl-10 pr-10"
+                      />
+                      {searchQuery && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={clearSearch}
+                          className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
+                        >
+                          <X size={14} />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* View Mode */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">View Mode</label>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant={viewMode === 'grid' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => {
+                          setViewMode('grid')
+                          setMobileControlsOpen(false)
+                        }}
+                        className="flex-1"
+                      >
+                        <Grid3X3 size={16} className="mr-2" />
+                        Grid
+                      </Button>
+                      <Button
+                        variant={viewMode === 'list' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => {
+                          setViewMode('list')
+                          setMobileControlsOpen(false)
+                        }}
+                        className="flex-1"
+                      >
+                        <List size={16} className="mr-2" />
+                        List
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Sort Options */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Sort By</label>
+                    <div className="space-y-1">
+                      <Button
+                        variant={sortBy === UI_CONSTANTS.SORT_NEWEST ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => {
+                          setSortBy(UI_CONSTANTS.SORT_NEWEST)
+                          setMobileControlsOpen(false)
+                        }}
+                        className="w-full justify-start"
+                      >
+                        Modified: Newest First
+                      </Button>
+                      <Button
+                        variant={sortBy === UI_CONSTANTS.SORT_OLDEST ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => {
+                          setSortBy(UI_CONSTANTS.SORT_OLDEST)
+                          setMobileControlsOpen(false)
+                        }}
+                        className="w-full justify-start"
+                      >
+                        Modified: Oldest First
+                      </Button>
+                      <Button
+                        variant={sortBy === UI_CONSTANTS.SORT_NAME_ASC ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => {
+                          setSortBy(UI_CONSTANTS.SORT_NAME_ASC)
+                          setMobileControlsOpen(false)
+                        }}
+                        className="w-full justify-start"
+                      >
+                        Name: A to Z
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Filters */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Filters</label>
+                    <div className="space-y-1">
+                      <Button
+                        variant={filterType === 'all' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => {
+                          setFilterType('all')
+                        }}
+                        className="w-full justify-start"
+                      >
+                        All Types
+                      </Button>
+                      <Button
+                        variant={filterType === DOCUMENT_TYPES.PDF ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => {
+                          setFilterType(DOCUMENT_TYPES.PDF)
+                        }}
+                        className="w-full justify-start"
+                      >
+                        <FileText size={14} className="mr-2" />
+                        PDF Documents
+                      </Button>
+                      <Button
+                        variant={filterType === DOCUMENT_TYPES.IMAGE ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => {
+                          setFilterType(DOCUMENT_TYPES.IMAGE)
+                        }}
+                        className="w-full justify-start"
+                      >
+                        <FileImage size={14} className="mr-2" />
+                        Images
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Recursive Toggle */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">View Files From</label>
+                    <Button
+                      variant={showRecursive ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setShowRecursive(!showRecursive)}
+                      className="w-full"
+                    >
+                      {showRecursive ? 'All Subfolders' : 'Current Folder Only'}
+                    </Button>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
 

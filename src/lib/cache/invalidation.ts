@@ -178,10 +178,10 @@ class CacheInvalidator {
   }
 
   private addPrefix(key: string): string {
-    if (key.startsWith('govmatch:')) {
+    if (key.startsWith('document-chat:')) {
       return key;
     }
-    return `govmatch:${key}`;
+    return `document-chat:${key}`;
   }
 
   // Health check for invalidation system

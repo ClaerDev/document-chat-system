@@ -412,7 +412,7 @@ export function LandingPageClient() {
                 </div>
                 <CardTitle className="text-xl">Advanced Document Processing</CardTitle>
                 <CardDescription className="text-base">
-                  Intelligent extraction and processing for <strong>50+ file formats</strong> including PDFs, Office documents,
+                  Intelligent extraction and processing for <strong>5+ file formats</strong> including PDFs, Office documents,
                   images, and more. Background processing with Inngest for scalability.
                 </CardDescription>
               </CardHeader>
@@ -518,82 +518,6 @@ export function LandingPageClient() {
               </CardContent>
             </Card>
 
-            <Card className="border-2 hover:border-red-500 transition-colors">
-              <CardHeader>
-                <div className="flex items-center justify-between mb-4">
-                  <Lock className="h-10 w-10 text-red-600" />
-                  <Badge variant="secondary">Security</Badge>
-                </div>
-                <CardTitle className="text-xl">Enterprise Security</CardTitle>
-                <CardDescription className="text-base">
-                  Production-ready security with <strong>Clerk authentication</strong>, encrypted API keys,
-                  audit logging, and compliance-ready data handling.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Clerk OAuth & SSO support</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Encrypted API key storage</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Comprehensive audit trails</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Row-level security (RLS)</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>GDPR & SOC2 ready</span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card className="border-2 hover:border-indigo-500 transition-colors">
-              <CardHeader>
-                <div className="flex items-center justify-between mb-4">
-                  <Terminal className="h-10 w-10 text-indigo-600" />
-                  <Badge variant="secondary">API</Badge>
-                </div>
-                <CardTitle className="text-xl">Encrypted API Key Management</CardTitle>
-                <CardDescription className="text-base">
-                  Secure storage and management of user API keys with client-side encryption.
-                  Users bring their own AI provider keys for maximum control and privacy.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>AES-256 encryption at rest</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Per-user key management</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>BYOK (Bring Your Own Key)</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Key rotation support</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Usage tracking per key</span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-
             <Card className="border-2 hover:border-pink-500 transition-colors">
               <CardHeader>
                 <div className="flex items-center justify-between mb-4">
@@ -627,44 +551,6 @@ export function LandingPageClient() {
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
                     <span>Folder-level permissions</span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card className="border-2 hover:border-teal-500 transition-colors">
-              <CardHeader>
-                <div className="flex items-center justify-between mb-4">
-                  <Activity className="h-10 w-10 text-teal-600" />
-                  <Badge variant="secondary">Analytics</Badge>
-                </div>
-                <CardTitle className="text-xl">Usage Tracking & Analytics</CardTitle>
-                <CardDescription className="text-base">
-                  Comprehensive usage metrics, AI credit tracking, document analytics,
-                  and real-time dashboards for monitoring your deployment.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>AI credit usage tracking</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Document processing metrics</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Real-time usage dashboards</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Per-user & org analytics</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>Export to CSV/JSON</span>
                   </li>
                 </ul>
               </CardContent>
@@ -1055,56 +941,62 @@ export function LandingPageClient() {
                   Easy Pricing Customization
                 </CardTitle>
                 <CardDescription>
-                  Customize pricing tiers in one file, run one command, and Stripe auto-syncs
+                  Create pricing plans via API or directly in the database, then sync with Stripe
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid md:grid-cols-3 gap-4 text-center">
                   <div className="p-4 border rounded-lg">
-                    <FileText className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                    <h4 className="font-semibold mb-1">Edit One File</h4>
-                    <p className="text-sm text-gray-600">scripts/seed-pricing-plans.ts</p>
+                    <Terminal className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                    <h4 className="font-semibold mb-1">Use Admin API</h4>
+                    <p className="text-sm text-gray-600">POST /api/v1/admin/pricing-plans</p>
                   </div>
                   <div className="p-4 border rounded-lg">
-                    <Terminal className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                    <h4 className="font-semibold mb-1">Run One Command</h4>
-                    <p className="text-sm text-gray-600">npx tsx scripts/seed-pricing-plans.ts</p>
+                    <Database className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                    <h4 className="font-semibold mb-1">Or Edit Database</h4>
+                    <p className="text-sm text-gray-600">pricing_plans table via Prisma</p>
                   </div>
                   <div className="p-4 border rounded-lg">
                     <Zap className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                    <h4 className="font-semibold mb-1">Stripe Auto-Syncs</h4>
-                    <p className="text-sm text-gray-600">Products created automatically</p>
+                    <h4 className="font-semibold mb-1">Stripe Sync</h4>
+                    <p className="text-sm text-gray-600">Optional auto-sync with Stripe</p>
                   </div>
                 </div>
 
                 <div className="p-4 bg-gray-900 text-gray-100 rounded-lg overflow-x-auto">
                   <pre className="text-sm"><code>{`{
-  id: 'startup-plan',
-  planType: 'STARTUP',
-  displayName: 'Startup',
-  monthlyPrice: 7900, // $79 in cents
+  planType: "STARTER",
+  displayName: "Starter Plan",
+  description: "Perfect for individuals",
+  monthlyPrice: 2900, // $29 in cents
+  yearlyPrice: 29000, // $290 yearly (2 months free)
+  currency: "usd",
   features: {
     list: [
-      '2 user seats',
-      '200 AI credits/month',
-      '500 pages processed/month',
-    ],
+      "3 user seats",
+      "500 AI credits/month",
+      "100 documents/month",
+      "Priority support"
+    ]
   },
   limits: {
-    seats: 2,
-    aiCreditsPerMonth: 200,
-    pagesPerMonth: 500,
+    seats: 3,
+    documentsPerMonth: 100,
+    aiCreditsPerMonth: 500,
+    storageGB: 10
   },
   isActive: true,
   isPopular: true,
+  displayOrder: 1,
+  createStripeProducts: true
 }`}</code></pre>
                 </div>
 
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Customize limits: <code className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded">seats</code>,
+                  Fully customizable limits including: <code className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded">seats</code>,
                   {' '}<code className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded">documentsPerMonth</code>,
                   {' '}<code className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded">aiCreditsPerMonth</code>,
-                  {' '}<code className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded">storageGB</code>
+                  {' '}<code className="bg-gray-200 dark:bg-gray-800 px-2 py-1 rounded">storageGB</code>, and more
                 </p>
               </CardContent>
             </Card>
@@ -1299,7 +1191,7 @@ export function LandingPageClient() {
           <div className="grid gap-6 lg:grid-cols-4">
             <div className="flex flex-col items-center space-y-2 p-6 border rounded-lg">
               <Files className="h-12 w-12 text-blue-600" />
-              <div className="text-4xl font-bold">50+</div>
+              <div className="text-4xl font-bold">5+</div>
               <p className="text-gray-600 dark:text-gray-400 text-center">Supported File Formats</p>
             </div>
             <div className="flex flex-col items-center space-y-2 p-6 border rounded-lg">
@@ -1370,9 +1262,9 @@ export function LandingPageClient() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 dark:text-gray-400">
-                  The repository includes a production-ready Dockerfile and comprehensive setup documentation.
-                  You can deploy to any platform that supports Docker (AWS, GCP, Azure, DigitalOcean, Railway, Render, etc.)
-                  or run it locally. Full step-by-step guide available in the README.
+                  Deploy to <strong>Vercel</strong> with our automated setup script that syncs all environment variables in one command.
+                  Or use the included production-ready Dockerfile for any platform that supports Docker (AWS, GCP, Azure, DigitalOcean, Railway, Render).
+                  Full step-by-step deployment guide with automated scripts available in the README.
                 </p>
               </CardContent>
             </Card>
@@ -1392,11 +1284,17 @@ export function LandingPageClient() {
                 Start chatting with your documents today. Free, open source, and ready to deploy.
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
+            <div className="flex flex-col sm:flex-row gap-4 w-full max-w-2xl">
               <Link href="/sign-up" className="flex-1">
                 <Button size="lg" variant="secondary" className="w-full">
                   <Sparkles className="mr-2 h-5 w-5" />
                   Start Free Trial
+                </Button>
+              </Link>
+              <Link href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fwatat83%2Fdocument-chat-system&env=DATABASE_URL,NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,CLERK_SECRET_KEY,NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY,INNGEST_EVENT_KEY,INNGEST_SIGNING_KEY&envDescription=Required%20environment%20variables%20for%20Document%20Chat%20System&envLink=https%3A%2F%2Fgithub.com%2Fwatat83%2Fdocument-chat-system%2Fblob%2Fmain%2F.env.example&project-name=document-chat-system&repository-name=document-chat-system" className="flex-1" target="_blank" rel="noopener noreferrer">
+                <Button size="lg" variant="default" className="w-full bg-black hover:bg-gray-900 text-white">
+                  <Zap className="mr-2 h-5 w-5" />
+                  Deploy to Vercel
                 </Button>
               </Link>
               <Link href="https://github.com/watat83/document-chat-system" className="flex-1">
@@ -1416,7 +1314,7 @@ export function LandingPageClient() {
       {/* Footer */}
       <footer className="flex flex-col gap-4 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          © 2024 Document Chat System. MIT Licensed. Built with ❤️ for the open source community.
+          © 2025 Document Chat System. MIT Licensed. Built with ❤️ for the open source community.
         </p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link className="text-xs hover:underline underline-offset-4" href="https://github.com/watat83/document-chat-system">

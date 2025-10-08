@@ -2,13 +2,13 @@
 
 /**
  * Store Initializer Component
- * 
- * This component initializes the GovMatch Zustand store with initial data.
+ *
+ * This component initializes the Document Chat System Zustand store with initial data.
  * Fixed to prevent infinite loops by stabilizing dependencies and using once-only initialization.
  */
 
 import React, { useEffect, useRef, ReactNode } from 'react'
-import { initializeGovMatchStore, useGovMatchStore } from '@/stores/document-chat-store'
+import { initializeDocumentChatStore, useDocumentChatStore } from '@/stores/document-chat-store'
 import type { Folder, Document } from '@/types/documents'
 import type { User, Organization } from '@/types'
 
@@ -50,15 +50,15 @@ export function StoreInitializer({ children, initialData }: StoreInitializerProp
     if (initialData.folders || initialData.documents || initialData.user || initialData.organization) {
       try {
         // Get current store state
-        const store = useGovMatchStore.getState()
+        const store = useDocumentChatStore.getState()
         const hasExistingData = store.documents.folders.length > 0 || store.documents.documents.length > 0
-        
+
         // Only initialize if we don't have data or data has changed
         if (!hasExistingData || dataHash !== lastDataHash.current) {
           console.log('🚀 [STORE INIT] Initializing store...')
-          
+
           // Initialize store with all available data
-          initializeGovMatchStore(initialData)
+          initializeDocumentChatStore(initialData)
           
           console.log('✅ [STORE INIT] Store initialized successfully')
           hasInitialized.current = true

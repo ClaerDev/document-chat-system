@@ -41,7 +41,7 @@ export interface OpenRouterMetrics extends AIMetrics {
  * OpenRouter Metrics Collector
  * 
  * Collects enhanced telemetry data from OpenRouter API responses
- * and integrates with the existing GovMatch AI metrics system.
+ * and integrates with the existing Document Chat System metrics system.
  */
 export class OpenRouterMetricsCollector {
   private aiMetricsIntegration: AIMetricsIntegration;

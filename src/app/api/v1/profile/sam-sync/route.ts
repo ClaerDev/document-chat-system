@@ -231,7 +231,7 @@ function calculateProfileCompleteness(profile: any): number {
     { field: 'coreCompetencies', weight: 8 },
     { field: 'pastPerformance', weight: 5 },
     // Brand voice and tone removed from scoring - these are communication preferences, not profile completeness factors
-    { field: 'governmentLevels', weight: 6 }, // Increased weight since brand preferences removed
+    { field: 'organizationLevels', weight: 6 }, // Increased weight since brand preferences removed
     { field: 'geographicPreferences', weight: 6 } // Increased weight since brand preferences removed
   ]
 
@@ -262,7 +262,7 @@ function calculateProfileCompleteness(profile: any): number {
       isComplete = Array.isArray(value) && value.length > 0
     } else if (field === 'pastPerformance') {
       isComplete = value && typeof value === 'object' && (value.description || value.keyProjects?.length > 0)
-    } else if (field === 'governmentLevels') {
+    } else if (field === 'organizationLevels') {
       isComplete = Array.isArray(value) && value.length > 0
     } else if (field === 'geographicPreferences') {
       if (value && typeof value === 'object') {

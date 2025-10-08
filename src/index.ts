@@ -139,7 +139,7 @@ export interface Profile {
 
   // Geographic and Government Level Preferences
   geographicPreferences?: import('./profile').GeographicPreferences // Preferred geographic markets
-  governmentLevels?: import('./profile').GovernmentLevel[] // Target government levels using enum
+  organizationLevels?: import('./profile').OrganizationLevel[] // Target government levels using enum
 
   // System fields
   profileCompleteness: number // Percentage 0-100

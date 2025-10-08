@@ -8,7 +8,6 @@
 export * from './types'
 
 // Template collections
-export { GOVERNMENT_CONTRACTING_TEMPLATES } from './templates/government-contracting'
 export { DOCUMENT_PROCESSING_TEMPLATES } from './templates/document-processing'
 
 // Main prompt library

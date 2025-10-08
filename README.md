@@ -10,6 +10,8 @@
 
 **Production-ready, open-source platform for intelligent document management and AI conversations**
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fwatat83%2Fdocument-chat-system&env=DATABASE_URL,NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,CLERK_SECRET_KEY,NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY,INNGEST_EVENT_KEY,INNGEST_SIGNING_KEY&envDescription=Required%20environment%20variables%20for%20Document%20Chat%20System&envLink=https%3A%2F%2Fgithub.com%2Fwatat83%2Fdocument-chat-system%2Fblob%2Fmain%2F.env.example&project-name=document-chat-system&repository-name=document-chat-system)
+
 [Features](#features) •
 [Quick Start](#quick-start) •
 [Documentation](#documentation) •
@@ -54,7 +56,6 @@
 - **📄 10+ File Formats** - PDFs, Office documents, images, and more
 - **🔍 Vector Search** - Semantic search with Pinecone or pgvector
 - **👥 Multi-Tenant** - Enterprise-grade organization isolation
-- **🔐 Enterprise Security** - Clerk auth, encrypted API keys, audit logs
 - **💳 Optional Billing** - Built-in Stripe integration for SaaS monetization
 - **🐳 Docker Ready** - Production Dockerfile included
 - **⚡ Background Jobs** - Scalable processing with Inngest
@@ -154,26 +155,6 @@ Thanks to client-side encryption and BYOK (Bring Your Own Key) architecture:
 - **Organization Isolation**: Complete data separation between organizations
 - **Per-Org Resource Limits**: Customizable limits per organization
 - **Activity Tracking**: Audit logs for compliance and security
-
-### 🔐 Enterprise Security
-
-- **Clerk Authentication**: OAuth, SSO, multi-factor authentication
-- **Client-Side Key Encryption**: API keys are encrypted with AES-256 and stored in browser localStorage - **never sent to remote servers**
-- **Settings Page Configuration**: Users configure their AI provider keys via the Settings page (`/settings`)
-- **BYOK (Bring Your Own Key)**: Users manage their own AI provider keys with full control
-- **Privacy-First Design**: Your API keys stay on your device, encrypted and secure
-- **Audit Logging**: Comprehensive activity tracking
-- **Row-Level Security**: Database-level access controls
-- **GDPR & SOC2 Ready**: Compliance-ready data handling
-
-### 📊 Usage Tracking & Analytics
-
-- **AI Credit Tracking**: Monitor AI model usage and costs
-- **Document Analytics**: Track document views, downloads, and processing
-- **User Activity**: Monitor user engagement and feature adoption
-- **Real-Time Dashboards**: Live metrics and visualizations
-- **Usage Reports**: Export analytics data to CSV/JSON
-- **Billing Integration**: Automatic usage-based billing (optional)
 
 ### ⚡ Background Processing
 
@@ -287,6 +268,12 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+**Ready to deploy?** Use our automated Vercel deployment script:
+```bash
+./scripts/setup-vercel.sh --all && vercel --prod
+```
+See the [Deployment](#deployment) section for details.
 
 ---
 
@@ -932,7 +919,28 @@ Don't want to charge users? Simply:
 
 ## Deployment
 
-This guide covers deploying your Document Chat System to production, including configuration for all services (Database, Authentication, File Storage, AI Providers, and Background Jobs).
+This guide covers deploying your Document Chat System to production. We provide an **automated Vercel deployment script** that syncs all environment variables in one command.
+
+### 🚀 Quick Deploy to Vercel
+
+```bash
+# 1. Install Vercel CLI
+npm install -g vercel
+
+# 2. Login to Vercel
+vercel login
+
+# 3. Link your project
+vercel link
+
+# 4. Sync all environment variables (automated!)
+./scripts/setup-vercel.sh --all
+
+# 5. Deploy to production
+vercel --prod
+```
+
+**That's it!** The automated script reads your `.env.local` file and syncs all variables to Vercel. See [scripts/setup-vercel.sh](scripts/setup-vercel.sh) for advanced options like `--dry-run`, `--prod`, `--preview`, etc.
 
 ---
 

@@ -94,7 +94,7 @@ html {
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
     
-    /* GovMatch AI Brand Colors */
+    /* Document Chat System Brand Colors */
     --primary: 217 91% 60%; /* Blue - #3b82f6 */
     --primary-foreground: 0 0% 100%;
     --secondary: 220 13% 91%; /* Light Gray - #e2e8f0 */
@@ -137,7 +137,7 @@ html {
     --popover: 222.2 84% 7%;
     --popover-foreground: 210 40% 98%;
     
-    /* GovMatch AI Brand Colors (Dark) */
+    /* Document Chat System Brand Colors (Dark) */
     --primary: 217 91% 70%; /* Lighter blue for dark mode */
     --primary-foreground: 222.2 84% 4.9%;
     --secondary: 217.2 32.6% 17.5%;

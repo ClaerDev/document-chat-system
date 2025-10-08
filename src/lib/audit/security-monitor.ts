@@ -227,29 +227,26 @@ export class SecurityMonitor {
    */
   private static async logSecurityEvent(event: SecurityEvent): Promise<void> {
     await crudAuditLogger.logCRUDOperation(
-      'CREATE',
-      'SECURITY_EVENT',
-      event.source,
-      `Security Event: ${event.type}`,
-      null,
-      event,
-      AuditCategory.SECURITY,
-      AuditEventType.SECURITY_VIOLATION,
-      event.severity === 'CRITICAL' ? AuditSeverity.HIGH : 
-      event.severity === 'HIGH' ? AuditSeverity.MEDIUM : AuditSeverity.LOW,
-      event.organizationId,
-      event.userId,
       {
-        securityEventType: event.type,
-        severity: event.severity,
-        source: event.source,
+        operation: 'CREATE',
+        entityType: 'SECURITY_EVENT',
+        entityId: event.source,
+        entityName: `Security Event: ${event.type}`,
+        previousData: null,
+        currentData: event,
         ipAddress: event.ipAddress,
         userAgent: event.userAgent,
-        ...event.metadata
+        metadata: {
+          securityEventType: event.type,
+          severity: event.severity,
+          source: event.source,
+          ...event.metadata
+        }
       },
-      undefined,
-      event.ipAddress,
-      event.userAgent
+      AuditCategory.SECURITY,
+      AuditEventType.SECURITY_VIOLATION,
+      event.severity === 'CRITICAL' ? AuditSeverity.HIGH :
+      event.severity === 'HIGH' ? AuditSeverity.MEDIUM : AuditSeverity.LOW
     );
   }
 

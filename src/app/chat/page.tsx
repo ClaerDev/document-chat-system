@@ -140,35 +140,51 @@ export default function ChatPage() {
           {/* Chat area */}
           <div className="flex-1 flex flex-col">
             {/* Chat header with document chat controls and settings */}
-            <div className="flex items-center justify-between p-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-              <div className="flex items-center gap-4">
-                <h1 className="text-lg font-semibold">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-3 md:p-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+              <div className="flex items-center gap-2 md:gap-4 min-w-0">
+                <h1 className="text-base md:text-lg font-semibold truncate">
                   {chatState.documentChatEnabled ? 'Document Chat' : 'AI Chat'}
                 </h1>
-                
+
                 {/* Document Chat Toggle */}
                 {isSignedIn && isHydrated && (
-                  <DocumentChatToggle
-                    enabled={chatState.documentChatEnabled}
-                    onToggle={handleDocumentChatToggle}
-                    isLoading={documentsLoading}
-                    documentCount={availableDocuments.length}
-                  />
+                  <div className="hidden sm:block">
+                    <DocumentChatToggle
+                      enabled={chatState.documentChatEnabled}
+                      onToggle={handleDocumentChatToggle}
+                      isLoading={documentsLoading}
+                      documentCount={availableDocuments.length}
+                    />
+                  </div>
                 )}
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Mobile Document Chat Toggle */}
+                {isSignedIn && isHydrated && (
+                  <div className="sm:hidden flex-1">
+                    <DocumentChatToggle
+                      enabled={chatState.documentChatEnabled}
+                      onToggle={handleDocumentChatToggle}
+                      isLoading={documentsLoading}
+                      documentCount={availableDocuments.length}
+                    />
+                  </div>
+                )}
+
                 {/* Document Scope Selector - only show when document chat is enabled */}
                 {isHydrated && chatState.documentChatEnabled && chatState.documentScope && (
-                  <DocumentScopeSelector
-                    currentScope={chatState.documentScope}
-                    onScopeChange={(scope) => setChatState(prev => ({
-                      ...prev,
-                      documentScope: scope
-                    }))}
-                    availableDocuments={availableDocuments}
-                    availableFolders={availableFolders}
-                  />
+                  <div className="flex-1 sm:flex-initial min-w-0">
+                    <DocumentScopeSelector
+                      currentScope={chatState.documentScope}
+                      onScopeChange={(scope) => setChatState(prev => ({
+                        ...prev,
+                        documentScope: scope
+                      }))}
+                      availableDocuments={availableDocuments}
+                      availableFolders={availableFolders}
+                    />
+                  </div>
                 )}
 
                 {/* Settings Dropdown */}
@@ -177,14 +193,14 @@ export default function ChatPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-1 md:gap-2 h-9 px-2 md:px-3"
                     >
                       <Settings className="h-4 w-4" />
-                      Settings
-                      <ChevronDown className="h-4 w-4" />
+                      <span className="hidden sm:inline">Settings</span>
+                      <ChevronDown className="h-3 w-3 md:h-4 md:w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-80">
+                  <DropdownMenuContent align="end" className="w-[280px] sm:w-80">
                     <div className="p-4">
                       <AISettingsPanel className="h-fit" />
                     </div>

@@ -1,5 +1,4 @@
 // export { scoreDocument } from "./score-document";  // Temporarily disabled due to import error
-export { batchProcessDocuments } from "./batch-process-documents";
 export { processDocumentBasic } from "./process-document-basic";
 export { processDocumentFull } from "./process-document-full";
 export { cancelDocumentProcessing } from "./cancel-document-processing";

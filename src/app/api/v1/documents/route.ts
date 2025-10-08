@@ -115,13 +115,6 @@ export async function GET(request: NextRequest) {
             name: true,
             color: true
           }
-        },
-        opportunity: {
-          select: {
-            id: true,
-            title: true,
-            solicitationNumber: true
-          }
         }
       },
       orderBy: [

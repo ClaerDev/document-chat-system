@@ -60,7 +60,7 @@ export function ExampleGenerator({ endpoint, endpointKey }: ExampleGeneratorProp
 
   // Generate example data based on endpoint patterns
   const generateExampleData = (endpoint: { method: string; path: string }): ExampleData => {
-    const baseUrl = 'https://api.govmatch.ai'
+    const baseUrl = 'https://api.document-chat-system.vercel.app'
     
     // Generate examples based on endpoint patterns
     if (endpoint.path.includes('/opportunities')) {
@@ -275,7 +275,7 @@ export function ExampleGenerator({ endpoint, endpointKey }: ExampleGeneratorProp
       responseExample = {
         success: true,
         data: {
-          id: "sub_govmatch_pro_123",
+          id: "sub_document_chat_pro_123",
           status: "active",
           planType: "PROFESSIONAL",
           currentPeriodStart: "2024-01-01T00:00:00.000Z",
@@ -378,7 +378,7 @@ export function ExampleGenerator({ endpoint, endpointKey }: ExampleGeneratorProp
     curl += ` \\\n  -H "Content-Type: application/json"`
     
     if (endpoint.auth) {
-      curl += ` \\\n  -H "Authorization: Bearer $GOVMATCH_API_TOKEN"`
+      curl += ` \\\n  -H "Authorization: Bearer $API_TOKEN"`
     }
     
     if (requestData && ['POST', 'PATCH', 'PUT'].includes(endpoint.method)) {
@@ -393,7 +393,7 @@ export function ExampleGenerator({ endpoint, endpointKey }: ExampleGeneratorProp
   const generateJavaScriptExample = (endpoint: any, baseUrl: string, requestData: any) => {
     const headers = {
       'Content-Type': 'application/json',
-      ...(endpoint.auth ? { 'Authorization': 'Bearer $GOVMATCH_API_TOKEN' } : {})
+      ...(endpoint.auth ? { 'Authorization': 'Bearer $API_TOKEN' } : {})
     }
 
     const fetchOptions = {
@@ -417,7 +417,7 @@ console.log(data)`
   const generatePythonExample = (endpoint: any, baseUrl: string, requestData: any) => {
     const headers = {
       'Content-Type': 'application/json',
-      ...(endpoint.auth ? { 'Authorization': 'Bearer $GOVMATCH_API_TOKEN' } : {})
+      ...(endpoint.auth ? { 'Authorization': 'Bearer $API_TOKEN' } : {})
     }
 
     let pythonCode = `import requests

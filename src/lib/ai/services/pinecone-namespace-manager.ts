@@ -99,10 +99,14 @@ export class PineconeNamespaceManager {
   private generateNamespaceInfo(organization: { id: string; name: string; slug: string }): NamespaceInfo {
     // Use organization name or slug as the readable part
     const readableName = organization.name || organization.slug || 'org'
-    
-    // Sanitize the name part
-    const sanitizedName = this.sanitizeNamespacePart(readableName)
-    
+
+    // Organization ID is typically 25 chars (CUID), plus underscore = 26 chars
+    // So we limit the sanitized name to 45 - 26 = 19 chars max
+    const maxNameLength = 19
+
+    // Sanitize the name part with length limit
+    const sanitizedName = this.sanitizeNamespacePart(readableName, maxNameLength)
+
     // Create namespace in format: sanitizedName_organizationId
     const namespace = `${sanitizedName}_${organization.id}`
 
@@ -118,13 +122,13 @@ export class PineconeNamespaceManager {
   /**
    * Sanitize namespace part to ensure it meets Pinecone requirements
    */
-  private sanitizeNamespacePart(name: string): string {
+  private sanitizeNamespacePart(name: string, maxLength: number = 40): string {
     return name
       .toLowerCase() // Convert to lowercase
       .replace(/[^a-z0-9\-_]/g, '') // Remove special chars, keep only alphanumeric, hyphens, underscores
       .replace(/^[-_]+|[-_]+$/g, '') // Remove leading/trailing hyphens and underscores
       .replace(/[-_]+/g, '-') // Replace multiple consecutive hyphens/underscores with single hyphen
-      .substring(0, 40) // Limit length to reasonable size
+      .substring(0, maxLength) // Limit length
       || 'org' // Fallback if sanitization results in empty string
   }
 

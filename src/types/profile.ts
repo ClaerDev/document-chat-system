@@ -48,7 +48,7 @@ export enum TravelWillingness {
   INTERNATIONAL = 'INTERNATIONAL'
 }
 
-export enum GovernmentLevel {
+export enum OrganizationLevel {
   FEDERAL = 'FEDERAL',
   STATE = 'STATE',
   LOCAL = 'LOCAL'
@@ -168,19 +168,19 @@ export const TRAVEL_WILLINGNESS_DISPLAY = {
 } as const
 
 export const GOVERNMENT_LEVEL_DISPLAY = {
-  [GovernmentLevel.FEDERAL]: {
+  [OrganizationLevel.FEDERAL]: {
     label: 'Federal Government',
     emoji: '🏛️',
     description: 'Federal agencies and departments (DoD, GSA, HHS, etc.)',
     examples: ['Department of Defense', 'General Services Administration', 'Department of Homeland Security']
   },
-  [GovernmentLevel.STATE]: {
+  [OrganizationLevel.STATE]: {
     label: 'State Government',
     emoji: '🏢',
     description: 'State-level agencies and departments',
     examples: ['State Transportation Departments', 'State Health Agencies', 'State Education Departments']
   },
-  [GovernmentLevel.LOCAL]: {
+  [OrganizationLevel.LOCAL]: {
     label: 'Local Government', 
     emoji: '🏘️',
     description: 'Cities, counties, municipalities, and local authorities',
@@ -221,8 +221,8 @@ export function getTravelWillingnessDisplay(willingness: TravelWillingness | str
   }
 }
 
-export function getGovernmentLevelDisplay(level: GovernmentLevel | string) {
-  return GOVERNMENT_LEVEL_DISPLAY[level as GovernmentLevel] || {
+export function getOrganizationLevelDisplay(level: OrganizationLevel | string) {
+  return GOVERNMENT_LEVEL_DISPLAY[level as OrganizationLevel] || {
     label: level,
     emoji: '❓',
     description: 'Custom government level'
@@ -259,7 +259,7 @@ export const TRAVEL_WILLINGNESS_OPTIONS = Object.entries(TRAVEL_WILLINGNESS_DISP
 }))
 
 export const GOVERNMENT_LEVEL_OPTIONS = Object.entries(GOVERNMENT_LEVEL_DISPLAY).map(([value, display]) => ({
-  value: value as GovernmentLevel,
+  value: value as OrganizationLevel,
   label: display.label,
   emoji: display.emoji,
   description: display.description,
@@ -283,8 +283,8 @@ export function isTravelWillingness(value: string): value is TravelWillingness {
   return Object.values(TravelWillingness).includes(value as TravelWillingness)
 }
 
-export function isGovernmentLevel(value: string): value is GovernmentLevel {
-  return Object.values(GovernmentLevel).includes(value as GovernmentLevel)
+export function isOrganizationLevel(value: string): value is OrganizationLevel {
+  return Object.values(OrganizationLevel).includes(value as OrganizationLevel)
 }
 
 // =============================================
@@ -719,7 +719,7 @@ export interface EnhancedProfile {
 
   // Geographic and Government Level Preferences
   geographicPreferences?: GeographicPreferences // Preferred geographic markets
-  governmentLevels?: GovernmentLevel[] // Target government levels using enum
+  organizationLevels?: OrganizationLevel[] // Target government levels using enum
 
   // System fields
   profileCompleteness: number // Percentage 0-100

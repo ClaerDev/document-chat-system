@@ -26,7 +26,7 @@ export function DocumentsHeader({
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Documents</h1>
         <p className="text-muted-foreground">
-          Organize and manage your government contracting documents
+          Organize and manage your documents with AI-powered analysis
           {!isBulkActionMode && currentDocuments.length > 0 && (
             <span className="ml-2 text-sm">
               • {currentDocuments.length} {currentDocuments.length === 1 ? 'document' : 'documents'}

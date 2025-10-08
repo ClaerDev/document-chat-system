@@ -273,11 +273,11 @@ export async function GET() {
       if (isDetailed) {
         const complexStart = Date.now()
         try {
-          await prisma.matchScore.findMany({
+          await prisma.document.findMany({
             take: 10,
             include: {
-              profile: { select: { companyName: true } },
-              opportunity: { select: { title: true } }
+              folder: { select: { name: true } },
+              uploadedBy: { select: { email: true } }
             },
             orderBy: { createdAt: 'desc' }
           })
@@ -419,18 +419,18 @@ export async function GET() {
     // 6. Collect key metrics
     if (healthMetrics.checks.connectivity.status === 'pass') {
       try {
-        const [userCount, orgCount, oppCount, matchCount] = await Promise.all([
+        const [userCount, orgCount, docCount, folderCount] = await Promise.all([
           prisma.user.count(),
           prisma.organization.count(),
-          prisma.opportunity.count(),
-          prisma.matchScore.count()
+          prisma.document.count(),
+          prisma.folder.count()
         ])
-        
+
         healthMetrics.metrics = {
           totalUsers: userCount,
           totalOrganizations: orgCount,
-          totalOpportunities: oppCount,
-          totalMatchScores: matchCount,
+          totalDocuments: docCount,
+          totalFolders: folderCount,
           avgQueryTime: (healthMetrics.checks.queryPerformance.simpleQueryTime + healthMetrics.checks.queryPerformance.complexQueryTime) / 2,
           uptime: Date.now() - startTime
         }

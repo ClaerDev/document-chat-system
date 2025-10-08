@@ -121,7 +121,7 @@ export async function GET() {
       // Transform Stripe invoice data to our format
       const transformedInvoices = invoices.data.map((invoice) => {
         // Generate a description based on subscription info
-        let description = 'GovMatch AI Subscription';
+        let description = 'Document Chat System Subscription';
         if (invoice.lines?.data?.[0]?.description) {
           description = invoice.lines.data[0].description;
         } else if (invoice.subscription && typeof invoice.subscription === 'object') {
@@ -135,7 +135,7 @@ export async function GET() {
               'ENTERPRISE': 'Enterprise'
             };
             const planName = planNames[metadata.planType as keyof typeof planNames] || metadata.planType;
-            description = `GovMatch AI ${planName}`;
+            description = `Document Chat System ${planName}`;
           }
         }
 
