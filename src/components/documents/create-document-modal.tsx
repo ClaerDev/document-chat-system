@@ -300,47 +300,11 @@ export function CreateDocumentModal({
         <DialogHeader>
           <DialogTitle>Create New Document</DialogTitle>
           <DialogDescription>
-            Create a new document from scratch or using a template.
+            Upload a file or create a new document from scratch.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Document Templates */}
-          {!loadingTemplates && templates.length > 0 && (
-            <div className="space-y-3">
-              <Label>Choose a Template (Optional)</Label>
-              <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
-                {templates.map((template) => {
-                  const Icon = documentTypeIcons[template.type] || FileText
-                  return (
-                    <div
-                      key={template.id}
-                      onClick={() => handleTemplateSelect(template.id)}
-                      className={`p-3 rounded-lg border cursor-pointer hover:bg-accent transition-colors ${
-                        selectedTemplate === template.id ? 'border-primary bg-primary/5' : ''
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <Icon size={20} className="mt-1 text-muted-foreground" />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="font-medium text-sm">{template.name}</p>
-                            <Badge variant="outline" className="text-xs">
-                              {template.type}
-                            </Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {template.description}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
           {/* File Upload Section */}
           <div className="space-y-3">
             <Label>File Upload (Optional)</Label>
