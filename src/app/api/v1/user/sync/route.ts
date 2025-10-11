@@ -22,6 +22,42 @@ export async function POST() {
 
     if (existingUser) {
       console.log('User sync: User already exists')
+
+      // **FIX**: Check if user has an organization, create one if missing
+      if (!existingUser.organizationId || !existingUser.organization) {
+        console.log('User sync: User missing organization, creating one...')
+
+        // Get user data from Clerk for organization name
+        const clerkUser = await currentUser()
+        if (!clerkUser) {
+          console.log('User sync: No Clerk user found')
+          return NextResponse.json({ success: false, error: 'Clerk user not found' }, { status: 404 })
+        }
+
+        // Create organization
+        const organization = await db.organization.create({
+          data: {
+            name: `${clerkUser.firstName || 'User'} ${clerkUser.lastName || 'Organization'}`,
+            slug: `org-${userId.slice(0, 8)}`,
+          }
+        })
+        console.log('User sync: Created organization with id =', organization.id)
+
+        // Update user with organization
+        const updatedUser = await db.user.update({
+          where: { clerkId: userId },
+          data: { organizationId: organization.id },
+          include: { organization: true }
+        })
+        console.log('User sync: Updated user with organization')
+
+        return NextResponse.json({
+          success: true,
+          data: updatedUser,
+          message: 'User updated with new organization'
+        })
+      }
+
       return NextResponse.json({
         success: true,
         data: existingUser,

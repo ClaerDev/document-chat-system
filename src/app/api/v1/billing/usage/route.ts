@@ -204,36 +204,50 @@ async function fetchUsageData(organizationId: string, period: string) {
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('[USAGE API] Starting GET request');
+
     const { userId } = await auth();
     if (!userId) {
+      console.log('[USAGE API] No userId from auth');
       return createErrorResponse('Unauthorized', 401, 'UNAUTHORIZED');
     }
 
+    console.log('[USAGE API] Got userId:', userId);
+
     const user = await currentUser();
     if (!user) {
+      console.log('[USAGE API] No user from currentUser()');
       return createErrorResponse('User not found', 404, 'USER_NOT_FOUND');
     }
 
+    console.log('[USAGE API] Got current user');
+
     const { searchParams } = new URL(request.url);
     const period = searchParams.get('period') || 'current';
+    console.log('[USAGE API] Period:', period);
 
     // Get user's organization from database
+    console.log('[USAGE API] Fetching user from database...');
     const dbUser = await db.user.findUnique({
       where: { clerkId: user.id },
       select: { organizationId: true }
     });
-    
+
     if (!dbUser) {
+      console.log('[USAGE API] User not found in database');
       return createErrorResponse('User not found in database', 404, 'USER_NOT_FOUND');
     }
-    
+
     const organizationId = dbUser.organizationId;
+    console.log('[USAGE API] Organization ID:', organizationId);
 
     if (!organizationId) {
+      console.log('[USAGE API] No organization ID for user');
       return createErrorResponse('Organization not found', 404, 'ORGANIZATION_NOT_FOUND');
     }
 
     // Use cache with 60-second TTL for usage data
+    console.log('[USAGE API] Fetching usage data with cache...');
     const result = await cacheManager.withCache(
       `usage:${organizationId}:${period}`,
       () => fetchUsageData(organizationId, period),
@@ -243,6 +257,8 @@ export async function GET(request: NextRequest) {
         prefix: 'usage:'
       }
     );
+
+    console.log('[USAGE API] Got usage data, cached:', result.cached);
 
     // Track this API call (only for cache misses to avoid double-counting)
     if (!result.cached) {
@@ -259,15 +275,17 @@ export async function GET(request: NextRequest) {
           }
         });
       } catch (trackingError) {
-        console.warn('Failed to track billing API usage:', trackingError);
+        console.warn('[USAGE API] Failed to track billing API usage:', trackingError);
         // Don't fail the request if tracking fails
       }
     }
 
+    console.log('[USAGE API] Returning success response');
     return NextResponse.json(result.data);
 
   } catch (error) {
-    console.error('Error fetching usage:', error);
+    console.error('[USAGE API] Error fetching usage:', error);
+    console.error('[USAGE API] Error stack:', error instanceof Error ? error.stack : 'No stack');
     return handleApiError(error);
   }
 }

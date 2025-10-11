@@ -161,35 +161,52 @@ async function fetchSubscriptionData(organizationId: string) {
 
 export async function GET() {
   try {
+    console.log('[SUBSCRIPTION API] Starting GET request');
+
     const { userId } = await auth();
     if (!userId) {
+      console.log('[SUBSCRIPTION API] No userId from auth');
       return createErrorResponse('Unauthorized', 401, 'UNAUTHORIZED');
     }
 
+    console.log('[SUBSCRIPTION API] Got userId:', userId);
+
     const user = await currentUser();
     if (!user) {
+      console.log('[SUBSCRIPTION API] No user from currentUser()');
       return createErrorResponse('User not found', 404, 'USER_NOT_FOUND');
     }
 
+    console.log('[SUBSCRIPTION API] Got current user');
+
     // Get user's organization from database
+    console.log('[SUBSCRIPTION API] Fetching user from database...');
     const dbUser = await db.user.findUnique({
       where: { clerkId: user.id },
       select: { organizationId: true }
     });
-    
+
     if (!dbUser) {
+      console.log('[SUBSCRIPTION API] User not found in database');
       return createErrorResponse('User not found in database', 404, 'USER_NOT_FOUND');
     }
-    
+
     const organizationId = dbUser.organizationId;
+    console.log('[SUBSCRIPTION API] Organization ID:', organizationId);
 
     if (!organizationId) {
+      console.log('[SUBSCRIPTION API] No organization ID for user');
       return createErrorResponse('Organization not found', 404, 'ORGANIZATION_NOT_FOUND');
     }
 
     // **NO CACHE** - Always fetch fresh subscription data for immediate updates
-    console.log('🚀 Fetching fresh subscription data (cache disabled)');
+    console.log('[SUBSCRIPTION API] Fetching fresh subscription data (cache disabled)');
     const result = await fetchSubscriptionData(organizationId);
+
+    console.log('[SUBSCRIPTION API] Got subscription data:', {
+      hasSubscription: !!result.subscription,
+      planType: result.subscription?.planType
+    });
 
     // Log subscription read operation for audit trail
     if (result.subscription) {
@@ -204,18 +221,20 @@ export async function GET() {
             endpoint: '/api/v1/billing/subscription',
             method: 'GET',
             organizationId,
-            hasActiveSubscription: result.hasActiveSubscription
+            hasActiveSubscription: !!result.subscription
           }
         );
       } catch (auditError) {
-        console.error('Failed to create subscription read audit log:', auditError);
+        console.error('[SUBSCRIPTION API] Failed to create subscription read audit log:', auditError);
       }
     }
 
+    console.log('[SUBSCRIPTION API] Returning success response');
     return NextResponse.json(result);
 
   } catch (error) {
-    console.error('Error fetching subscription:', error);
+    console.error('[SUBSCRIPTION API] Error fetching subscription:', error);
+    console.error('[SUBSCRIPTION API] Error stack:', error instanceof Error ? error.stack : 'No stack');
     return handleApiError(error);
   }
 }
