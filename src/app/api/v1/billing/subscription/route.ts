@@ -382,10 +382,11 @@ const createSubscriptionSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     console.log('POST /api/billing/subscription - Starting subscription creation');
-    
+
     // Check if Stripe is configured
-    if (!process.env.STRIPE_SECRET_KEY) {
-      return createErrorResponse('Stripe is not configured. Please add STRIPE_SECRET_KEY to your environment variables.', 503, 'STRIPE_NOT_CONFIGURED');
+    const stripeKey = process.env.STRIPE_SECRET_KEY?.trim();
+    if (!stripeKey || stripeKey.length < 10) {
+      return createErrorResponse('Stripe is not configured. Please contact support to enable billing.', 503, 'STRIPE_NOT_CONFIGURED');
     }
 
     const { userId } = await auth();
@@ -708,11 +709,12 @@ const updateSubscriptionSchema = z.object({
 export async function PATCH(request: NextRequest) {
   try {
     console.log('PATCH /api/billing/subscription - Starting request');
-    
+
     // Check if Stripe is configured
-    if (!process.env.STRIPE_SECRET_KEY) {
+    const stripeKey = process.env.STRIPE_SECRET_KEY?.trim();
+    if (!stripeKey || stripeKey.length < 10) {
       console.error('Stripe not configured');
-      return createErrorResponse('Stripe is not configured. Please add STRIPE_SECRET_KEY to your environment variables.', 503, 'STRIPE_NOT_CONFIGURED');
+      return createErrorResponse('Stripe is not configured. Please contact support to enable billing.', 503, 'STRIPE_NOT_CONFIGURED');
     }
 
     const { userId } = await auth();
