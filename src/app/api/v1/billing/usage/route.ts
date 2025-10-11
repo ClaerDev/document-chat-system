@@ -246,27 +246,55 @@ export async function GET(request: NextRequest) {
       console.log('[USAGE API] No organization ID for user, creating one...');
 
       try {
-        // Create organization
-        const organization = await db.organization.create({
-          data: {
-            name: `${user.firstName || 'User'} ${user.lastName || 'Organization'}`,
-            slug: `org-${userId.slice(0, 8)}-${Date.now()}`,
-          }
-        });
-
-        console.log('[USAGE API] Created organization:', organization.id);
-
-        // Update user with organization
-        await db.user.update({
+        // First check if an organization was created by another concurrent request
+        const refreshedUser = await db.user.findUnique({
           where: { clerkId: user.id },
-          data: { organizationId: organization.id }
+          select: { organizationId: true }
         });
 
-        organizationId = organization.id;
-        console.log('[USAGE API] Updated user with organization');
-      } catch (orgError) {
+        if (refreshedUser?.organizationId) {
+          console.log('[USAGE API] Organization created by concurrent request:', refreshedUser.organizationId);
+          organizationId = refreshedUser.organizationId;
+        } else {
+          // Create organization with unique slug
+          const organization = await db.organization.create({
+            data: {
+              name: `${user.firstName || 'User'} ${user.lastName || 'Organization'}`,
+              slug: `org-${userId.slice(0, 12)}-${Date.now()}`,
+            }
+          });
+
+          console.log('[USAGE API] Created organization:', organization.id);
+
+          // Update user with organization
+          await db.user.update({
+            where: { clerkId: user.id },
+            data: { organizationId: organization.id }
+          });
+
+          organizationId = organization.id;
+          console.log('[USAGE API] Updated user with organization');
+        }
+      } catch (orgError: any) {
         console.error('[USAGE API] Failed to create organization:', orgError);
-        return createErrorResponse('Failed to create organization', 500, 'ORGANIZATION_CREATION_FAILED');
+
+        // Check if it's a unique constraint error - another request might have created it
+        if (orgError.code === 'P2002') {
+          console.log('[USAGE API] Unique constraint error, re-fetching user...');
+          const refreshedUser = await db.user.findUnique({
+            where: { clerkId: user.id },
+            select: { organizationId: true }
+          });
+
+          if (refreshedUser?.organizationId) {
+            organizationId = refreshedUser.organizationId;
+            console.log('[USAGE API] Found organization after constraint error:', organizationId);
+          } else {
+            return createErrorResponse('Failed to create organization', 500, 'ORGANIZATION_CREATION_FAILED');
+          }
+        } else {
+          return createErrorResponse('Failed to create organization', 500, 'ORGANIZATION_CREATION_FAILED');
+        }
       }
     }
 
