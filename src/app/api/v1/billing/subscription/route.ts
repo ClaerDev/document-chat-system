@@ -65,13 +65,23 @@ import { crudAuditLogger } from '@/lib/audit/crud-audit-logger';
 // Extract subscription data fetching logic for caching
 async function fetchSubscriptionData(organizationId: string) {
   // Check if Stripe is configured
-  if (!process.env.STRIPE_SECRET_KEY) {
-    throw new Error('Stripe is not configured. Please add STRIPE_SECRET_KEY to your environment variables.');
+  const stripeKey = process.env.STRIPE_SECRET_KEY?.trim();
+  if (!stripeKey || stripeKey.length < 10) {
+    console.warn('[SUBSCRIPTION] Stripe is not configured properly, returning empty subscription');
+    return {
+      subscription: null,
+      hasActiveSubscription: false,
+      trialStatus: null,
+      usageData: null,
+      nextBilling: null,
+      planFeatures: null,
+      billingHistory: []
+    };
   }
 
   // **ENHANCED**: Use smart sync to ensure fresh data
   console.log('🔍 Getting current subscription with smart sync...');
-  
+
   const smartSyncResult = await SubscriptionSync.smartSync(organizationId, 5); // 5 minute freshness
   const subscription = smartSyncResult.subscription;
 
