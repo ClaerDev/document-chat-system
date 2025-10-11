@@ -70,8 +70,43 @@ export function LandingPageClient() {
     fetchStars()
   }, [])
 
+  // JSON-LD structured data for SEO
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    'name': 'Document Chat System',
+    'applicationCategory': 'BusinessApplication',
+    'description': 'AI-powered document analysis and intelligent chat platform. Upload PDFs, Word documents, images and more. Chat with AI using semantic search and RAG (Retrieval Augmented Generation).',
+    'operatingSystem': 'Web',
+    'offers': {
+      '@type': 'Offer',
+      'price': '0',
+      'priceCurrency': 'USD',
+    },
+    'aggregateRating': {
+      '@type': 'AggregateRating',
+      'ratingValue': '5',
+      'ratingCount': '1',
+    },
+    'featureList': [
+      'AI-powered document chat',
+      'Multi-provider AI support (OpenRouter, OpenAI, Anthropic)',
+      'Semantic search with vector embeddings',
+      'PDF, DOCX, TXT, image support',
+      'RAG (Retrieval Augmented Generation)',
+      'Multi-tenant architecture',
+      'Enterprise security with AES-256 encryption',
+      'Background document processing',
+    ],
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
+      {/* JSON-LD structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Sticky Header with Navigation */}
       <header className="sticky top-0 z-50 px-4 lg:px-6 h-14 flex items-center border-b bg-white/95 dark:bg-gray-950/95 backdrop-blur supports-[backdrop-filter]:bg-white/95 dark:supports-[backdrop-filter]:bg-gray-950/95">
         <Link className="flex items-center justify-center" href="/">
