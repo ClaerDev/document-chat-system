@@ -205,12 +205,12 @@ export function LandingPageClient() {
                 AI-Powered Document Chat System
               </h1>
               <p className="mx-auto max-w-[800px] text-gray-600 md:text-xl lg:text-2xl dark:text-gray-300">
-                Production-ready, open-source platform for intelligent document management and AI conversations.
-                Built with Next.js 15, React 19, and cutting-edge AI technology.
+                Upload documents, chat with AI about their content, and extract insights instantly.
+                Bring Your Own AI Keys (BYOK) - pay providers directly with zero markup.
               </p>
               <p className="mx-auto max-w-[700px] text-gray-500 md:text-lg dark:text-gray-400">
-                Upload any document, have natural conversations with AI about the content, and build your own
-                SaaS product with built-in monetization features.
+                Open-source, privacy-first document chat system built with Next.js 15, React 19, and TypeScript.
+                Deploy your own instance with optional billing to monetize as a SaaS.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">

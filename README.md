@@ -8,7 +8,7 @@
 [![React 19](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 
-**Production-ready, open-source platform for intelligent document management and AI conversations**
+**Upload documents, chat with AI, extract insights. BYOK (Bring Your Own Keys) - pay AI providers directly with zero markup.**
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fwatat83%2Fdocument-chat-system&env=DATABASE_URL,NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,CLERK_SECRET_KEY,NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY,INNGEST_EVENT_KEY,INNGEST_SIGNING_KEY&envDescription=Required%20environment%20variables%20for%20Document%20Chat%20System&envLink=https%3A%2F%2Fgithub.com%2Fwatat83%2Fdocument-chat-system%2Fblob%2Fmain%2F.env.example&project-name=document-chat-system&repository-name=document-chat-system)
 
@@ -47,19 +47,20 @@
 
 ## Overview
 
-**Document Chat System** is a full-stack, production-ready application that combines intelligent document management with AI-powered conversations. Upload documents in 10+ formats, automatically process and index them, then have natural language conversations about your content.
+**Document Chat System** is an open-source platform that lets you upload documents and chat with AI about their content. Unlike typical SaaS solutions, you bring your own AI API keys (BYOK) - your keys stay encrypted in your browser, never touch our servers, and you pay AI providers directly with zero markup.
 
-### Key Highlights
+### What Makes This Different?
 
-- **🆓 100% Free & Open Source** - MIT licensed with no restrictions
-- **🤖 Multi-Provider AI** - OpenRouter (100+ models), OpenAI, ImageRouter
-- **📄 10+ File Formats** - PDFs, Office documents, images, and more
-- **🔍 Vector Search** - Semantic search with Pinecone or pgvector
-- **👥 Multi-Tenant** - Enterprise-grade organization isolation
-- **💳 Optional Billing** - Built-in Stripe integration for SaaS monetization
-- **🐳 Docker Ready** - Production Dockerfile included
-- **⚡ Background Jobs** - Scalable processing with Inngest
-- **🎨 Modern UI** - Beautiful, responsive interface with dark mode
+- **🔐 Privacy-First BYOK** - Your API keys are AES-256 encrypted and stored only in your browser's localStorage. They never leave your device or touch any server.
+- **💰 Zero Markup** - Pay AI providers directly (OpenRouter, OpenAI, Anthropic). No middleman, no markup, full cost transparency.
+- **🆓 100% Free & Open Source** - MIT licensed. Deploy your own instance, modify as needed, or monetize as a SaaS.
+- **🤖 Multi-Provider AI** - Choose from 100+ models via OpenRouter, or use OpenAI/Anthropic directly. Switch providers anytime.
+- **📄 Full Document Support** - PDFs, DOCX, TXT, images with OCR, and more. Automatic text extraction and processing.
+- **🔍 Semantic Search** - Vector search with Pinecone or pgvector finds relevant content, not just keywords.
+- **👥 Multi-Tenant Ready** - Built-in organization isolation. Each user/org has separate data.
+- **💳 Optional SaaS Billing** - Want to monetize? Built-in Stripe integration with customizable pricing plans.
+- **⚡ Background Processing** - Inngest handles document processing, vectorization, and AI analysis asynchronously.
+- **🐳 Production Ready** - Dockerfile included, deploy to Vercel/Railway/Render in minutes.
 
 ---
 
