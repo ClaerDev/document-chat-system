@@ -191,12 +191,36 @@ export async function GET() {
       return createErrorResponse('User not found in database', 404, 'USER_NOT_FOUND');
     }
 
-    const organizationId = dbUser.organizationId;
+    let organizationId = dbUser.organizationId;
     console.log('[SUBSCRIPTION API] Organization ID:', organizationId);
 
+    // **AUTO-FIX**: If user doesn't have organization, create one automatically
     if (!organizationId) {
-      console.log('[SUBSCRIPTION API] No organization ID for user');
-      return createErrorResponse('Organization not found', 404, 'ORGANIZATION_NOT_FOUND');
+      console.log('[SUBSCRIPTION API] No organization ID for user, creating one...');
+
+      try {
+        // Create organization
+        const organization = await db.organization.create({
+          data: {
+            name: `${user.firstName || 'User'} ${user.lastName || 'Organization'}`,
+            slug: `org-${userId.slice(0, 8)}-${Date.now()}`,
+          }
+        });
+
+        console.log('[SUBSCRIPTION API] Created organization:', organization.id);
+
+        // Update user with organization
+        await db.user.update({
+          where: { clerkId: user.id },
+          data: { organizationId: organization.id }
+        });
+
+        organizationId = organization.id;
+        console.log('[SUBSCRIPTION API] Updated user with organization');
+      } catch (orgError) {
+        console.error('[SUBSCRIPTION API] Failed to create organization:', orgError);
+        return createErrorResponse('Failed to create organization', 500, 'ORGANIZATION_CREATION_FAILED');
+      }
     }
 
     // **NO CACHE** - Always fetch fresh subscription data for immediate updates

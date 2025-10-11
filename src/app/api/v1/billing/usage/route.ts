@@ -238,12 +238,36 @@ export async function GET(request: NextRequest) {
       return createErrorResponse('User not found in database', 404, 'USER_NOT_FOUND');
     }
 
-    const organizationId = dbUser.organizationId;
+    let organizationId = dbUser.organizationId;
     console.log('[USAGE API] Organization ID:', organizationId);
 
+    // **AUTO-FIX**: If user doesn't have organization, create one automatically
     if (!organizationId) {
-      console.log('[USAGE API] No organization ID for user');
-      return createErrorResponse('Organization not found', 404, 'ORGANIZATION_NOT_FOUND');
+      console.log('[USAGE API] No organization ID for user, creating one...');
+
+      try {
+        // Create organization
+        const organization = await db.organization.create({
+          data: {
+            name: `${user.firstName || 'User'} ${user.lastName || 'Organization'}`,
+            slug: `org-${userId.slice(0, 8)}-${Date.now()}`,
+          }
+        });
+
+        console.log('[USAGE API] Created organization:', organization.id);
+
+        // Update user with organization
+        await db.user.update({
+          where: { clerkId: user.id },
+          data: { organizationId: organization.id }
+        });
+
+        organizationId = organization.id;
+        console.log('[USAGE API] Updated user with organization');
+      } catch (orgError) {
+        console.error('[USAGE API] Failed to create organization:', orgError);
+        return createErrorResponse('Failed to create organization', 500, 'ORGANIZATION_CREATION_FAILED');
+      }
     }
 
     // Use cache with 60-second TTL for usage data
