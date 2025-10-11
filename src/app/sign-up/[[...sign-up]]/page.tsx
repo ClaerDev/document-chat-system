@@ -16,7 +16,6 @@ export default function Page() {
             <p className="text-gray-600 mt-2">Create your account</p>
           </div>
           <SignUp
-            afterSignUpUrl="/dashboard"
             appearance={{
               elements: {
                 formButtonPrimary: 'bg-blue-600 hover:bg-blue-700 text-sm',
