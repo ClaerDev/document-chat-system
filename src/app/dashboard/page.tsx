@@ -302,7 +302,7 @@ export default function Dashboard() {
                 ) : (
                   <div className="space-y-3">
                     {recentDocuments.map((doc) => (
-                      <Link key={doc.id} href={`/documents?id=${doc.id}`}>
+                      <Link key={doc.id} href={`/documents/${doc.id}`}>
                         <div className="flex items-center space-x-4 p-3 rounded-lg border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
                           <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
                             <FileText className="h-5 w-5" />
