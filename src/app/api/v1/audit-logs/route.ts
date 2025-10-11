@@ -173,7 +173,10 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    return NextResponse.json(result);
+    return NextResponse.json({
+      success: true,
+      ...result
+    });
   } catch (error) {
     console.error('Failed to retrieve audit logs:', error);
     
