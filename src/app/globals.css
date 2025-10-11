@@ -410,7 +410,7 @@ html {
   /* Enhanced animations */
   .animate-gradient {
     background-size: 200% 200%;
-    animation: gradient 3s ease infinite;
+    animation: gradient 8s ease infinite;
   }
 
   @keyframes gradient {
