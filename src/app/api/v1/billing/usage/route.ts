@@ -338,7 +338,43 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('[USAGE API] Error fetching usage:', error);
     console.error('[USAGE API] Error stack:', error instanceof Error ? error.stack : 'No stack');
-    return handleApiError(error);
+    console.error('[USAGE API] Error name:', error instanceof Error ? error.name : 'Unknown');
+    console.error('[USAGE API] Error message:', error instanceof Error ? error.message : 'Unknown');
+
+    // Return empty usage data as fallback instead of failing
+    return NextResponse.json({
+      usage: {
+        period: {
+          start: new Date().toISOString(),
+          end: new Date().toISOString()
+        },
+        totals: {
+          OPPORTUNITY_MATCH: 0,
+          AI_QUERY: 0,
+          DOCUMENT_PROCESSING: 0,
+          API_CALL: 0,
+          EXPORT: 0,
+          MATCH_SCORE_CALCULATION: 0,
+          SAVED_SEARCH: 0,
+        },
+        limits: {
+          matchesPerMonth: 100,
+          aiQueriesPerMonth: 50,
+          documentsPerMonth: 10,
+          matchScoreCalculations: 1000,
+          savedSearches: 10,
+        },
+        percentUsed: {
+          matches: 0,
+          aiQueries: 0,
+          documents: 0,
+          matchScoreCalculations: 0,
+          savedSearches: 0,
+        },
+        recordCount: 0,
+      },
+      error: 'Failed to fetch usage data, showing defaults'
+    });
   }
 }
 

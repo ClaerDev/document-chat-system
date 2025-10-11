@@ -287,7 +287,20 @@ export async function GET() {
   } catch (error) {
     console.error('[SUBSCRIPTION API] Error fetching subscription:', error);
     console.error('[SUBSCRIPTION API] Error stack:', error instanceof Error ? error.stack : 'No stack');
-    return handleApiError(error);
+    console.error('[SUBSCRIPTION API] Error name:', error instanceof Error ? error.name : 'Unknown');
+    console.error('[SUBSCRIPTION API] Error message:', error instanceof Error ? error.message : 'Unknown');
+
+    // Return empty subscription data as fallback instead of failing
+    return NextResponse.json({
+      subscription: null,
+      hasActiveSubscription: false,
+      trialStatus: null,
+      usageData: null,
+      nextBilling: null,
+      planFeatures: null,
+      billingHistory: [],
+      error: 'Failed to fetch subscription data'
+    });
   }
 }
 
