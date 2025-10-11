@@ -285,7 +285,7 @@ export function CleanAIChat({ organizationId, className, onCitationsUpdate, chat
       return {
         id: 'welcome-general',
         role: 'assistant', 
-        content: `👋 **Welcome to AI Assistant**\n\nI'm here to help with government contracting questions, general business advice, and any other topics you'd like to discuss.\n\n💡 *Tip: Enable "Document Chat" in the floating chat window to search and analyze your uploaded documents.*`,
+        content: `👋 **Welcome to AI Assistant**\n\nI'm here to help with your questions, provide insights, and assist with any topics you'd like to discuss.\n\n💡 *Tip: Enable "Document Chat" in the floating chat window to search and analyze your uploaded documents.*`,
         timestamp: new Date().toISOString()
       };
     }
@@ -934,21 +934,20 @@ export function CleanAIChat({ organizationId, className, onCitationsUpdate, chat
       // Prepare messages for AI API
       const systemMessage = {
         role: 'system' as const,
-        content: `You are an AI assistant, an expert for government contracting. You help users with:
-- Finding and analyzing government contract opportunities
-- Writing proposals and ensuring compliance
-- Understanding regulations (FAR, DFARS, etc.)
-- Market research and competitive analysis
-- NAICS code analysis and certification requirements
-- Analyzing images, documents, PDFs, and other attachments in the context of government contracting
+        content: `You are a helpful AI assistant. You help users with their questions and tasks including:
+- Analyzing and extracting information from documents
+- Answering questions and providing insights
+- Research and information gathering
+- Content creation and analysis
+- Analyzing images, documents, PDFs, and other attachments
 
 IMPORTANT: When users upload files (PDFs, images, documents), you MUST acknowledge that you can see the attached files and analyze their content. Extract and analyze all relevant information from uploaded files. For PDFs, extract text, tables, and data. For images, describe what you see. Always reference the specific files the user has uploaded.
 
 CRITICAL: When referencing information from uploaded files, you MUST cite the specific file name in your response. Format file references like this:
-- "According to [filename.pdf], the requirement states..."
+- "According to [filename.pdf], the document states..."
 - "Based on the data in [document.xlsx], we can see..."
 - "The image [screenshot.png] shows..."
-- "As outlined in [proposal.docx], the key points are..."
+- "As outlined in [document.docx], the key points are..."
 
 Always include the filename in brackets when referencing uploaded content. This helps users understand which specific document contains the information you're referencing.
 
@@ -967,10 +966,10 @@ REQUIRED FORMAT (copy this exactly):
 https://www.youtube.com/watch?v=[VIDEO_ID]
 
 EXAMPLE - THIS IS CORRECT:
-### Who Is Nick Fuentes? | PBD Podcast
+### Sample Video Title
 https://www.youtube.com/watch?v=7TEnJ5pyFDg
 
-### Nick Fuentes Interview 2024
+### Another Video Title
 https://www.youtube.com/watch?v=M6eEn5IsDxk
 
 ❌ NEVER DO THIS:
@@ -990,7 +989,7 @@ If you cannot find actual YouTube URLs in your search results, say: "I searched 
 
 DO NOT respond with just video titles. URLs are MANDATORY.
 
-Provide accurate, helpful, and professional guidance for government contracting success.`
+Provide accurate, helpful, and professional assistance.`
       };
 
       // Convert messages to API format using imperative approach
@@ -1602,59 +1601,59 @@ Provide accurate, helpful, and professional guidance for government contracting 
     return uniqueCitations;
   };
 
-  // Generate fallback content for demo mode
+  // Generate fallback content
   const generateFallbackContent = (messageContent: string) => {
     if (messageContent.trim().length === 0 || messageContent.trim() === '?') {
-      return `I'm here to help you with government contracting! Here are some ways I can assist:
+      return `I'm here to help you! Here are some ways I can assist:
 
-**🎯 Opportunity Discovery**
-- Search for federal, state, and local contracts
-- Analyze NAICS code alignment
-- Filter opportunities by set-asides (8(a), HUBZone, WOSB, etc.)
+**🎯 Information & Research**
+- Answer questions on various topics
+- Research and gather information
+- Provide insights and analysis
 
-**📝 Proposal Development**
-- Review and improve proposal content
-- Ensure compliance with FAR/DFARS requirements
-- Draft technical documentation
+**📝 Content & Documents**
+- Review and analyze documents
+- Extract information from files
+- Summarize content
 
-**💼 Business Development**
-- Analyze past performance requirements
-- Identify teaming opportunities
-- Research contracting vehicles (GSA, SEWP, CIO-SP3)
+**💼 General Assistance**
+- Problem solving
+- Task planning
+- Creative ideation
 
-**📊 Market Research**
-- Study government spending patterns
-- Identify emerging opportunities
-- Competitive landscape analysis
+**📊 Data Analysis**
+- Analyze patterns and trends
+- Extract insights from data
+- Provide recommendations
 
-Try asking me something specific like:
-- "Help me find IT contracts for small businesses"
-- "Review my proposal for compliance"
-- "What NAICS codes should I consider?"
-- "Explain the FAR clauses for this opportunity"
+Try asking me something like:
+- "Can you help me understand this document?"
+- "What are the key points in this file?"
+- "Help me research [topic]"
+- "Analyze this information for me"
 
-> **Note**: This is a demonstration mode. Connect your API keys for full functionality.`;
+> **Note**: Connect your API keys for full functionality.`;
     }
-    
+
     return `I understand you're asking about: "${messageContent}"
 
 ${documents.length > 0 ? `I can see you've attached ${documents.length} file(s). Let me analyze them for you.\n\n` : ''}
-As your **AI Assistant**, I'm here to help you with government contracting opportunities. Based on your query, here's how I can assist:
+As your **AI Assistant**, I'm here to help you with your questions. Based on your query, here's how I can assist:
 
 **🎯 For your specific question:**
-${messageContent.toLowerCase().includes('naics') ? '- I can help analyze NAICS code alignment and eligibility requirements\n- Identify the best codes for your business capabilities\n- Explain how NAICS codes affect contract opportunities' : ''}
-${messageContent.toLowerCase().includes('proposal') ? '- I can review your proposal content for compliance and effectiveness\n- Suggest improvements to technical approach and cost structure\n- Ensure all requirements are addressed' : ''}
-${messageContent.toLowerCase().includes('compliance') || messageContent.toLowerCase().includes('far') || messageContent.toLowerCase().includes('dfars') ? '- I can help navigate FAR, DFARS, and other regulatory requirements\n- Identify compliance gaps and provide recommendations\n- Explain specific clauses and their implications' : ''}
-${messageContent.toLowerCase().includes('opportunity') || messageContent.toLowerCase().includes('contract') ? '- I can help you find relevant contracting opportunities\n- Analyze opportunity requirements and fit\n- Identify potential teaming partners' : ''}
+- I can analyze the content and provide insights
+- Extract key information and patterns
+- Provide relevant context and explanations
+- Suggest next steps and recommendations
 
 **💡 Recommended next steps:**
-1. Review the relevant regulations and requirements
-2. Analyze your company's capabilities and past performance  
-3. Develop a strategic approach that highlights your unique value proposition
+1. Review the information provided
+2. Analyze any relevant context or background
+3. Develop an approach based on your specific needs
 
-Would you like me to dive deeper into any of these areas? I can also help you search for specific opportunities or analyze particular aspects of government contracting.
+Would you like me to dive deeper into any aspects of your question?
 
-> **Note**: This is a demonstration. Enable API keys for full functionality.`;
+> **Note**: Enable API keys for full functionality.`;
   };
   
   const simulateStreaming = async (fullContent: string, modelName?: string, metadata?: { citations?: Citation[]; annotations?: any[] }) => {
@@ -2063,7 +2062,7 @@ Would you like me to dive deeper into any of these areas? I can also help you se
                       Welcome to AI Assistant
                     </h1>
                     <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mb-6 sm:mb-8">
-                      Your AI assistant for government contracting success
+                      Your intelligent assistant for documents and information
                     </p>
                   </div>
                   
@@ -2071,30 +2070,30 @@ Would you like me to dive deeper into any of these areas? I can also help you se
                     <div className="p-3 sm:p-4 rounded-lg bg-muted/50 border border-border">
                       <div className="flex items-center gap-2 sm:gap-3 mb-2">
                         <Target className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
-                        <h3 className="font-semibold text-sm sm:text-base text-foreground">Find Opportunities</h3>
+                        <h3 className="font-semibold text-sm sm:text-base text-foreground">Research & Analysis</h3>
                       </div>
-                      <p className="text-xs sm:text-sm text-muted-foreground">Discover federal, state, and local contracting opportunities</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Get insights and information on any topic</p>
                     </div>
                     <div className="p-3 sm:p-4 rounded-lg bg-muted/50 border border-border">
                       <div className="flex items-center gap-2 sm:gap-3 mb-2">
                         <PenTool className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
-                        <h3 className="font-semibold text-sm sm:text-base text-foreground">Write Proposals</h3>
+                        <h3 className="font-semibold text-sm sm:text-base text-foreground">Document Analysis</h3>
                       </div>
-                      <p className="text-xs sm:text-sm text-muted-foreground">Get help drafting winning proposals and technical documentation</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Extract information and insights from your documents</p>
                     </div>
                     <div className="p-3 sm:p-4 rounded-lg bg-muted/50 border border-border">
                       <div className="flex items-center gap-2 sm:gap-3 mb-2">
                         <CheckSquare className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
-                        <h3 className="font-semibold text-sm sm:text-base text-foreground">Ensure Compliance</h3>
+                        <h3 className="font-semibold text-sm sm:text-base text-foreground">Content Creation</h3>
                       </div>
-                      <p className="text-xs sm:text-sm text-muted-foreground">Navigate FAR, DFARS, and other regulatory requirements</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Draft, edit, and improve written content</p>
                     </div>
                     <div className="p-3 sm:p-4 rounded-lg bg-muted/50 border border-border">
                       <div className="flex items-center gap-2 sm:gap-3 mb-2">
                         <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
-                        <h3 className="font-semibold text-sm sm:text-base text-foreground">Analyze Markets</h3>
+                        <h3 className="font-semibold text-sm sm:text-base text-foreground">Data Insights</h3>
                       </div>
-                      <p className="text-xs sm:text-sm text-muted-foreground">Research spending patterns and identify teaming opportunities</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Analyze patterns and extract meaningful insights</p>
                     </div>
                   </div>
 
@@ -2104,22 +2103,22 @@ Would you like me to dive deeper into any of these areas? I can also help you se
                     </p>
                     <div className="flex flex-wrap justify-center gap-2">
                       <button
-                        onClick={() => setInput('Help me find federal opportunities in cybersecurity')}
+                        onClick={() => setInput('Help me analyze this document')}
                         className="px-3 py-1 text-xs bg-primary/10 hover:bg-primary/20 text-primary rounded-full transition-colors"
                       >
-                        Find opportunities
+                        Analyze document
                       </button>
                       <button
-                        onClick={() => setInput('Review my proposal for compliance issues')}
+                        onClick={() => setInput('Summarize this information for me')}
                         className="px-3 py-1 text-xs bg-primary/10 hover:bg-primary/20 text-primary rounded-full transition-colors"
                       >
-                        Review proposal
+                        Summarize
                       </button>
                       <button
-                        onClick={() => setInput('What are the key requirements for 8(a) certification?')}
+                        onClick={() => setInput('What are the key points in this content?')}
                         className="px-3 py-1 text-xs bg-primary/10 hover:bg-primary/20 text-primary rounded-full transition-colors"
                       >
-                        Learn about 8(a)
+                        Extract key points
                       </button>
                     </div>
                   </div>
