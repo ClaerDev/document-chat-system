@@ -79,24 +79,24 @@ function getActivityColor(type: ActivityItem['type']) {
   }
 }
 
-function getActivityBadge(type: ActivityItem['type']) {
+function getActivityBadgeText(type: ActivityItem['type']): string {
   switch (type) {
     case 'document_upload':
-      return <Badge variant="outline" className="text-blue-600 border-blue-600">Upload</Badge>
+      return 'Uploaded'
     case 'chat':
-      return <Badge variant="outline" className="text-green-600 border-green-600">Chat</Badge>
+      return 'Chat'
     case 'document_view':
-      return <Badge variant="outline" className="text-purple-600 border-purple-600">View</Badge>
+      return 'Viewed'
     case 'search':
-      return <Badge variant="outline" className="text-orange-600 border-orange-600">Search</Badge>
+      return 'Search'
     case 'document_edit':
-      return <Badge variant="outline" className="text-yellow-600 border-yellow-600">Edit</Badge>
+      return 'Edited'
     case 'document_delete':
-      return <Badge variant="outline" className="text-red-600 border-red-600">Delete</Badge>
+      return 'Deleted'
     case 'document_share':
-      return <Badge variant="outline" className="text-indigo-600 border-indigo-600">Share</Badge>
+      return 'Shared'
     default:
-      return <Badge variant="outline">Activity</Badge>
+      return 'Activity'
   }
 }
 
@@ -272,7 +272,8 @@ export function UserActivity() {
               {activities.map((activity) => (
                 <div
                   key={activity.id}
-                  className="group flex items-start space-x-4 p-3 rounded-lg border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                  className="group flex items-start space-x-4 p-3 rounded-lg border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                  onClick={() => activity.type !== 'document_delete' && handleViewActivity(activity)}
                 >
                   <div className={`p-2.5 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 ${getActivityColor(activity.type)} flex-shrink-0`}>
                     {getActivityIcon(activity.type)}
@@ -283,11 +284,13 @@ export function UserActivity() {
                         <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-0.5">
                           {activity.title}
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
                           {activity.description}
                         </p>
                       </div>
-                      {getActivityBadge(activity.type)}
+                      <Badge variant="secondary" className="text-xs flex-shrink-0">
+                        {getActivityBadgeText(activity.type)}
+                      </Badge>
                     </div>
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
@@ -295,15 +298,10 @@ export function UserActivity() {
                         {formatRelativeTime(activity.timestamp)}
                       </div>
                       {activity.type !== 'document_delete' && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleViewActivity(activity)}
-                          className="h-7 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          View
-                          <ExternalLink className="ml-1 h-3 w-3" />
-                        </Button>
+                        <div className="flex items-center text-xs text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <span className="mr-1">View</span>
+                          <ExternalLink className="h-3 w-3" />
+                        </div>
                       )}
                     </div>
                   </div>
