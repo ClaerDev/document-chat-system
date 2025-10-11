@@ -43,8 +43,8 @@ function mapEntityTypeToEnum(type: string): EntityType {
  */
 export const analyzeDocument = inngest.createFunction(
   {
-    id: "analyze-document",
-    name: "Analyze Document",
+    id: "analyze-document-v2",
+    name: "Analyze Document v2",
     retries: 2,
     concurrency: {
       limit: 3, // Limit concurrent analysis for better resource management
@@ -635,9 +635,6 @@ export const analyzeDocument = inngest.createFunction(
             estimatedValue: metadataAnalysis.metadata.estimatedValue,
             timeline: metadataAnalysis.metadata.deadline ? `Due: ${metadataAnalysis.metadata.deadline}` : undefined,
             deadlines: metadataAnalysis.metadata.deadline ? [metadataAnalysis.metadata.deadline] : [],
-            naicsCodes: metadataAnalysis.metadata.naicsCodes || [],
-            setAsideType: metadataAnalysis.metadata.setAsideType,
-            documentType: metadataAnalysis.metadata.documentType,
             urgencyLevel: metadataAnalysis.metadata.urgencyLevel,
             complexityScore: metadataAnalysis.metadata.complexityScore
           } : null,
@@ -651,19 +648,6 @@ export const analyzeDocument = inngest.createFunction(
             risks: contractAnalysis.analysis.risks || [],
             opportunities: contractAnalysis.analysis.opportunities || []
           } : null,
-          // Add metadata for document-level fields
-          metadata: metadataAnalysis.success && metadataAnalysis.metadata ? {
-            documentType: metadataAnalysis.metadata.documentType,
-            tags: metadataAnalysis.metadata.tags || [],
-            keywords: metadataAnalysis.metadata.keywords || [],
-            naicsCodes: metadataAnalysis.metadata.naicsCodes || [],
-            setAsideType: metadataAnalysis.metadata.setAsideType,
-            estimatedValue: metadataAnalysis.metadata.estimatedValue,
-            urgencyLevel: metadataAnalysis.metadata.urgencyLevel,
-            complexityScore: metadataAnalysis.metadata.complexityScore,
-            description: metadataAnalysis.metadata.description,
-            extractedAt: new Date().toISOString()
-          } : null,
           // Add overall confidence score for UI display
           confidence: overallConfidence,
           // Flatten content analysis to top level for UI compatibility
@@ -675,8 +659,6 @@ export const analyzeDocument = inngest.createFunction(
           sentiment: contentAnalysisData.sentiment || 'neutral',
           qualityScore: contentAnalysisData.qualityScore || qualityScore?.overallScore || 0,
           readabilityScore: contentAnalysisData.readabilityScore || 0,
-          // Keep full content analysis in nested structure for compatibility
-          content: contentAnalysisData,
           security: securityAnalysis.security || { classification: 'UNCLASSIFIED' },
           completedAt: new Date().toISOString(),
           processingTime: Date.now() - startTime
@@ -744,17 +726,19 @@ export const analyzeDocument = inngest.createFunction(
           ]
         };
 
-        await prisma.document.update({
-          where: { id: documentId },
-          data: {
-            processing: finalProcessing,
-            analysis: analysisData,
-            entities: entitiesData,
+        console.log(`📊 [INNGEST] About to save - analysisData keys:`, Object.keys(analysisData));
+        console.log(`📊 [INNGEST] About to save - analysisData structure:`, JSON.stringify(analysisData, null, 2).substring(0, 500));
+
+        try {
+          await prisma.document.update({
+            where: { id: documentId },
+            data: {
+              processing: finalProcessing,
+              analysis: analysisData,
+              entities: entitiesData,
             // Update document-level metadata fields if metadata analysis succeeded
             ...(metadataAnalysis.success && metadataAnalysis.metadata && {
               documentType: metadataAnalysis.metadata.documentType,
-              naicsCodes: metadataAnalysis.metadata.naicsCodes || [],
-              setAsideType: metadataAnalysis.metadata.setAsideType,
               tags: metadataAnalysis.metadata.tags || []
             }),
             // Update extracted text only if we got fresh content from file processing (not editor content)
@@ -779,9 +763,14 @@ export const analyzeDocument = inngest.createFunction(
               }
             })
           }
-        });
+          });
 
-        console.log(`✅ [INNGEST] Analysis completed successfully for ${documentId} in ${Date.now() - startTime}ms`);
+          console.log(`✅ [INNGEST] Analysis completed successfully for ${documentId} in ${Date.now() - startTime}ms`);
+        } catch (saveError) {
+          console.error(`❌ [INNGEST] Failed to save analysis results:`, saveError);
+          console.error(`❌ [INNGEST] Error details:`, JSON.stringify(saveError, null, 2));
+          throw saveError; // Re-throw to let Inngest handle retry
+        }
       });
 
       return {

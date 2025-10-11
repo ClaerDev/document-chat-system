@@ -1353,9 +1353,7 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
   
   // Editing states for document fields - gracefully handles documents without AI data
   const [editableData, setEditableData] = useState(() => ({
-    naicsCodes: [], // Will be populated when document loads
     tags: [], // Will be populated when document loads
-    setAsideType: '', // Will be populated when document loads
     contractValue: '', // Will be populated when document loads
     deadline: '', // Will be populated when document loads
     documentType: 'OTHER', // Will be populated when document loads
@@ -1458,17 +1456,11 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
         deadline: document.analysis?.contract?.deadlines?.[0],
         timeline: document.analysis?.contract?.timeline,
         directDeadline: document.deadline,
-        naicsCodes: document.naicsCodes,
-        setAsideType: document.setAsideType,
         documentType: document.documentType
       })
       
       setEditableData({
-        naicsCodes: document.naicsCodes || 
-                   (document.entities?.entities?.filter(e => e.type === 'NAICS_CODE').map(e => e.text)) || 
-                   [], // User-defined business data from database or AI-extracted
         tags: document.tags || [], // User tags from database
-        setAsideType: document.setAsideType || '', // User-defined business data from database
         contractValue: document.analysis?.contract?.estimatedValue || 
                       document.analysis?.contractAnalysis?.estimatedValue || 
                       document.contractValue || '', // From AI contract analysis or alternative sources
@@ -1491,11 +1483,7 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
       
       // Update last saved data to match initial document state
       setLastSavedData({
-        naicsCodes: document.naicsCodes || 
-                   (document.entities?.entities?.filter(e => e.type === 'NAICS_CODE').map(e => e.text)) || 
-                   [],
         tags: document.tags || [],
-        setAsideType: document.setAsideType || '',
         contractValue: document.analysis?.contract?.estimatedValue || 
                       document.analysis?.contractAnalysis?.estimatedValue || 
                       document.contractValue || '',
@@ -1649,8 +1637,6 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
     const dataToSave = overrideData ? { ...editableData, ...overrideData } : editableData
     
     console.log('💾 Saving document with data:', {
-      setAsideType: dataToSave.setAsideType,
-      naicsCodes: dataToSave.naicsCodes,
       contractValue: dataToSave.contractValue,
       deadline: dataToSave.deadline
     })
@@ -1696,8 +1682,6 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
         name: documentTitle,
         documentType: dataToSave.documentType,
         description: document.description, // Preserve existing description
-        setAsideType: dataToSave.setAsideType,
-        naicsCodes: dataToSave.naicsCodes,
         entities: dataToSave.entities // Add entities to payload
       }
       
@@ -1766,8 +1750,6 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
         
         console.log('🔄 PATCH Response - Full Updated Document:', updatedDoc)
         console.log('🔍 PATCH Response - Key Fields Check:', {
-          setAsideType: updatedDoc.setAsideType,
-          naicsCodes: updatedDoc.naicsCodes,
           tags: updatedDoc.tags,
           contractAnalysis: updatedDoc.analysis?.contractAnalysis
         })
@@ -1807,8 +1789,6 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
             name: completeUpdatedDoc.name,
             tags: completeUpdatedDoc.tags,
             documentType: completeUpdatedDoc.documentType,
-            setAsideType: completeUpdatedDoc.setAsideType,
-            naicsCodes: completeUpdatedDoc.naicsCodes,
             content: completeUpdatedDoc.content,
             analysis: completeUpdatedDoc.analysis,
             entities: completeUpdatedDoc.entities,
@@ -1823,9 +1803,7 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
         setEditableData(prev => ({
           ...prev, // Preserve all existing editable data
           // Update fields from the complete merged document
-          naicsCodes: completeUpdatedDoc.naicsCodes || prev.naicsCodes || [],
           tags: completeUpdatedDoc.tags || prev.tags || [],
-          setAsideType: completeUpdatedDoc.setAsideType || prev.setAsideType || '',
           documentType: completeUpdatedDoc.documentType || prev.documentType || 'OTHER',
           contractValue: completeUpdatedDoc.analysis?.contractAnalysis?.estimatedValue || 
                         completeUpdatedDoc.analysis?.contract?.estimatedValue || 
@@ -1935,7 +1913,7 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
     
     let newValue: any
     
-    if (field === 'naicsCodes' || field === 'tags') {
+    if (field === 'tags') {
       newValue = tempValue.split(',').map(item => item.trim()).filter(item => item)
     } else if (field === 'entities') {
       newValue = value // Entities are passed directly as an array
@@ -2090,11 +2068,7 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
     if (document) {
       setLocalAIKeywords(document.content?.keywords || [])
       setEditableData({
-        naicsCodes: document.naicsCodes || 
-                   (document.entities?.entities?.filter(e => e.type === 'NAICS_CODE').map(e => e.text)) || 
-                   [],
         tags: document.tags || [],
-        setAsideType: document.setAsideType || '',
         contractValue: document.analysis?.contract?.estimatedValue || 
                       document.analysis?.contractAnalysis?.estimatedValue || 
                       document.contractValue || '',
@@ -2128,10 +2102,10 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
    * USAGE EXAMPLES:
    * 
    * 1. User field update (current functionality):
-   *    await updateDocumentField({ 
-   *      field: 'setAsideType', 
-   *      value: '8(a)', 
-   *      source: 'user' 
+   *    await updateDocumentField({
+   *      field: 'tags',
+   *      value: ['contract', 'proposal'],
+   *      source: 'user'
    *    })
    * 
    * 2. AI analysis update (future):
@@ -2171,8 +2145,6 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
    * 5. Batch update (multiple fields at once):
    *    await updateDocumentField({
    *      batchUpdates: {
-   *        setAsideType: '8(a)',
-   *        naicsCodes: ['541511', '541512'],
    *        tags: ['important', 'priority']
    *      },
    *      source: 'batch',
@@ -2295,9 +2267,7 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
       
       // Handle user field updates (current functionality)
       if (source === 'user' && field && value !== undefined) {
-        if (field === 'setAsideType') {
-          saveData[field] = value
-        } else if (field === 'documentType') {
+        if (field === 'documentType') {
           // Validate document type against enum values
           const validDocumentTypes = Object.values(DocumentType)
           if (validDocumentTypes.includes(value as DocumentType)) {
@@ -2308,7 +2278,7 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
             notify.warning('Invalid Document Type', `"${value}" is not a valid document type. Using "OTHER" instead.`)
             saveData[field] = DocumentType.OTHER
           }
-        } else if (field === 'naicsCodes' || field === 'tags') {
+        } else if (field === 'tags') {
           saveData[field] = Array.isArray(value) ? value : value.split(',').map((item: string) => item.trim()).filter((item: string) => item)
         } else if (field === 'contractValue' || field === 'deadline') {
           saveData.contractAnalysis = {
@@ -2459,14 +2429,8 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
             setEditableData(prev => ({
               ...prev, // CRITICAL: Preserve all existing editable data
               // Only update fields that were actually returned in the response
-              ...(updatedDoc.document.naicsCodes !== undefined && { 
-                naicsCodes: updatedDoc.document.naicsCodes || [] 
-              }),
-              ...(updatedDoc.document.tags !== undefined && { 
-                tags: updatedDoc.document.tags || [] 
-              }),
-              ...(updatedDoc.document.setAsideType !== undefined && { 
-                setAsideType: updatedDoc.document.setAsideType || '' 
+              ...(updatedDoc.document.tags !== undefined && {
+                tags: updatedDoc.document.tags || []
               }),
               ...(updatedDoc.document.documentType !== undefined && { 
                 documentType: updatedDoc.document.documentType || 'OTHER' 
@@ -2882,115 +2846,6 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
                       >
                         <Edit2 className="h-3 w-3" />
                       </Button>
-                    )}
-                  </div>
-                )}
-              </div>
-              
-              {/* Set-Aside Type */}
-              <div className="flex justify-between items-center text-sm min-w-0">
-                <span className="text-muted-foreground shrink-0">Set-Aside</span>
-                {isEditing && editingField === 'setAsideType' ? (
-                  <div className="flex items-center gap-1">
-                    <Select 
-                      value={tempValue || editableData.setAsideType} 
-                      onValueChange={(value) => {
-                        setTempValue(value)
-                        // Auto-save immediately when dropdown value changes
-                        handleSelectChange('setAsideType', value)
-                      }}
-                    >
-                      <SelectTrigger className="h-6 w-28 min-w-20 flex-1 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Small Business">Small Business</SelectItem>
-                        <SelectItem value="8(a)">8(a)</SelectItem>
-                        <SelectItem value="HUBZone">HUBZone</SelectItem>
-                        <SelectItem value="SDVOSB">SDVOSB</SelectItem>
-                        <SelectItem value="WOSB">WOSB</SelectItem>
-                        <SelectItem value="Full and Open">Full and Open</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1">
-                    <Badge variant="secondary">
-                      {editableData.setAsideType || 'None'}
-                    </Badge>
-                    {savingFields.has('setAsideType') && (
-                      <div className="animate-spin rounded-full h-3 w-3 border-b border-primary" title="Saving..." />
-                    )}
-                    {isEditing && (
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-6 w-6"
-                        onClick={() => startEditing('setAsideType', editableData.setAsideType || '')}
-                      >
-                        <Edit2 className="h-3 w-3" />
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </div>
-              
-              {/* NAICS Codes */}
-              <div className="text-sm">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground">NAICS Codes</span>
-                    {savingFields.has('naicsCodes') && (
-                      <div className="animate-spin rounded-full h-3 w-3 border-b border-primary" title="Saving..." />
-                    )}
-                  </div>
-                  {isEditing && (
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-6 w-6"
-                      onClick={() => startEditing('naicsCodes', (editableData.naicsCodes || []).join(', '))}
-                    >
-                      <Edit2 className="h-3 w-3" />
-                    </Button>
-                  )}
-                </div>
-                {isEditing && editingField === 'naicsCodes' ? (
-                  <div className="space-y-2">
-                    <Input
-                      value={tempValue}
-                      onChange={(e) => setTempValue(e.target.value)}
-                      onKeyDown={(e) => handleKeyDown(e, 'naicsCodes')}
-                      onBlur={() => {
-                        // Auto-save when user clicks away from the input
-                        if (tempValue.trim()) {
-                          saveField('naicsCodes')
-                        }
-                      }}
-                      className="text-xs"
-                      placeholder="541330, 541512, 334516"
-                      autoFocus
-                    />
-                    <div className="flex items-center gap-1">
-                      <Button size="sm" variant="outline" onClick={() => saveField('naicsCodes')}>
-                        <Check className="h-3 w-3 mr-1" />
-                        Save
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={cancelEditing}>
-                        <X className="h-3 w-3 mr-1" />
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-wrap gap-1">
-                    {(editableData.naicsCodes || []).map((code, i) => (
-                      <Badge key={i} variant="outline" className="text-xs">
-                        {code}
-                      </Badge>
-                    ))}
-                    {(!editableData.naicsCodes || editableData.naicsCodes.length === 0) && (
-                      <span className="text-muted-foreground text-xs">No NAICS codes set</span>
                     )}
                   </div>
                 )}

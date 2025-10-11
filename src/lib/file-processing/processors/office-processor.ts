@@ -150,14 +150,25 @@ export class OfficeProcessor implements IFileProcessor {
   private async extractFromWordDocument(buffer: Buffer, options: FileProcessingOptions): Promise<{ text: string; metadata: Record<string, unknown> }> {
     try {
       const result = await mammoth.extractRawText({ buffer });
-      
+
       let text = result.value;
-      
-      // Clean up text if not preserving formatting
+
+      // Clean up text while preserving document structure
       if (!options.preserveFormatting) {
         text = text
-          .replace(/\s+/g, ' ')
+          // First normalize line endings
+          .replace(/\r\n/g, '\n')
+          // Preserve paragraph breaks (double newlines)
+          .replace(/\n\s*\n/g, '\n\n')
+          // Fix excessive blank lines (more than 2)
           .replace(/\n{3,}/g, '\n\n')
+          // Fix multiple spaces within lines (but preserve newlines)
+          .replace(/[ \t]+/g, ' ')
+          // Trim each line individually to remove leading/trailing spaces
+          .split('\n')
+          .map((line: string) => line.trim())
+          .filter((line: string) => line.length > 0) // Remove empty lines
+          .join('\n')
           .trim();
       }
 

@@ -12,7 +12,7 @@ export const processDocumentBasic = inngest.createFunction(
     name: "Process Document Basic",
     retries: 3,
     concurrency: {
-      limit: 10, // Process max 10 documents concurrently for basic processing
+      limit: 5, // Process max 5 documents concurrently (plan limit)
     },
   },
   { event: "document/process-basic.requested" },
