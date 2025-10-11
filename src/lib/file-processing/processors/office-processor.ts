@@ -149,28 +149,36 @@ export class OfficeProcessor implements IFileProcessor {
 
   private async extractFromWordDocument(buffer: Buffer, options: FileProcessingOptions): Promise<{ text: string; metadata: Record<string, unknown> }> {
     try {
-      const result = await mammoth.extractRawText({ buffer });
+      console.log(`📄 [OfficeProcessor] Starting Word document extraction, buffer size: ${buffer.length} bytes`);
 
+      const result = await mammoth.extractRawText({ buffer });
       let text = result.value;
 
-      // Clean up text while preserving document structure
-      if (!options.preserveFormatting) {
-        text = text
-          // First normalize line endings
-          .replace(/\r\n/g, '\n')
-          // Preserve paragraph breaks (double newlines)
-          .replace(/\n\s*\n/g, '\n\n')
-          // Fix excessive blank lines (more than 2)
-          .replace(/\n{3,}/g, '\n\n')
-          // Fix multiple spaces within lines (but preserve newlines)
-          .replace(/[ \t]+/g, ' ')
-          // Trim each line individually to remove leading/trailing spaces
-          .split('\n')
-          .map((line: string) => line.trim())
-          .filter((line: string) => line.length > 0) // Remove empty lines
-          .join('\n')
-          .trim();
-      }
+      console.log(`📄 [OfficeProcessor] Raw text extracted, length: ${text.length} chars`);
+      console.log(`📄 [OfficeProcessor] First 200 chars: "${text.substring(0, 200)}"`);
+
+      // ALWAYS clean up text to preserve document structure properly
+      // This is essential for vectorization and chat functionality regardless of preserveFormatting flag
+      // The flag is meant for visual formatting (bold, italics), not for text structure
+      text = text
+        // First normalize line endings
+        .replace(/\r\n/g, '\n')
+        // Preserve paragraph breaks (double newlines)
+        .replace(/\n\s*\n/g, '\n\n')
+        // Fix excessive blank lines (more than 2)
+        .replace(/\n{3,}/g, '\n\n')
+        // Fix multiple spaces within lines (but preserve newlines)
+        .replace(/[ \t]+/g, ' ')
+        // Trim each line individually to remove leading/trailing spaces
+        .split('\n')
+        .map((line: string) => line.trim())
+        .filter((line: string) => line.length > 0) // Remove empty lines
+        .join('\n')
+        .trim();
+
+      console.log(`📄 [OfficeProcessor] Cleaned text length: ${text.length} chars`);
+      console.log(`📄 [OfficeProcessor] Text has ${text.split('\n').length} lines`);
+      console.log(`📄 [OfficeProcessor] First 200 chars after cleaning: "${text.substring(0, 200)}"`);
 
       const metadata = {
         title: undefined, // mammoth doesn't extract document properties
@@ -181,6 +189,7 @@ export class OfficeProcessor implements IFileProcessor {
 
       return { text, metadata };
     } catch (error) {
+      console.error(`❌ [OfficeProcessor] Word extraction failed:`, error);
       throw new Error(`Failed to extract text from Word document: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
