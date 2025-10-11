@@ -8,7 +8,7 @@
 [![React 19](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 
-**Upload documents, chat with AI, extract insights. BYOK (Bring Your Own Keys) - pay AI providers directly with zero markup.**
+**Upload documents, chat with AI, extract insights. Open-source platform with semantic search and intelligent document processing.**
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fwatat83%2Fdocument-chat-system&env=DATABASE_URL,NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,CLERK_SECRET_KEY,NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY,INNGEST_EVENT_KEY,INNGEST_SIGNING_KEY&envDescription=Required%20environment%20variables%20for%20Document%20Chat%20System&envLink=https%3A%2F%2Fgithub.com%2Fwatat83%2Fdocument-chat-system%2Fblob%2Fmain%2F.env.example&project-name=document-chat-system&repository-name=document-chat-system)
 
@@ -47,20 +47,20 @@
 
 ## Overview
 
-**Document Chat System** is an open-source platform that lets you upload documents and chat with AI about their content. Unlike typical SaaS solutions, you bring your own AI API keys (BYOK) - your keys stay encrypted in your browser, never touch our servers, and you pay AI providers directly with zero markup.
+**Document Chat System** is a full-stack, production-ready application that combines intelligent document management with AI-powered conversations. Upload documents in multiple formats, automatically process and index them, then have natural language conversations about your content using advanced AI models.
 
-### What Makes This Different?
+### Key Features
 
-- **🔐 Privacy-First BYOK** - Your API keys are AES-256 encrypted and stored only in your browser's localStorage. They never leave your device or touch any server.
-- **💰 Zero Markup** - Pay AI providers directly (OpenRouter, OpenAI, Anthropic). No middleman, no markup, full cost transparency.
 - **🆓 100% Free & Open Source** - MIT licensed. Deploy your own instance, modify as needed, or monetize as a SaaS.
-- **🤖 Multi-Provider AI** - Choose from 100+ models via OpenRouter, or use OpenAI/Anthropic directly. Switch providers anytime.
-- **📄 Full Document Support** - PDFs, DOCX, TXT, images with OCR, and more. Automatic text extraction and processing.
-- **🔍 Semantic Search** - Vector search with Pinecone or pgvector finds relevant content, not just keywords.
-- **👥 Multi-Tenant Ready** - Built-in organization isolation. Each user/org has separate data.
-- **💳 Optional SaaS Billing** - Want to monetize? Built-in Stripe integration with customizable pricing plans.
+- **🤖 Multi-Provider AI** - Supports OpenRouter (100+ models), OpenAI, Anthropic, and ImageRouter. Uses gpt-4o-mini by default for cost-effective responses.
+- **📄 Full Document Support** - PDFs, DOCX, TXT, images with OCR, and more. Automatic text extraction and intelligent processing.
+- **🔍 Semantic Search** - Vector search with Pinecone or pgvector finds relevant content beyond simple keyword matching.
+- **👥 Multi-Tenant Ready** - Built-in organization isolation with complete data separation between users/organizations.
+- **💳 Optional SaaS Billing** - Integrated Stripe billing system with customizable pricing plans for monetization.
 - **⚡ Background Processing** - Inngest handles document processing, vectorization, and AI analysis asynchronously.
-- **🐳 Production Ready** - Dockerfile included, deploy to Vercel/Railway/Render in minutes.
+- **🎨 Modern UI** - Beautiful, responsive interface with dark mode built using shadcn/ui and Tailwind CSS.
+- **🔐 Enterprise Security** - AES-256 encryption, Row-Level Security (RLS), and Clerk authentication.
+- **🐳 Production Ready** - Dockerfile included, deploy to Vercel/Railway/Render in minutes with one-click setup.
 
 ---
 
@@ -115,9 +115,9 @@ Document Chat System is perfect for a variety of applications and industries:
 - **Media Archives**: Manage scripts, transcripts, and multimedia documentation
 
 ### 🔒 **Privacy-Focused Applications**
-Thanks to client-side encryption and BYOK (Bring Your Own Key) architecture:
+Thanks to enterprise-grade security with encryption and authentication:
 - **Personal Finance**: Upload financial statements and documents knowing your data stays secure
-- **Confidential Projects**: Maintain sensitive business information with enterprise-grade security
+- **Confidential Projects**: Maintain sensitive business information with Row-Level Security (RLS)
 - **Private Research**: Keep proprietary research and development documentation secure
 
 ---

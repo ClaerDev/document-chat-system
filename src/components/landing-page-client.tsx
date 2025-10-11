@@ -206,10 +206,10 @@ export function LandingPageClient() {
               </h1>
               <p className="mx-auto max-w-[800px] text-gray-600 md:text-xl lg:text-2xl dark:text-gray-300">
                 Upload documents, chat with AI about their content, and extract insights instantly.
-                Bring Your Own AI Keys (BYOK) - pay providers directly with zero markup.
+                Powered by advanced AI models with semantic search and intelligent document processing.
               </p>
               <p className="mx-auto max-w-[700px] text-gray-500 md:text-lg dark:text-gray-400">
-                Open-source, privacy-first document chat system built with Next.js 15, React 19, and TypeScript.
+                Open-source document chat platform built with Next.js 15, React 19, and TypeScript.
                 Deploy your own instance with optional billing to monetize as a SaaS.
               </p>
             </div>
@@ -1240,8 +1240,8 @@ export function LandingPageClient() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 dark:text-gray-400">
-                  The platform is free and open source, but you'll need API keys from your chosen AI provider(s).
-                  Users can bring their own keys (BYOK) and pay AI providers directly, giving them full control over costs and usage.
+                  The platform is free and open source. Configure your AI provider API keys to enable chat features.
+                  Supports multiple AI providers including OpenRouter, OpenAI, Anthropic, and more.
                 </p>
               </CardContent>
             </Card>
