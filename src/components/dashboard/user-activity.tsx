@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   FileText,
@@ -13,7 +15,9 @@ import {
   Search,
   Edit,
   Trash2,
-  Share2
+  Share2,
+  ExternalLink,
+  ArrowRight
 } from 'lucide-react'
 
 interface ActivityItem {
@@ -22,10 +26,14 @@ interface ActivityItem {
   title: string
   description: string
   timestamp: Date
+  resourceId?: string
+  resourceType?: string
+  action?: string
   metadata?: {
     documentName?: string
     chatMessages?: number
     searchQuery?: string
+    [key: string]: any
   }
 }
 
@@ -123,37 +131,43 @@ function mapAuditEventToActivityType(eventType: string): ActivityItem['type'] {
 function transformAuditLogToActivity(log: any): ActivityItem {
   const eventType = log.eventType || 'UNKNOWN'
   const activityType = mapAuditEventToActivityType(eventType)
-  const resourceName = log.resourceName || log.metadata?.documentName || 'Unknown'
+  const resourceName = log.resource || log.metadata?.documentName || log.description || 'Unknown item'
 
   let title = ''
-  let description = resourceName
+  let description = ''
 
   switch (activityType) {
     case 'document_upload':
       title = 'Document Uploaded'
+      description = resourceName
       break
     case 'document_view':
       title = 'Document Viewed'
+      description = resourceName
       break
     case 'document_edit':
       title = 'Document Updated'
+      description = resourceName
       break
     case 'document_delete':
       title = 'Document Deleted'
+      description = resourceName
       break
     case 'document_share':
       title = 'Document Shared'
+      description = resourceName
       break
     case 'chat':
       title = 'AI Chat Session'
-      description = log.description || 'Chat interaction'
+      description = log.message || log.description || 'Started a conversation'
       break
     case 'search':
       title = 'Document Search'
-      description = log.metadata?.query || 'Search performed'
+      description = log.metadata?.query || log.message || 'Performed a search'
       break
     default:
       title = log.eventType?.replace(/_/g, ' ') || 'Activity'
+      description = log.message || log.description || resourceName
   }
 
   return {
@@ -162,11 +176,15 @@ function transformAuditLogToActivity(log: any): ActivityItem {
     title,
     description,
     timestamp: new Date(log.createdAt),
+    resourceId: log.resourceId,
+    resourceType: log.resource,
+    action: log.action,
     metadata: log.metadata
   }
 }
 
 export function UserActivity() {
+  const router = useRouter()
   const [activities, setActivities] = useState<ActivityItem[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -190,51 +208,103 @@ export function UserActivity() {
     fetchActivity()
   }, [])
 
+  const handleViewActivity = (activity: ActivityItem) => {
+    // Navigate based on activity type
+    if (activity.type === 'chat') {
+      router.push('/chat')
+    } else if (activity.resourceId && (activity.type === 'document_view' || activity.type === 'document_upload' || activity.type === 'document_edit')) {
+      router.push(`/documents?id=${activity.resourceId}`)
+    } else if (activity.type === 'search') {
+      router.push('/documents')
+    } else {
+      router.push('/documents')
+    }
+  }
+
   return (
     <Card className="col-span-4">
       <CardHeader>
-        <CardTitle className="flex items-center">
-          <Clock className="mr-2 h-5 w-5" />
-          Recent Activity
-        </CardTitle>
-        <CardDescription>
-          Your recent document interactions and AI conversations
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center">
+              <Clock className="mr-2 h-5 w-5" />
+              Recent Activity
+            </CardTitle>
+            <CardDescription>
+              Your recent document interactions and AI conversations
+            </CardDescription>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push('/logs')}
+            className="hidden sm:flex"
+          >
+            View All
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[400px]">
+        <ScrollArea className="h-[400px] pr-4">
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100"></div>
             </div>
           ) : activities.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <FileText className="h-12 w-12 text-gray-400 mb-2" />
-              <p className="text-sm text-gray-500 dark:text-gray-400">No activity yet</p>
-              <p className="text-xs text-gray-400 mt-1">Start uploading documents to see your activity here</p>
+            <div className="flex flex-col items-center justify-center h-full text-center py-12">
+              <div className="rounded-full bg-gray-100 dark:bg-gray-800 p-6 mb-4">
+                <FileText className="h-12 w-12 text-gray-400" />
+              </div>
+              <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-1">No activity yet</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Start uploading documents to see your activity here</p>
+              <Button
+                variant="outline"
+                onClick={() => router.push('/documents')}
+                className="mt-2"
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                Upload Document
+              </Button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {activities.map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-3 pb-3 border-b border-gray-100 last:border-b-0 dark:border-gray-800">
-                  <div className={`p-2 rounded-full bg-gray-100 dark:bg-gray-800 ${getActivityColor(activity.type)}`}>
+                <div
+                  key={activity.id}
+                  className="group flex items-start space-x-4 p-3 rounded-lg border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                >
+                  <div className={`p-2.5 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 ${getActivityColor(activity.type)} flex-shrink-0`}>
                     {getActivityIcon(activity.type)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                        {activity.title}
-                      </p>
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-0.5">
+                          {activity.title}
+                        </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-1">
+                          {activity.description}
+                        </p>
+                      </div>
                       {getActivityBadge(activity.type)}
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                      {activity.description}
-                    </p>
-                    <div className="flex items-center mt-1">
-                      <Clock className="h-3 w-3 mr-1 text-gray-400" />
-                      <p className="text-xs text-gray-400">
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                        <Clock className="h-3 w-3 mr-1.5" />
                         {formatRelativeTime(activity.timestamp)}
-                      </p>
+                      </div>
+                      {activity.type !== 'document_delete' && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleViewActivity(activity)}
+                          className="h-7 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          View
+                          <ExternalLink className="ml-1 h-3 w-3" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
