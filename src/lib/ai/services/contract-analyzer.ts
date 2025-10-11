@@ -23,47 +23,48 @@ export class ContractAnalyzer {
     error?: string
   }> {
     try {
-      const prompt = `Analyze this government contracting document for contract-specific information and risks.
+      const prompt = `Analyze this business document for key information, requirements, and strategic insights.
 
 Document Name: ${documentName}
 Document Type: ${documentType}
 
-Provide comprehensive contract analysis including:
+Provide comprehensive analysis including:
 
-1. contractType - Identify the type of contract (RFP, IFB, RFQ, Task Order, IDIQ, BPA, etc.)
-2. estimatedValue - Extract contract value, budget, or estimated amount if mentioned
-3. timeline - Extract timeline, duration, key dates, and deadlines
-4. requirements - List key requirements, specifications, and deliverables
-5. risks - Identify potential risks, challenges, and concerns
-6. opportunities - Identify opportunities, advantages, and positive aspects
+1. contractType - Identify the document type (Agreement, Proposal, RFP, SOW, Contract, Requirements Doc, etc.)
+2. estimatedValue - Extract budget, estimated value, or financial information if mentioned
+3. timeline - Extract timeline, duration, key dates, milestones, and deadlines
+4. requirements - List key requirements, specifications, deliverables, and obligations
+5. risks - Identify potential risks, challenges, constraints, and concerns
+6. opportunities - Identify opportunities, benefits, advantages, and positive aspects
 
-FOCUS ON GOVERNMENT CONTRACTING CONTEXT:
-- Look for NAICS codes, set-aside types, security clearance requirements
-- Identify compliance requirements (DFARS, FAR, etc.)
-- Extract technical specifications and performance requirements
-- Identify evaluation criteria and scoring factors
-- Look for past performance requirements
-- Identify subcontracting opportunities
+EXTRACT KEY INFORMATION:
+- Technical requirements and specifications
+- Performance requirements and success criteria
+- Compliance requirements and standards
+- Deliverables and milestones
+- Qualifications and capabilities needed
+- Dependencies and constraints
+- Success factors and evaluation criteria
 
 Return as JSON:
 {
-  "contractType": "RFP",
-  "estimatedValue": "$2.5M over 3 years",
-  "timeline": "Proposal due: 30 days, Performance period: 36 months",
+  "contractType": "Service Agreement",
+  "estimatedValue": "$250K over 12 months",
+  "timeline": "Start date: Q2 2024, Duration: 12 months, Key milestones: Monthly deliverables",
   "requirements": [
-    "Security clearance required",
-    "AWS cloud infrastructure experience",
-    "FISMA compliance"
+    "Proven experience with cloud platforms",
+    "ISO 27001 compliance required",
+    "24/7 support capability"
   ],
   "risks": [
-    "Aggressive timeline for deliverables",
-    "Complex security requirements",
-    "Limited past performance examples"
+    "Tight timeline for initial deliverables",
+    "Complex integration requirements",
+    "Multiple stakeholder dependencies"
   ],
   "opportunities": [
-    "Large contract value with renewal options",
-    "Direct access to end users",
-    "Potential for follow-on work"
+    "Long-term partnership potential",
+    "Opportunity to showcase innovative solutions",
+    "Expandable scope for additional services"
   ]
 }
 
@@ -78,7 +79,7 @@ ${extractedText}`
         messages: [
           {
             role: 'system',
-            content: 'You are an expert government contracting analyst specializing in contract analysis, risk assessment, and opportunity identification. Focus on actionable insights for government contractors.'
+            content: 'You are an expert business analyst specializing in contract analysis, risk assessment, and opportunity identification. Provide actionable insights for business decision-making. Focus on generic business context applicable to any industry.'
           },
           {
             role: 'user',
@@ -208,40 +209,40 @@ ${extractedText}`
       }
     }
 
-    // Common government contracting requirements
-    if (lowerText.includes('security clearance') || lowerText.includes('clearance')) {
-      requirements.push('Security clearance may be required')
+    // Common business requirements
+    if (lowerText.includes('experience') || lowerText.includes('expertise')) {
+      requirements.push('Relevant experience and expertise required')
     }
-    if (lowerText.includes('fisma') || lowerText.includes('compliance')) {
-      requirements.push('Compliance requirements specified')
+    if (lowerText.includes('certification') || lowerText.includes('compliance')) {
+      requirements.push('Compliance and certification requirements specified')
     }
-    if (lowerText.includes('past performance')) {
-      requirements.push('Past performance evaluation required')
+    if (lowerText.includes('deliverable') || lowerText.includes('milestone')) {
+      requirements.push('Specific deliverables and milestones defined')
     }
-    if (lowerText.includes('small business') || lowerText.includes('set-aside')) {
-      requirements.push('Set-aside requirements may apply')
+    if (lowerText.includes('support') || lowerText.includes('maintenance')) {
+      requirements.push('Support and maintenance requirements included')
     }
 
-    // Common risks
+    // Common business risks
     if (lowerText.includes('complex') || lowerText.includes('challenging')) {
-      risks.push('Technical complexity indicated')
+      risks.push('Technical or operational complexity indicated')
     }
-    if (lowerText.includes('tight') || lowerText.includes('aggressive')) {
-      risks.push('Potentially aggressive timeline')
+    if (lowerText.includes('tight') || lowerText.includes('aggressive') || lowerText.includes('urgent')) {
+      risks.push('Potentially challenging timeline')
     }
-    if (lowerText.includes('security') || lowerText.includes('classified')) {
-      risks.push('Security requirements may add complexity')
+    if (lowerText.includes('dependency') || lowerText.includes('integration')) {
+      risks.push('Third-party dependencies or integration requirements')
     }
 
-    // Common opportunities
-    if (lowerText.includes('option') || lowerText.includes('renewal')) {
-      opportunities.push('Contract includes option periods')
+    // Common business opportunities
+    if (lowerText.includes('option') || lowerText.includes('renewal') || lowerText.includes('extension')) {
+      opportunities.push('Contract includes renewal or extension options')
     }
-    if (lowerText.includes('large') || lowerText.includes('significant')) {
-      opportunities.push('Significant contract opportunity')
+    if (lowerText.includes('partnership') || lowerText.includes('relationship')) {
+      opportunities.push('Potential for long-term partnership')
     }
-    if (lowerText.includes('follow-on') || lowerText.includes('subsequent')) {
-      opportunities.push('Potential for follow-on work')
+    if (lowerText.includes('expand') || lowerText.includes('scale') || lowerText.includes('growth')) {
+      opportunities.push('Opportunity for expansion or additional services')
     }
 
     // Ensure we have some basic content

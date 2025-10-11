@@ -46,7 +46,7 @@ export class DocumentSectionsAnalyzer {
           {
             role: 'system',
             content:
-              'You are an expert document structure analyzer specializing in government contracting documents. Extract and organize document sections logically.',
+              'You are an expert document structure analyzer. Extract and organize document sections logically for any type of business document.',
           },
           {
             role: 'user',
@@ -582,7 +582,7 @@ SECTION QUALITY REQUIREMENTS:
 - Section titles should be descriptive and professional
 - Content should be complete sentences and paragraphs
 - Preserve original formatting and structure where possible
-- Focus on actionable information for government contractors
+- Focus on extracting key information and actionable insights
 
 RETURN FORMAT - JSON Array:
 [
