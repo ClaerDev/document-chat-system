@@ -3,19 +3,11 @@
 import { Header } from '@/components/layout/header';
 import { Sidebar } from '@/components/layout/sidebar';
 import { CleanAIChat } from '@/components/ai/clean-ai-chat';
-import { AISettingsPanel } from '@/components/ai/ai-settings-panel';
 import { CitationsPanel } from '@/components/chat/citations-panel';
 import { DocumentChatToggle } from '@/components/chat/document-chat-toggle';
 import { DocumentScopeSelector } from '@/components/chat/document-scope-selector';
 import { useAuth } from '@clerk/nextjs';
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Settings, ChevronDown } from 'lucide-react';
 import { ChatState, DEFAULT_GENERAL_STATE } from '@/types/chat';
 
 export default function ChatPage() {
@@ -186,26 +178,6 @@ export default function ChatPage() {
                     />
                   </div>
                 )}
-
-                {/* Settings Dropdown */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center gap-1 md:gap-2 h-9 px-2 md:px-3"
-                    >
-                      <Settings className="h-4 w-4" />
-                      <span className="hidden sm:inline">Settings</span>
-                      <ChevronDown className="h-3 w-3 md:h-4 md:w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[280px] sm:w-80">
-                    <div className="p-4">
-                      <AISettingsPanel className="h-fit" />
-                    </div>
-                  </DropdownMenuContent>
-                </DropdownMenu>
               </div>
             </div>
             
