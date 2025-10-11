@@ -65,8 +65,8 @@ const enhancedChatSchema = z.object({
   })).min(1)
     .describe("Array of conversation messages forming the chat history. Must contain at least one message. The AI uses this complete context to generate relevant responses for government contracting discussions."),
   
-  model: z.string().default('gpt-4o')
-    .describe("AI model identifier to use for chat completion. Default 'gpt-4o' provides high-quality responses. Other options include 'gpt-4o-mini' for cost optimization or 'claude-3-sonnet' for specialized analysis. Use 'auto' for automatic model selection."),
+  model: z.string().default('gpt-4o-mini')
+    .describe("AI model identifier to use for chat completion. Default 'gpt-4o-mini' provides cost-effective responses. Other options include 'gpt-4o' for higher quality or 'claude-3-sonnet' for specialized analysis. Use 'auto' for automatic model selection."),
   
   provider: z.string().optional()
     .describe("AI provider to use for the request. Options include 'openai', 'anthropic', 'google'. Use 'auto' for automatic provider selection based on the task requirements."),
@@ -654,9 +654,9 @@ async function handleExistingSystem(
               
               // Ensure we're using a multimodal-capable model
               // GPT-4o and Claude Sonnet are known to handle various file types well
-              if (!baseModel.includes('gpt-4o') && !baseModel.includes('claude-3') && !baseModel.includes('gemini')) {
-                console.log(`⚠️ Model ${baseModel} may not support file processing, upgrading to gpt-4o`);
-                baseModel = 'openai/gpt-4o';
+              if (!baseModel.includes('gpt-4o') && !baseModel.includes('gpt-4o-mini') && !baseModel.includes('claude-3') && !baseModel.includes('gemini')) {
+                console.log(`⚠️ Model ${baseModel} may not support file processing, upgrading to gpt-4o-mini`);
+                baseModel = 'openai/gpt-4o-mini';
               }
               
               // For PDFs specifically, use the full GPT-4o model for better processing
@@ -1279,7 +1279,7 @@ function getVercelModel(modelName: string) {
   }
   
   // Default fallback
-  return openai('gpt-4o');
+  return openai('gpt-4o-mini');
 }
 
 /**

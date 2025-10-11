@@ -46,7 +46,6 @@ import { ChatState } from '@/types/chat';
 interface CleanAIChatProps {
   organizationId: string;
   className?: string;
-  demoMode?: boolean;
   onCitationsUpdate?: (citations: Citation[]) => void;
   chatState?: ChatState; // NEW - optional chat state
 }
@@ -183,7 +182,7 @@ const contentTemplates: ContentTemplate[] = [
   }
 ];
 
-export function CleanAIChat({ organizationId, className, demoMode = false, onCitationsUpdate, chatState }: CleanAIChatProps) {
+export function CleanAIChat({ organizationId, className, onCitationsUpdate, chatState }: CleanAIChatProps) {
   const { isSignedIn, isLoaded, userId } = useAuth();
   const { success: notifySuccess, error: notifyError, warning: notifyWarning, info: notifyInfo } = useNotify();
   const [isMounted, setIsMounted] = useState(false);
@@ -204,8 +203,8 @@ export function CleanAIChat({ organizationId, className, demoMode = false, onCit
   
   // Compute overall loading state including AI models loading
   const isInputDisabled = useMemo(() => {
-    return isLoading || ai.loading || (models.length === 0 && !demoMode);
-  }, [isLoading, ai.loading, models.length, demoMode]);
+    return isLoading || ai.loading || models.length === 0;
+  }, [isLoading, ai.loading, models.length]);
   const [currentStreamingMessage, setCurrentStreamingMessage] = useState('');
   
   // Image generation mode toggle
@@ -312,7 +311,7 @@ export function CleanAIChat({ organizationId, className, demoMode = false, onCit
           if (hasConfiguredProviders && hasValidConfig) {
             console.log('AI system ready: All providers configured');
           } else {
-            console.log('Demo mode active: Configure API keys for full functionality');
+            console.log('Configure API keys for full functionality');
           }
         } else {
           console.warn('API health check failed:', response.status);
@@ -323,11 +322,9 @@ export function CleanAIChat({ organizationId, className, demoMode = false, onCit
         setApiKeyConfigured(false);
       }
     };
-    
-    if (!demoMode) {
-      checkAPIConfiguration();
-    }
-  }, [demoMode, notifySuccess, notifyInfo, notifyWarning, notifyError]);
+
+    checkAPIConfiguration();
+  }, [notifySuccess, notifyInfo, notifyWarning, notifyError]);
   
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -900,17 +897,8 @@ export function CleanAIChat({ organizationId, className, demoMode = false, onCit
       setIsThinking(false);
       setIsLoading(true);
 
-      // Determine if we should use real AI or demo mode
-      const shouldUseRealAI = !demoMode && features.openRouterEnabled && hasUsageQuota && apiKeyConfigured;
-
-      if (shouldUseRealAI) {
-        // Use the final content (with video URL instructions if needed)
-        await callRealAI(finalContent, attachedFiles, modelToUse, webSearchNeeded);
-      } else {
-        const fallbackContent = generateFallbackContent(messageContent);
-        const fileCitations = extractFileCitations(fallbackContent, attachedFiles);
-        await simulateStreaming(fallbackContent, 'Demo Mode', { citations: fileCitations });
-      }
+      // Always use real AI
+      await callRealAI(finalContent, attachedFiles, modelToUse, webSearchNeeded);
     } catch (error) {
       console.error('Error sending message:', error);
       notifyError('Error sending message. Please try again.');
@@ -1208,18 +1196,16 @@ Provide accurate, helpful, and professional guidance for government contracting 
         }
         
         if (response.status === 429) {
-          // Rate limit or quota exceeded - fall back to demo mode
+          // Rate limit or quota exceeded
           setHasUsageQuota(false);
-          notifyWarning('Usage limit reached. Switching to demo mode.');
-          await simulateStreaming(generateFallbackContent(messageContent));
+          notifyError('Usage limit reached. Please try again later or check your billing.');
           return;
         }
-        
+
         if (response.status === 401) {
-          // API key issue - fall back to demo mode
+          // API key issue
           setApiKeyConfigured(false);
-          notifyWarning('API configuration issue. Using demo mode.');
-          await simulateStreaming(generateFallbackContent(messageContent));
+          notifyError('API configuration issue. Please check your API keys in settings.');
           return;
         }
         
@@ -1449,14 +1435,11 @@ Provide accurate, helpful, and professional guidance for government contracting 
           message: error.message,
           stack: error.stack
         });
-        notifyWarning('AI service temporarily unavailable. Using demo mode.');
+        notifyError('AI service error: ' + error.message);
       } else {
         console.error('❌ Unknown error type:', error);
-        notifyWarning('AI service temporarily unavailable. Using demo mode.');
+        notifyError('AI service temporarily unavailable. Please try again.');
       }
-      
-      // Fall back to demo mode
-      await simulateStreaming(generateFallbackContent(messageContent));
     }
   };
 
@@ -1465,12 +1448,8 @@ Provide accurate, helpful, and professional guidance for government contracting 
     try {
       
       // Check if user is authenticated for media generation
-      if (!isSignedIn || demoMode) {
-        if (!isSignedIn) {
-          notifyWarning('Please sign in to use image generation features.');
-        } else {
-          notifyInfo('Image generation is not available in demo mode.');
-        }
+      if (!isSignedIn) {
+        notifyWarning('Please sign in to use image generation features.');
         return null;
       }
       
@@ -2030,7 +2009,7 @@ Would you like me to dive deeper into any of these areas? I can also help you se
     );
   }
 
-  if (!isSignedIn && !demoMode) {
+  if (!isSignedIn) {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
         <Card className="w-full max-w-md">
@@ -2339,7 +2318,7 @@ Would you like me to dive deeper into any of these areas? I can also help you se
               <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
                 <div className="flex items-center gap-1.5">
                   <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">Demo Mode</span>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">AI Chat</span>
                 </div>
                 {selectedProvider && (
                   <Badge variant="outline" className="text-xs hidden sm:inline-flex">
