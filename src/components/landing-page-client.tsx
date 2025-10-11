@@ -1308,7 +1308,7 @@ export function LandingPageClient() {
       </section>
 
       {/* CTA Section */}
-      <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+      <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white animate-gradient" style={{ backgroundSize: '200% 200%' }}>
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-6 text-center">
             <div className="space-y-4">
