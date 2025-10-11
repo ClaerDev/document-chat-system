@@ -162,6 +162,13 @@ const getOriginalFileName = (document: Document): string => {
   return pathParts[pathParts.length - 1] || ''
 }
 
+// Utility function to check if document has valid embeddings/chunks for chat
+const hasValidEmbeddings = (document: Document | null): boolean => {
+  if (!document?.embeddings) return false
+  const embeddings = document.embeddings as DocumentEmbeddings
+  return !!(embeddings.chunks && Array.isArray(embeddings.chunks) && embeddings.chunks.length > 0)
+}
+
 // Utility function to get file extension from original filename (not editable name)
 const getOriginalFileExtension = (document: Document): string => {
   // First try to get extension from the document name
@@ -4957,7 +4964,7 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
         )}
 
         {/* Chat Interface Panel - only show if document is vectorized and chat is open */}
-        {document && document.embeddings && Object.keys(document.embeddings).length > 0 && isChatOpen && (
+        {hasValidEmbeddings(document) && isChatOpen && (
           <>
             <PanelResizeHandle className="w-2 bg-border hover:bg-muted-foreground/20 transition-colors" />
             <Panel defaultSize={30} minSize={20} maxSize={40} className="flex flex-col">
@@ -5001,7 +5008,7 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
       )}
       
       {/* Chat Toggle Button - only show if document is vectorized and chat is closed */}
-      {document && document.embeddings && Object.keys(document.embeddings).length > 0 && !isChatOpen && (
+      {hasValidEmbeddings(document) && !isChatOpen && (
         <ChatToggleButton
           onClick={() => setIsChatOpen(true)}
           isOpen={isChatOpen}

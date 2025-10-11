@@ -53,14 +53,17 @@ export function DocumentChatInterface({ document, isOpen, onToggle }: DocumentCh
 
   const performSemanticSearch = async (query: string) => {
     try {
-      console.log('🔍 Document object for filters:', {
+      console.log('🔍 [Chat] Document object for filters:', {
         id: document.id,
+        name: document.name,
+        mimeType: document.mimeType,
         documentType: document.documentType,
+        hasEmbeddings: !!document.embeddings,
+        embeddings: document.embeddings,
         naicsCodes: document.naicsCodes,
-        tags: document.tags,
-        fullDocument: document
+        tags: document.tags
       })
-      
+
       const response = await fetch('/api/v1/search/similarity', {
         method: 'POST',
         headers: {
