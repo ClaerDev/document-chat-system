@@ -390,7 +390,7 @@ export function LandingPageClient() {
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>ImageRouter for visual AI tasks</span>
+                    <span>ImageRouter for image generation</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
@@ -420,7 +420,7 @@ export function LandingPageClient() {
                 <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>PDF, DOCX, XLSX, PPTX, TXT, MD</span>
+                    <span>PDF, DOCX, TXT, MD, and images</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
@@ -667,7 +667,7 @@ export function LandingPageClient() {
               <div className="space-y-2">
                 <h3 className="text-2xl font-bold">1. Upload Documents</h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Drag and drop any document - PDFs, Word, Excel, PowerPoint, images, and more.
+                  Drag and drop any document - PDFs, Word documents, text files, images, and more.
                   Organize in folders or let AI categorize them automatically.
                 </p>
               </div>
@@ -1229,7 +1229,7 @@ export function LandingPageClient() {
               <CardContent>
                 <p className="text-gray-600 dark:text-gray-400">
                   You can use any model from <strong>OpenRouter</strong> (100+ models including GPT-4, Claude, Llama, Mistral, and more),
-                  <strong>OpenAI</strong> directly (GPT-4 Turbo, GPT-3.5), or <strong>ImageRouter</strong> for visual AI tasks.
+                  <strong>OpenAI</strong> directly (GPT-4 Turbo, GPT-3.5), or <strong>ImageRouter</strong> for image generation.
                   The system supports switching between providers seamlessly.
                 </p>
               </CardContent>

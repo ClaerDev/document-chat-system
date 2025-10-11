@@ -162,7 +162,6 @@ Thanks to enterprise-grade security with encryption and authentication:
 - **Inngest Integration**: Event-driven serverless functions
 - **Document Processing Queue**: Scalable batch processing
 - **Automatic Retries**: Built-in error handling and retries
-- **Scheduled Jobs**: Cron-based maintenance tasks
 - **Real-Time Notifications**: Progress updates via webhooks
 - **Job Monitoring**: Track job status and logs
 
@@ -619,38 +618,6 @@ document-chat-system/
 
 ## Using the Application
 
-### Configuring Your API Keys (Settings Page)
-
-After signing up, you'll need to configure your AI provider API keys to use the chat features:
-
-1. **Navigate to Settings**:
-   - Click on your profile icon in the top navigation
-   - Select **Settings** or go directly to `/settings`
-
-2. **Add Your API Keys**:
-   - Enter your OpenRouter API key (recommended - access to 100+ models)
-   - Optionally add OpenAI API key for direct GPT access
-   - Optionally add ImageRouter API key for visual AI capabilities
-
-3. **How Your Keys Are Secured**:
-   - **AES-256 Encryption**: All API keys are encrypted before storage
-   - **Local Storage Only**: Keys are stored in your browser's localStorage
-   - **Never Transmitted**: Your keys are **never sent to remote servers**
-   - **Client-Side Only**: Encryption and decryption happen entirely in your browser
-   - **Full Privacy**: Only you have access to your API credentials
-
-4. **Key Benefits of This Approach**:
-   - ✅ **Maximum Security**: No server-side storage means no data breach risk
-   - ✅ **Full Control**: You own and manage your own API keys
-   - ✅ **Cost Transparency**: You see your actual usage on your AI provider dashboard
-   - ✅ **No Middleman**: Direct API calls to your chosen provider
-   - ✅ **Privacy First**: Your conversations and keys stay completely private
-
-5. **Testing Your Configuration**:
-   - After adding keys, navigate to the Chat page
-   - Try sending a message to verify the connection
-   - Check your AI provider dashboard to confirm API calls
-
 ### Uploading and Managing Documents
 
 1. **Upload Documents**:
@@ -765,7 +732,7 @@ View the complete API documentation at `/api/docs` when running the application 
 
 ---
 
-## Monetization (Optional)
+<!-- ## Monetization (Optional)
 
 ### For Developers Who Want to Charge Users
 
@@ -915,6 +882,8 @@ Don't want to charge users? Simply:
 1. Remove Stripe keys from `.env.local`
 2. Set `DISABLE_BILLING=true` in environment variables
 3. The app will work perfectly without any billing features
+
+-->
 
 ---
 
