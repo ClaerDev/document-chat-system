@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
-import { UserActivity } from '@/components/dashboard/user-activity'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 import { useCSRF } from '@/hooks/useCSRF'
 import {
@@ -19,7 +19,13 @@ import {
   FolderOpen,
   Clock,
   AlertCircle,
-  ArrowUpRight
+  ArrowUpRight,
+  Upload,
+  Search,
+  Settings,
+  TrendingUp,
+  Calendar,
+  Eye
 } from 'lucide-react'
 import { Profile } from '@/types'
 
@@ -37,6 +43,8 @@ export default function Dashboard() {
     lastActivity: null as string | null
   })
   const [statsLoading, setStatsLoading] = useState(true)
+  const [recentDocuments, setRecentDocuments] = useState<any[]>([])
+  const [documentsLoading, setDocumentsLoading] = useState(true)
 
   const fetchStats = useCallback(async () => {
     try {
@@ -59,11 +67,15 @@ export default function Dashboard() {
           folders: foldersData.count || 0,
           lastActivity
         })
+
+        // Set recent documents (top 5)
+        setRecentDocuments(docsData.documents?.slice(0, 5) || [])
       }
     } catch (error) {
       console.error('Error fetching stats:', error)
     } finally {
       setStatsLoading(false)
+      setDocumentsLoading(false)
     }
   }, [])
 
@@ -244,11 +256,130 @@ export default function Dashboard() {
           </AlertDescription>
         </Alert>
 
-
         {/* Main Content Grid */}
-        <div className="grid gap-4 md:grid-cols-1">
-          {/* Activity Overview - Now using the UserActivity component */}
-          <UserActivity />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {/* Recent Documents */}
+          <Card className="col-span-full lg:col-span-2">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center">
+                    <FileText className="mr-2 h-5 w-5" />
+                    Recent Documents
+                  </CardTitle>
+                  <CardDescription>
+                    Your most recently uploaded or modified documents
+                  </CardDescription>
+                </div>
+                <Link href="/documents">
+                  <Button variant="outline" size="sm">
+                    View All
+                    <ArrowUpRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[300px]">
+                {documentsLoading ? (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100"></div>
+                  </div>
+                ) : recentDocuments.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-center py-12">
+                    <div className="rounded-full bg-gray-100 dark:bg-gray-800 p-6 mb-4">
+                      <FileText className="h-12 w-12 text-gray-400" />
+                    </div>
+                    <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-1">No documents yet</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Upload your first document to get started</p>
+                    <Link href="/documents">
+                      <Button variant="outline">
+                        <Upload className="mr-2 h-4 w-4" />
+                        Upload Document
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {recentDocuments.map((doc) => (
+                      <Link key={doc.id} href={`/documents?id=${doc.id}`}>
+                        <div className="flex items-center space-x-4 p-3 rounded-lg border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+                          <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+                            <FileText className="h-5 w-5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                              {doc.name}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant="secondary" className="text-xs">
+                                {doc.type?.toUpperCase() || 'FILE'}
+                              </Badge>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {doc.size ? `${(doc.size / 1024).toFixed(1)} KB` : 'Unknown size'}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end text-xs text-gray-500 dark:text-gray-400">
+                            <span>{new Date(doc.uploadDate || doc.createdAt).toLocaleDateString()}</span>
+                            <span className="flex items-center mt-1">
+                              <Clock className="h-3 w-3 mr-1" />
+                              {new Date(doc.lastModified || doc.uploadDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </ScrollArea>
+            </CardContent>
+          </Card>
+
+          {/* Quick Actions */}
+          <Card className="col-span-full lg:col-span-1">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <TrendingUp className="mr-2 h-5 w-5" />
+                Quick Actions
+              </CardTitle>
+              <CardDescription>
+                Common tasks and shortcuts
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Link href="/documents" className="block">
+                <Button variant="outline" className="w-full justify-start" size="lg">
+                  <Upload className="mr-2 h-5 w-5" />
+                  Upload Document
+                </Button>
+              </Link>
+              <Link href="/chat" className="block">
+                <Button variant="outline" className="w-full justify-start" size="lg">
+                  <MessageSquare className="mr-2 h-5 w-5" />
+                  Start Chat
+                </Button>
+              </Link>
+              <Link href="/documents" className="block">
+                <Button variant="outline" className="w-full justify-start" size="lg">
+                  <Search className="mr-2 h-5 w-5" />
+                  Search Documents
+                </Button>
+              </Link>
+              <Link href="/documents" className="block">
+                <Button variant="outline" className="w-full justify-start" size="lg">
+                  <FolderOpen className="mr-2 h-5 w-5" />
+                  Manage Folders
+                </Button>
+              </Link>
+              <Link href="/settings" className="block">
+                <Button variant="outline" className="w-full justify-start" size="lg">
+                  <Settings className="mr-2 h-5 w-5" />
+                  Settings
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </AppLayout>
