@@ -999,9 +999,11 @@ export const ResponsiveCanvasPreview: React.FC<ResponsiveCanvasPreviewProps> = (
         generatePreview()
       }
     }, 100)
-    
+
     return () => clearTimeout(timeoutId)
-  }, [generatePreview, dimensions])
+    // Only trigger when actual dimension values change, not object reference
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dimensions.width, dimensions.height])
 
   if (loading) {
     return (
