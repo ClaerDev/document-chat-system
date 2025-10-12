@@ -21,11 +21,8 @@ import {
   AlertCircle,
   ArrowUpRight,
   Upload,
-  Search,
   Settings,
-  TrendingUp,
-  Calendar,
-  Eye
+  TrendingUp
 } from 'lucide-react'
 import { Profile } from '@/types'
 
@@ -358,12 +355,6 @@ export default function Dashboard() {
                 <Button variant="outline" className="w-full justify-start" size="lg">
                   <MessageSquare className="mr-2 h-5 w-5" />
                   Start Chat
-                </Button>
-              </Link>
-              <Link href="/documents" className="block">
-                <Button variant="outline" className="w-full justify-start" size="lg">
-                  <Search className="mr-2 h-5 w-5" />
-                  Search Documents
                 </Button>
               </Link>
               <Link href="/documents" className="block">
