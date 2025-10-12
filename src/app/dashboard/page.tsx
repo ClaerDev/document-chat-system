@@ -96,13 +96,7 @@ export default function Dashboard() {
 
       if (data.success) {
         setProfile(data.data)
-
-        // Check if profile is incomplete and redirect to profile page
-        if (!data.data || data.data.profileCompleteness < 20) {
-          console.log('Incomplete profile detected, redirecting to profile page')
-          router.replace('/profile')
-          return
-        }
+        // Allow access to dashboard regardless of profile completeness
       } else if (data.needsUserCreation) {
         // User doesn't exist, try to sync from Clerk
         if (!csrfToken) {
@@ -123,21 +117,13 @@ export default function Dashboard() {
 
           if (retryData.success) {
             setProfile(retryData.data)
-            // Redirect to profile page for new users to complete setup
-            router.replace('/profile')
-            return
           }
         }
-      } else {
-        // No profile found, redirect to profile page
-        console.log('No profile found, redirecting to profile page')
-        router.replace('/profile')
-        return
       }
+      // Allow dashboard access even if profile is not found
     } catch (error) {
       console.error('Error fetching profile:', error)
-      // On error, redirect to profile page as fallback
-      router.replace('/profile')
+      // Allow dashboard access even on error
     } finally {
       setProfileLoading(false)
     }
