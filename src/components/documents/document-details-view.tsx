@@ -664,7 +664,9 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
       
       backupFetch()
     }
-  }, [document, fetchedDocument, isLoading, documentId]) // Run when these change
+    // Only trigger on documentId or loading state changes, not document object changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [documentId, isLoading])
   
   // Only warn if store has documents loaded but our document isn't found
   if (!foundDocument && !isLoading && state.documents.length > 0) {
@@ -702,7 +704,8 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
     } else {
       navigateToFolder(null) // Navigate to root
     }
-  }, [document, moveDocument, navigateToFolder])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [moveDocument, navigateToFolder])
   
   // Generate sections dynamically from document data
   // Use deep dependency tracking to ensure sections update when AI data changes
@@ -760,7 +763,9 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
       console.log('📝 Setting document title:', { original: document.name, cleaned: titleToSet })
       setDocumentTitle(titleToSet)
     }
-  }, [document])
+    // Only trigger when document ID or name changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [document?.id, document?.name])
   const [isEditing, setIsEditing] = useState(false)
   const [pendingChanges, setPendingChanges] = useState<any>({})
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
@@ -834,7 +839,9 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
         estimatedCompletion: new Date(Date.now() + 2 * 60 * 1000).toISOString()
       })
     }
-  }, [document, isAnalyzing])
+    // Only trigger when processing status changes, not when document object changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [document?.processing?.currentStatus, isAnalyzing])
 
   // Handler for starting AI analysis
   const handleStartAnalysis = async () => {
