@@ -392,7 +392,7 @@ const CanvasPreviewWithFetch: React.FC<{ document: any; className?: string }> = 
     );
   }
 
-  // Log error state for debugging
+  // Log error state for debugging (only once when error/fetchedFile changes)
   React.useEffect(() => {
     if (error || !fetchedFile) {
       console.error('❌ FilePreview - Preview not available:', {
@@ -407,7 +407,8 @@ const CanvasPreviewWithFetch: React.FC<{ document: any; className?: string }> = 
         hasOriginalFile: !!doc.originalFile
       });
     }
-  }, [error, fetchedFile, doc]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error, fetchedFile]);
 
   if (error || !fetchedFile) {
     const debugInfo = {
