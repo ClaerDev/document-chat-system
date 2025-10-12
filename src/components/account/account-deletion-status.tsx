@@ -52,6 +52,12 @@ export function AccountDeletionStatus() {
       });
 
       if (!response.ok) {
+        // Silently handle 404 - no deletion request exists
+        if (response.status === 404) {
+          setStatus(null);
+          setLoading(false);
+          return;
+        }
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || 'Failed to fetch deletion status');
       }
@@ -60,8 +66,14 @@ export function AccountDeletionStatus() {
       setStatus(data);
 
     } catch (err) {
-      console.error('Error fetching deletion status:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load deletion status');
+      // Only log non-network errors
+      if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        // Network error - silently fail
+        setStatus(null);
+      } else {
+        console.error('Error fetching deletion status:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load deletion status');
+      }
     } finally {
       setLoading(false);
     }
