@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { Search, Loader2, FileText, Building2, X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Search, Loader2, FileText, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,23 +12,23 @@ import {
   CommandGroup,
   CommandItem,
   CommandList,
-  CommandSeparator,
 } from '@/components/ui/command'
 import { DialogTitle } from '@/components/ui/dialog'
 import { useDebounce } from '@/hooks/useDebounce'
-import { Opportunity } from '@/types'
+import { Badge } from '@/components/ui/badge'
 
 interface SearchResult {
-  opportunities: Opportunity[]
+  documents: any[]
   total: number
 }
 
 export function HeaderSearch() {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
-  const [results, setResults] = useState<SearchResult>({ opportunities: [], total: 0 })
-  
+  const [results, setResults] = useState<SearchResult>({ documents: [], total: 0 })
+
   const debouncedQuery = useDebounce(query, 300)
 
   // Keyboard shortcut
@@ -46,19 +46,19 @@ export function HeaderSearch() {
   // Search functionality
   useEffect(() => {
     if (!debouncedQuery || debouncedQuery.length < 2) {
-      setResults({ opportunities: [], total: 0 })
+      setResults({ documents: [], total: 0 })
       return
     }
 
-    const searchOpportunities = async () => {
+    const searchDocuments = async () => {
       setLoading(true)
       try {
-        const response = await fetch(`/api/v1/opportunities-mock?query=${encodeURIComponent(debouncedQuery)}&limit=5`)
+        const response = await fetch(`/api/v1/documents?search=${encodeURIComponent(debouncedQuery)}`)
         const data = await response.json()
         if (data.success) {
           setResults({
-            opportunities: data.data.items,
-            total: data.data.total
+            documents: data.documents || [],
+            total: data.count || 0
           })
         }
       } catch (error) {
@@ -68,18 +68,18 @@ export function HeaderSearch() {
       }
     }
 
-    searchOpportunities()
+    searchDocuments()
   }, [debouncedQuery])
 
-  const handleSelect = (opportunityId: string) => {
+  const handleSelect = (documentId: string) => {
     setOpen(false)
     setQuery('')
-    // In a real app, this would navigate to opportunity details
-    console.log('Selected opportunity:', opportunityId)
+    router.push(`/documents/${documentId}`)
   }
 
   const handleViewAll = () => {
     setOpen(false)
+    router.push('/documents')
   }
 
   return (
@@ -90,7 +90,7 @@ export function HeaderSearch() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
             type="text"
-            placeholder="Search opportunities... (⌘K)"
+            placeholder="Search documents... (⌘K)"
             className="w-full pl-10 pr-4 py-2.5"
             onClick={() => setOpen(true)}
             readOnly
@@ -114,14 +114,14 @@ export function HeaderSearch() {
 
       {/* Search Dialog */}
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <DialogTitle className="sr-only">Search Opportunities</DialogTitle>
+        <DialogTitle className="sr-only">Search Documents</DialogTitle>
         <Command className="rounded-lg border shadow-md">
           <div className="flex items-center border-b px-3">
             <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search opportunities, agencies, or keywords..."
+              placeholder="Search documents..."
               className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 border-0 focus-visible:ring-0"
             />
             {loading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
@@ -136,57 +136,50 @@ export function HeaderSearch() {
           </div>
           
           <CommandList>
-            {query.length >= 2 && !loading && results.opportunities.length === 0 && (
-              <CommandEmpty>No opportunities found.</CommandEmpty>
+            {query.length >= 2 && !loading && results.documents.length === 0 && (
+              <CommandEmpty>No documents found.</CommandEmpty>
             )}
-            
-            {results.opportunities.length > 0 && (
-              <CommandGroup heading={`Opportunities (${results.total} found)`}>
-                {results.opportunities.map((opp) => (
+
+            {results.documents.length > 0 && (
+              <CommandGroup heading={`Documents (${results.total} found)`}>
+                {results.documents.map((doc) => (
                   <CommandItem
-                    key={opp.id}
-                    value={opp.id}
-                    onSelect={() => handleSelect(opp.id)}
+                    key={doc.id}
+                    value={doc.id}
+                    onSelect={() => handleSelect(doc.id)}
                     className="px-4 py-3"
                   >
                     <div className="flex items-start gap-3 w-full">
                       <FileText className="mt-0.5 h-4 w-4 text-muted-foreground shrink-0" />
                       <div className="flex-1 space-y-1">
-                        <div className="font-medium line-clamp-1">{opp.title}</div>
+                        <div className="font-medium line-clamp-1">{doc.name}</div>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <Building2 className="h-3 w-3" />
-                          <span>{typeof opp.agency === 'string' ? opp.agency : opp.agency?.name || ''}</span>
+                          <Badge variant="secondary" className="text-xs">
+                            {doc.type?.toUpperCase() || 'FILE'}
+                          </Badge>
                           <span>•</span>
-                          <span>{opp.solicitationNumber}</span>
+                          <span>{doc.size ? `${(doc.size / 1024).toFixed(1)} KB` : 'Unknown size'}</span>
                         </div>
-                        {opp.contractValue && (
-                          <div className="text-xs font-medium">
-                            ${(opp.contractValue / 1000000).toFixed(1)}M
-                          </div>
-                        )}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {new Date(opp.deadline).toLocaleDateString()}
+                        {new Date(doc.uploadDate || doc.createdAt).toLocaleDateString()}
                       </div>
                     </div>
                   </CommandItem>
                 ))}
               </CommandGroup>
             )}
-            
+
             {results.total > 5 && (
-              <>
-                <CommandSeparator />
-                <CommandGroup>
-                  <Link href={`/opportunities?query=${encodeURIComponent(query)}`} prefetch={true} onClick={handleViewAll}>
-                    <CommandItem
-                      className="justify-center text-sm text-muted-foreground"
-                    >
-                      View all {results.total} results →
-                    </CommandItem>
-                  </Link>
-                </CommandGroup>
-              </>
+              <div className="p-2 border-t">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleViewAll}
+                >
+                  View all {results.total} documents
+                </Button>
+              </div>
             )}
 
             {query.length < 2 && (
