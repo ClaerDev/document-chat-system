@@ -100,24 +100,28 @@ export async function GET(request: NextRequest) {
 
     // Add search filter if provided
     if (searchQuery && searchQuery.trim().length > 0) {
-      whereClause.OR = [
+      whereClause.AND = [
         {
-          name: {
-            contains: searchQuery,
-            mode: 'insensitive'
-          }
-        },
-        {
-          type: {
-            contains: searchQuery,
-            mode: 'insensitive'
-          }
-        },
-        {
-          mimeType: {
-            contains: searchQuery,
-            mode: 'insensitive'
-          }
+          OR: [
+            {
+              name: {
+                contains: searchQuery,
+                mode: 'insensitive'
+              }
+            },
+            {
+              type: {
+                contains: searchQuery,
+                mode: 'insensitive'
+              }
+            },
+            {
+              mimeType: {
+                contains: searchQuery,
+                mode: 'insensitive'
+              }
+            }
+          ]
         }
       ]
     }
