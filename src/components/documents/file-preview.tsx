@@ -97,8 +97,10 @@ const CanvasPreviewWithFetch: React.FC<{ document: any; className?: string }> = 
       </div>
     </div>
   );
+};
 
-  /* ORIGINAL CODE - Disabled due to infinite loop issue:
+/* ORIGINAL CanvasPreviewWithFetch CODE - Disabled due to infinite loop issue:
+const CanvasPreviewWithFetch_DISABLED: React.FC<{ document: any; className?: string }> = ({ document: doc, className = '' }) => {
   const [fetchedFile, setFetchedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -538,8 +540,8 @@ const CanvasPreviewWithFetch: React.FC<{ document: any; className?: string }> = 
   //     className={className}
   //   />
   // );
-  */
 };
+*/
 
 export const FilePreview: React.FC<FilePreviewProps> = ({ document: doc, className = '', videoFit = 'contain' }) => {
   const [iframeLoading, setIframeLoading] = useState(true);
