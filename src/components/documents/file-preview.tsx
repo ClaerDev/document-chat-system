@@ -490,13 +490,31 @@ const CanvasPreviewWithFetch: React.FC<{ document: any; className?: string }> = 
     );
   }
 
+  // TEMPORARY: Disable ResponsiveCanvasPreview due to infinite loop issue
+  // TODO: Fix infinite loop in ResponsiveCanvasPreview component
   return (
-    <ResponsiveCanvasPreview 
-      file={fetchedFile} 
-      fileName={getOriginalFileName(doc)} 
-      className={className}
-    />
+    <div className={`w-full h-full flex items-center justify-center bg-gray-50 ${className}`}>
+      <div className="text-center p-8">
+        <div className="text-4xl mb-4">📄</div>
+        <div className="text-sm font-medium mb-2">{getOriginalFileName(doc)}</div>
+        <div className="text-xs text-muted-foreground mb-4">
+          File size: {(fetchedFile.size / 1024).toFixed(1)} KB
+        </div>
+        <div className="text-xs text-muted-foreground">
+          Preview temporarily disabled - please download to view
+        </div>
+      </div>
+    </div>
   );
+
+  // Original code - re-enable after fixing infinite loop:
+  // return (
+  //   <ResponsiveCanvasPreview
+  //     file={fetchedFile}
+  //     fileName={getOriginalFileName(doc)}
+  //     className={className}
+  //   />
+  // );
 };
 
 export const FilePreview: React.FC<FilePreviewProps> = ({ document: doc, className = '', videoFit = 'contain' }) => {
