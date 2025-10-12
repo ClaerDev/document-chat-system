@@ -276,97 +276,95 @@ export default function Dashboard() {
                 </Link>
               </div>
             </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[300px]">
-                {documentsLoading ? (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100"></div>
+            <CardContent className="pb-4">
+              {documentsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100"></div>
+                </div>
+              ) : recentDocuments.length === 0 ? (
+                <div className="flex flex-col items-center justify-center text-center py-8">
+                  <div className="rounded-full bg-gray-100 dark:bg-gray-800 p-4 mb-3">
+                    <FileText className="h-8 w-8 text-gray-400" />
                   </div>
-                ) : recentDocuments.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full text-center py-12">
-                    <div className="rounded-full bg-gray-100 dark:bg-gray-800 p-6 mb-4">
-                      <FileText className="h-12 w-12 text-gray-400" />
-                    </div>
-                    <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-1">No documents yet</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Upload your first document to get started</p>
-                    <Link href="/documents">
-                      <Button variant="outline">
-                        <Upload className="mr-2 h-4 w-4" />
-                        Upload Document
-                      </Button>
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {recentDocuments.map((doc) => (
-                      <Link key={doc.id} href={`/documents/${doc.id}`}>
-                        <div className="flex items-center space-x-4 p-3 rounded-lg border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
-                          <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
-                            <FileText className="h-5 w-5" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
-                              {doc.name}
-                            </p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Badge variant="secondary" className="text-xs">
-                                {doc.type?.toUpperCase() || 'FILE'}
-                              </Badge>
-                              <span className="text-xs text-gray-500 dark:text-gray-400">
-                                {doc.size ? `${(doc.size / 1024).toFixed(1)} KB` : 'Unknown size'}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex flex-col items-end text-xs text-gray-500 dark:text-gray-400">
-                            <span>{new Date(doc.uploadDate || doc.createdAt).toLocaleDateString()}</span>
-                            <span className="flex items-center mt-1">
-                              <Clock className="h-3 w-3 mr-1" />
-                              {new Date(doc.lastModified || doc.uploadDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">No documents yet</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Upload your first document to get started</p>
+                  <Link href="/documents">
+                    <Button variant="outline" size="sm">
+                      <Upload className="mr-2 h-4 w-4" />
+                      Upload Document
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {recentDocuments.map((doc) => (
+                    <Link key={doc.id} href={`/documents/${doc.id}`}>
+                      <div className="flex items-center space-x-3 p-2.5 rounded-lg border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
+                        <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 flex-shrink-0">
+                          <FileText className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                            {doc.name}
+                          </p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <Badge variant="secondary" className="text-xs">
+                              {doc.type?.toUpperCase() || 'FILE'}
+                            </Badge>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              {doc.size ? `${(doc.size / 1024).toFixed(1)} KB` : 'Unknown size'}
                             </span>
                           </div>
                         </div>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </ScrollArea>
+                        <div className="flex flex-col items-end text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
+                          <span>{new Date(doc.uploadDate || doc.createdAt).toLocaleDateString()}</span>
+                          <span className="flex items-center mt-0.5">
+                            <Clock className="h-3 w-3 mr-1" />
+                            {new Date(doc.lastModified || doc.uploadDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 
           {/* Quick Actions */}
           <Card className="col-span-full lg:col-span-1">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <TrendingUp className="mr-2 h-5 w-5" />
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center text-base">
+                <TrendingUp className="mr-2 h-4 w-4" />
                 Quick Actions
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-xs">
                 Common tasks and shortcuts
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-2 pb-4">
               <Link href="/documents" className="block">
-                <Button variant="outline" className="w-full justify-start" size="lg">
-                  <Upload className="mr-2 h-5 w-5" />
-                  Upload Document
+                <Button variant="outline" className="w-full justify-start h-9">
+                  <Upload className="mr-2 h-4 w-4" />
+                  <span className="text-sm">Upload Document</span>
                 </Button>
               </Link>
               <Link href="/chat" className="block">
-                <Button variant="outline" className="w-full justify-start" size="lg">
-                  <MessageSquare className="mr-2 h-5 w-5" />
-                  Start Chat
+                <Button variant="outline" className="w-full justify-start h-9">
+                  <MessageSquare className="mr-2 h-4 w-4" />
+                  <span className="text-sm">Start Chat</span>
                 </Button>
               </Link>
               <Link href="/documents" className="block">
-                <Button variant="outline" className="w-full justify-start" size="lg">
-                  <FolderOpen className="mr-2 h-5 w-5" />
-                  Manage Folders
+                <Button variant="outline" className="w-full justify-start h-9">
+                  <FolderOpen className="mr-2 h-4 w-4" />
+                  <span className="text-sm">Manage Folders</span>
                 </Button>
               </Link>
               <Link href="/settings" className="block">
-                <Button variant="outline" className="w-full justify-start" size="lg">
-                  <Settings className="mr-2 h-5 w-5" />
-                  Settings
+                <Button variant="outline" className="w-full justify-start h-9">
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span className="text-sm">Settings</span>
                 </Button>
               </Link>
             </CardContent>
