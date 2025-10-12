@@ -65,6 +65,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const folderId = searchParams.get('folderId')
     const includeDeleted = searchParams.get('includeDeleted') === 'true'
+    const searchQuery = searchParams.get('search')
 
     // Get user's organization
     const user = await prisma.user.findUnique({
@@ -95,6 +96,30 @@ export async function GET(request: NextRequest) {
     // Include soft-deleted documents if requested
     if (!includeDeleted) {
       whereClause.deletedAt = null
+    }
+
+    // Add search filter if provided
+    if (searchQuery && searchQuery.trim().length > 0) {
+      whereClause.OR = [
+        {
+          name: {
+            contains: searchQuery,
+            mode: 'insensitive'
+          }
+        },
+        {
+          type: {
+            contains: searchQuery,
+            mode: 'insensitive'
+          }
+        },
+        {
+          mimeType: {
+            contains: searchQuery,
+            mode: 'insensitive'
+          }
+        }
+      ]
     }
 
     // Fetch documents with new consolidated JSON structure
