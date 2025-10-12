@@ -100,30 +100,44 @@ export async function GET(request: NextRequest) {
 
     // Add search filter if provided
     if (searchQuery && searchQuery.trim().length > 0) {
+      const searchTerm = searchQuery.trim()
+      // Replace the entire whereClause structure for search
+      const baseWhere = { ...whereClause }
       whereClause.AND = [
+        baseWhere,
         {
           OR: [
             {
               name: {
-                contains: searchQuery,
-                mode: 'insensitive'
-              }
-            },
-            {
-              type: {
-                contains: searchQuery,
+                contains: searchTerm,
                 mode: 'insensitive'
               }
             },
             {
               mimeType: {
-                contains: searchQuery,
+                contains: searchTerm,
+                mode: 'insensitive'
+              }
+            },
+            {
+              extractedText: {
+                contains: searchTerm,
+                mode: 'insensitive'
+              }
+            },
+            {
+              description: {
+                contains: searchTerm,
                 mode: 'insensitive'
               }
             }
           ]
         }
       ]
+      // Remove the already added conditions from root level
+      delete whereClause.organizationId
+      delete whereClause.folderId
+      delete whereClause.deletedAt
     }
 
     // Fetch documents with new consolidated JSON structure
