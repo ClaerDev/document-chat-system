@@ -392,7 +392,35 @@ const CanvasPreviewWithFetch: React.FC<{ document: any; className?: string }> = 
     );
   }
 
+  // Log error state for debugging
+  React.useEffect(() => {
+    if (error || !fetchedFile) {
+      console.error('❌ FilePreview - Preview not available:', {
+        error,
+        hasFetchedFile: !!fetchedFile,
+        documentId: doc.id,
+        documentName: doc.name,
+        documentType: doc.type,
+        filePath: doc.filePath,
+        mimeType: doc.mimeType,
+        size: doc.size,
+        hasOriginalFile: !!doc.originalFile
+      });
+    }
+  }, [error, fetchedFile, doc]);
+
   if (error || !fetchedFile) {
+    const debugInfo = {
+      ID: doc.id,
+      Name: doc.name,
+      Type: doc.type || 'none',
+      FilePath: doc.filePath || 'none',
+      MimeType: doc.mimeType || 'none',
+      Size: doc.size || 'none',
+      HasOriginalFile: doc.originalFile ? 'yes' : 'no',
+      Error: error || 'none'
+    };
+
     return (
       <div className={`w-full h-full flex items-center justify-center text-gray-500 ${className}`}>
         <div className="text-center p-4 max-w-2xl">
@@ -414,23 +442,23 @@ const CanvasPreviewWithFetch: React.FC<{ document: any; className?: string }> = 
             {doc.filePath ? 'Unable to load file from storage' : 'No file path found'}
           </div>
 
-          {/* Debug info - always show for troubleshooting */}
-          <details className="text-left text-xs bg-gray-100 p-3 rounded mt-3 max-w-lg mx-auto">
-            <summary className="cursor-pointer font-medium mb-2">Debug Info (Click to expand)</summary>
-            <div className="mt-2 space-y-1 font-mono">
-              <div><strong>ID:</strong> {doc.id}</div>
-              <div><strong>Name:</strong> {doc.name}</div>
-              <div><strong>Type:</strong> {doc.type || 'none'}</div>
-              <div><strong>FilePath:</strong> {doc.filePath || 'none'}</div>
-              <div><strong>MimeType:</strong> {doc.mimeType || 'none'}</div>
-              <div><strong>Size:</strong> {doc.size || 'none'}</div>
-              <div><strong>Has OriginalFile:</strong> {doc.originalFile ? 'yes' : 'no'}</div>
-              <div><strong>Error Message:</strong> {error || 'none'}</div>
-              <div className="mt-2 pt-2 border-t border-gray-300">
-                <strong>Check Console:</strong> Open browser DevTools (F12) and check the Console tab for detailed logs starting with "FilePreview -"
-              </div>
+          {/* Visible debug info box */}
+          <div className="text-left text-xs bg-yellow-50 border-2 border-yellow-400 p-3 rounded mt-3 max-w-lg mx-auto">
+            <div className="font-bold text-yellow-900 mb-2">🔍 Debug Information:</div>
+            <div className="space-y-1 font-mono text-yellow-900">
+              <div><strong>ID:</strong> {debugInfo.ID}</div>
+              <div><strong>Name:</strong> {debugInfo.Name}</div>
+              <div><strong>Type:</strong> {debugInfo.Type}</div>
+              <div><strong>FilePath:</strong> {debugInfo.FilePath}</div>
+              <div><strong>MimeType:</strong> {debugInfo.MimeType}</div>
+              <div><strong>Size:</strong> {debugInfo.Size}</div>
+              <div><strong>Has File:</strong> {debugInfo.HasOriginalFile}</div>
+              <div><strong>Error:</strong> {debugInfo.Error}</div>
             </div>
-          </details>
+            <div className="mt-3 pt-2 border-t border-yellow-300 text-yellow-900">
+              <strong>Console:</strong> Check browser DevTools Console (F12) for detailed logs
+            </div>
+          </div>
 
           {/* Fallback: Provide link to original document */}
           {doc.filePath && doc.filePath.includes('sam.gov') && (
