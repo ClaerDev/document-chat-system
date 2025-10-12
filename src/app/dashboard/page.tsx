@@ -332,7 +332,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Quick Actions */}
-          <Card className="col-span-full lg:col-span-1">
+          <Card className="col-span-full lg:col-span-1 lg:self-start">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center text-base">
                 <TrendingUp className="mr-2 h-4 w-4" />
