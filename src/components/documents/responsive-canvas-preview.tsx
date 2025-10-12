@@ -212,7 +212,7 @@ export const ResponsiveCanvasPreview: React.FC<ResponsiveCanvasPreviewProps> = (
       dataURL: canvas.toDataURL('image/png'),
       additionalInfo: {}
     }
-  }, [dimensions])
+  }, [dimensions.width, dimensions.height])
 
   // Enhanced image preview with error handling and optimization
   const generateImagePreview = useCallback(async (file: File): Promise<{ dataURL: string; additionalInfo: any }> => {
@@ -285,7 +285,7 @@ export const ResponsiveCanvasPreview: React.FC<ResponsiveCanvasPreviewProps> = (
       
       reader.readAsDataURL(file)
     })
-  }, [dimensions])
+  }, [dimensions.width, dimensions.height])
 
   // Robust PDF preview with better error handling and fallback
   const generatePDFPreview = useCallback(async (file: File): Promise<{ dataURL: string; additionalInfo: any }> => {
@@ -544,7 +544,7 @@ export const ResponsiveCanvasPreview: React.FC<ResponsiveCanvasPreviewProps> = (
         estimatedSize: text.length 
       }
     }
-  }, [dimensions])
+  }, [dimensions.width, dimensions.height])
 
   // Enhanced Office document preview with actual content rendering
   const generateOfficePreview = useCallback(async (file: File, category: string): Promise<{ dataURL: string; additionalInfo: any }> => {
@@ -739,7 +739,7 @@ export const ResponsiveCanvasPreview: React.FC<ResponsiveCanvasPreviewProps> = (
         features: style.features
       }
     }
-  }, [dimensions])
+  }, [dimensions.width, dimensions.height])
 
   // Video file preview
   const generateVideoPreview = useCallback(async (file: File): Promise<{ dataURL: string; additionalInfo: any }> => {
@@ -800,7 +800,7 @@ export const ResponsiveCanvasPreview: React.FC<ResponsiveCanvasPreviewProps> = (
       dataURL: canvas.toDataURL('image/png'),
       additionalInfo: { fileSize: file.size }
     }
-  }, [dimensions])
+  }, [dimensions.width, dimensions.height])
 
   // Audio file preview
   const generateAudioPreview = useCallback(async (file: File): Promise<{ dataURL: string; additionalInfo: any }> => {
@@ -861,7 +861,7 @@ export const ResponsiveCanvasPreview: React.FC<ResponsiveCanvasPreviewProps> = (
       dataURL: canvas.toDataURL('image/png'),
       additionalInfo: { fileSize: file.size }
     }
-  }, [dimensions])
+  }, [dimensions.width, dimensions.height])
 
   // Archive file preview
   const generateArchivePreview = useCallback(async (file: File): Promise<{ dataURL: string; additionalInfo: any }> => {
@@ -932,7 +932,7 @@ export const ResponsiveCanvasPreview: React.FC<ResponsiveCanvasPreviewProps> = (
         format: extension
       }
     }
-  }, [dimensions])
+  }, [dimensions.width, dimensions.height])
 
   // Generate preview based on file type
   const generatePreview = useCallback(async () => {
