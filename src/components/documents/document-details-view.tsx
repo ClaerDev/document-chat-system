@@ -1101,7 +1101,9 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
     
     // Start the async process
     processVectorization()
-  }, [document, updateDocument, refreshDocumentData, notify, playSound])
+    // Only depend on document.id to avoid infinite loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [document?.id, updateDocument, refreshDocumentData, notify, playSound])
 
   // Progress polling for background jobs
   const startProgressPolling = useCallback((jobId: string) => {
@@ -1150,7 +1152,9 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
           'Background job may still be running. Check document status later.')
       }
     }, 300000) // 5 minutes
-  }, [document, isVectorizing, notify, playSound, refreshDocumentData])
+    // Only depend on document.id to avoid infinite loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [document?.id, isVectorizing, notify, playSound, refreshDocumentData])
 
   // Handler for deleting document vectors
   const handleDeleteVectors = useCallback(async () => {
@@ -1202,7 +1206,9 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
     } finally {
       setIsVectorizing(false)
     }
-  }, [document, refreshDocumentData, notify, playSound])
+    // Only depend on document.id to avoid infinite loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [document?.id, refreshDocumentData, notify, playSound])
   
   // Polling function to check analysis progress and update when complete
   React.useEffect(() => {
@@ -3541,7 +3547,9 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
       )
     }
   ];
-  }, [document, editableData, isEditing, editingField, tempValue])
+    // Only depend on document.id to avoid infinite loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [document?.id, editableData, isEditing, editingField, tempValue])
 
   // Separate editable and non-editable sections
   const allSections = cardSections.reduce((acc, section) => {
