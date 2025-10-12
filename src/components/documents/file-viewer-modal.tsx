@@ -38,7 +38,9 @@ export function FileViewerModal({ open, onOpenChange, document }: FileViewerModa
       ...document,
       type
     }
-  }, [document])
+    // Only recalculate when specific fields change, not the whole document object
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [document.id, document.type, document.mimeType, document.name])
 
   const handleDownload = async () => {
     try {
