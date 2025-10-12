@@ -546,55 +546,158 @@ export const ResponsiveCanvasPreview: React.FC<ResponsiveCanvasPreviewProps> = (
     }
   }, [dimensions])
 
-  // Enhanced Office document preview with better styling
+  // Enhanced Office document preview with actual content rendering
   const generateOfficePreview = useCallback(async (file: File, category: string): Promise<{ dataURL: string; additionalInfo: any }> => {
+    // For Word documents, try to use mammoth to extract text and render it
+    if (category === 'document') {
+      try {
+        // Dynamically import mammoth
+        const mammoth = await import('mammoth')
+        const arrayBuffer = await file.arrayBuffer()
+        const result = await mammoth.extractRawText({ arrayBuffer })
+        const text = result.value
+
+        if (text && text.trim().length > 0) {
+          // Create canvas with document text
+          const canvas = document.createElement('canvas')
+          const ctx = canvas.getContext('2d')
+
+          if (!ctx) {
+            throw new Error('Cannot get canvas context')
+          }
+
+          const baseWidth = Math.max(600, dimensions.width)
+          const baseHeight = Math.max(700, dimensions.height)
+
+          canvas.width = baseWidth
+          canvas.height = baseHeight
+
+          // White background like a document
+          ctx.fillStyle = '#ffffff'
+          ctx.fillRect(0, 0, baseWidth, baseHeight)
+
+          // Document border
+          ctx.strokeStyle = '#e5e7eb'
+          ctx.lineWidth = 2
+          ctx.strokeRect(0, 0, baseWidth, baseHeight)
+
+          // Header bar
+          ctx.fillStyle = '#2b579a'
+          ctx.fillRect(0, 0, baseWidth, 40)
+          ctx.fillStyle = '#ffffff'
+          ctx.font = 'bold 14px Arial'
+          ctx.textAlign = 'left'
+          ctx.fillText('📄 ' + file.name, 15, 25)
+
+          // Document content
+          ctx.fillStyle = '#1f2937'
+          ctx.font = '13px Georgia, serif'
+          ctx.textAlign = 'left'
+
+          const lines = text.split('\n')
+          const maxLines = Math.floor((baseHeight - 80) / 18)
+          const displayLines = lines.slice(0, maxLines)
+          const maxCharsPerLine = Math.floor((baseWidth - 60) / 7.5)
+
+          let yPos = 70
+          displayLines.forEach((line) => {
+            const trimmedLine = line.trim()
+            if (trimmedLine.length > 0) {
+              // Word wrap long lines
+              if (trimmedLine.length > maxCharsPerLine) {
+                const wrapped = trimmedLine.substring(0, maxCharsPerLine - 3) + '...'
+                ctx.fillText(wrapped, 30, yPos)
+              } else {
+                ctx.fillText(trimmedLine, 30, yPos)
+              }
+            } else {
+              // Empty line - add small space
+              yPos += 9
+            }
+            yPos += 18
+          })
+
+          // Footer with stats
+          ctx.fillStyle = '#6b7280'
+          ctx.font = '11px Arial'
+          ctx.textAlign = 'center'
+          const totalChars = text.length
+          const totalWords = text.split(/\s+/).filter(w => w.length > 0).length
+          ctx.fillText(`${lines.length} lines • ${totalWords} words • ${totalChars} characters • ${(file.size / 1024).toFixed(1)} KB`, baseWidth / 2, baseHeight - 15)
+
+          // Truncation indicator
+          if (lines.length > maxLines) {
+            ctx.fillStyle = '#f59e0b'
+            ctx.font = 'italic 11px Arial'
+            ctx.fillText(`... and ${lines.length - maxLines} more lines`, baseWidth / 2, baseHeight - 35)
+          }
+
+          return {
+            dataURL: canvas.toDataURL('image/png'),
+            additionalInfo: {
+              category,
+              fileSize: file.size,
+              lines: lines.length,
+              words: totalWords,
+              characters: totalChars,
+              extracted: true
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to extract Word document content with mammoth:', error)
+        // Fall through to generic preview
+      }
+    }
+
+    // Fallback: Generic preview for Office files (used when mammoth fails or for other office types)
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')
-    
+
     if (!ctx) {
       throw new Error('Cannot get canvas context')
     }
 
     const baseWidth = Math.max(400, dimensions.width)
     const baseHeight = Math.max(500, dimensions.height)
-    
+
     canvas.width = baseWidth
     canvas.height = baseHeight
-    
+
     // Office-specific styling
     const officeStyles: Record<string, any> = {
-      document: { 
-        bg: '#2b579a', 
-        accent: '#ffffff', 
-        icon: '📝', 
+      document: {
+        bg: '#2b579a',
+        accent: '#ffffff',
+        icon: '📝',
         name: 'Word Document',
-        features: ['Rich Text', 'Tables', 'Images'] 
+        features: ['Rich Text', 'Tables', 'Images']
       },
-      spreadsheet: { 
-        bg: '#217346', 
-        accent: '#ffffff', 
-        icon: '📊', 
+      spreadsheet: {
+        bg: '#217346',
+        accent: '#ffffff',
+        icon: '📊',
         name: 'Excel Spreadsheet',
-        features: ['Formulas', 'Charts', 'Data Analysis'] 
+        features: ['Formulas', 'Charts', 'Data Analysis']
       },
-      presentation: { 
-        bg: '#d24726', 
-        accent: '#ffffff', 
-        icon: '📽️', 
+      presentation: {
+        bg: '#d24726',
+        accent: '#ffffff',
+        icon: '📽️',
         name: 'PowerPoint Presentation',
-        features: ['Slides', 'Animations', 'Media'] 
+        features: ['Slides', 'Animations', 'Media']
       }
     }
-    
+
     const style = officeStyles[category] || officeStyles.document
-    
+
     // Background gradient
     const gradient = ctx.createLinearGradient(0, 0, 0, baseHeight)
     gradient.addColorStop(0, style.bg)
     gradient.addColorStop(1, '#000000')
     ctx.fillStyle = gradient
     ctx.fillRect(0, 0, baseWidth, baseHeight)
-    
+
     // Office-style header
     ctx.fillStyle = style.accent
     ctx.fillRect(0, 0, baseWidth, 60)
@@ -602,35 +705,35 @@ export const ResponsiveCanvasPreview: React.FC<ResponsiveCanvasPreviewProps> = (
     ctx.font = 'bold 18px Arial'
     ctx.textAlign = 'left'
     ctx.fillText(style.name, 20, 35)
-    
+
     // Large icon
     ctx.font = 'bold 80px Arial'
     ctx.textAlign = 'center'
     ctx.fillStyle = style.accent
     ctx.fillText(style.icon, baseWidth / 2, 180)
-    
+
     // File info
     ctx.font = 'bold 20px Arial'
     ctx.fillText(file.name, baseWidth / 2, 240)
-    
+
     ctx.font = '16px Arial'
     ctx.fillText(`${(file.size / (1024 * 1024)).toFixed(1)} MB`, baseWidth / 2, 270)
-    
+
     // Features
     ctx.font = '14px Arial'
     ctx.fillStyle = '#e0e0e0'
     style.features.forEach((feature: string, index: number) => {
       ctx.fillText(`✓ ${feature}`, baseWidth / 2, 320 + (index * 25))
     })
-    
+
     // Preview notice
     ctx.font = 'italic 12px Arial'
     ctx.fillStyle = '#cccccc'
-    ctx.fillText('Full document available in Office applications', baseWidth / 2, baseHeight - 30)
-    
+    ctx.fillText('Download to view full document', baseWidth / 2, baseHeight - 30)
+
     return {
       dataURL: canvas.toDataURL('image/png'),
-      additionalInfo: { 
+      additionalInfo: {
         category,
         fileSize: file.size,
         features: style.features
