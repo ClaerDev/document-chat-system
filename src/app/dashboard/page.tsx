@@ -26,15 +26,7 @@ import {
   Search
 } from 'lucide-react'
 import { Profile } from '@/types'
-import {
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command'
-import { DialogTitle } from '@/components/ui/dialog'
+import { HeaderSearch } from '@/components/layout/header-search'
 
 export default function Dashboard() {
   const { isLoaded, isSignedIn } = useAuth()
@@ -52,10 +44,7 @@ export default function Dashboard() {
   const [statsLoading, setStatsLoading] = useState(true)
   const [recentDocuments, setRecentDocuments] = useState<any[]>([])
   const [documentsLoading, setDocumentsLoading] = useState(true)
-  const [searchOpen, setSearchOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<any[]>([])
-  const [searchLoading, setSearchLoading] = useState(false)
+  const [triggerSearch, setTriggerSearch] = useState(false)
 
   const fetchStats = useCallback(async () => {
     try {
@@ -147,31 +136,6 @@ export default function Dashboard() {
     }
   }, [isLoaded, isSignedIn, fetchProfile, fetchStats])
 
-  // Search functionality
-  useEffect(() => {
-    if (!searchQuery || searchQuery.length < 2) {
-      setSearchResults([])
-      return
-    }
-
-    const searchDocuments = async () => {
-      setSearchLoading(true)
-      try {
-        const response = await fetch(`/api/v1/documents?search=${encodeURIComponent(searchQuery)}`)
-        const data = await response.json()
-        if (data.success) {
-          setSearchResults(data.documents || [])
-        }
-      } catch (error) {
-        console.error('Search error:', error)
-      } finally {
-        setSearchLoading(false)
-      }
-    }
-
-    const timeoutId = setTimeout(searchDocuments, 300)
-    return () => clearTimeout(timeoutId)
-  }, [searchQuery])
   
   // Don't render anything on server-side to prevent hydration mismatch
   if (!isLoaded || !isSignedIn) {
@@ -378,7 +342,7 @@ export default function Dashboard() {
               <Button
                 variant="outline"
                 className="w-full justify-start h-9"
-                onClick={() => setSearchOpen(true)}
+                onClick={() => setTriggerSearch(true)}
               >
                 <Search className="mr-2 h-4 w-4" />
                 <span className="text-sm">Search Documents</span>
@@ -405,42 +369,13 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Search Modal */}
-        <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
-          <DialogTitle className="sr-only">Search Documents</DialogTitle>
-          <CommandInput
-            placeholder="Search documents..."
-            value={searchQuery}
-            onValueChange={setSearchQuery}
+        {/* Hidden Search Component - controlled by trigger */}
+        <div className="hidden">
+          <HeaderSearch
+            triggerOpen={triggerSearch}
+            onOpenChange={(open) => !open && setTriggerSearch(false)}
           />
-          <CommandList>
-            <CommandEmpty>
-              {searchLoading ? 'Searching...' : 'No documents found.'}
-            </CommandEmpty>
-            {searchResults.length > 0 && (
-              <CommandGroup heading="Documents">
-                {searchResults.map((doc) => (
-                  <CommandItem
-                    key={doc.id}
-                    onSelect={() => {
-                      router.push(`/documents/${doc.id}`)
-                      setSearchOpen(false)
-                      setSearchQuery('')
-                    }}
-                  >
-                    <FileText className="mr-2 h-4 w-4" />
-                    <div className="flex-1">
-                      <div className="font-medium">{doc.name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {doc.type?.toUpperCase()} • {doc.size ? `${(doc.size / 1024).toFixed(1)} KB` : 'Unknown size'}
-                      </div>
-                    </div>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            )}
-          </CommandList>
-        </CommandDialog>
+        </div>
       </div>
     </AppLayout>
   )

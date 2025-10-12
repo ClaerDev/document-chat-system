@@ -22,7 +22,12 @@ interface SearchResult {
   total: number
 }
 
-export function HeaderSearch() {
+interface HeaderSearchProps {
+  triggerOpen?: boolean
+  onOpenChange?: (open: boolean) => void
+}
+
+export function HeaderSearch({ triggerOpen, onOpenChange }: HeaderSearchProps = {}) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -31,17 +36,30 @@ export function HeaderSearch() {
 
   const debouncedQuery = useDebounce(query, 300)
 
+  // Handle external trigger
+  useEffect(() => {
+    if (triggerOpen !== undefined) {
+      setOpen(triggerOpen)
+    }
+  }, [triggerOpen])
+
+  // Notify parent of open state changes
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen)
+    onOpenChange?.(newOpen)
+  }
+
   // Keyboard shortcut
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
-        setOpen((open) => !open)
+        handleOpenChange(!open)
       }
     }
     document.addEventListener('keydown', down)
     return () => document.removeEventListener('keydown', down)
-  }, [])
+  }, [open])
 
   // Search functionality
   useEffect(() => {
@@ -72,13 +90,13 @@ export function HeaderSearch() {
   }, [debouncedQuery])
 
   const handleSelect = (documentId: string) => {
-    setOpen(false)
+    handleOpenChange(false)
     setQuery('')
     router.push(`/documents/${documentId}`)
   }
 
   const handleViewAll = () => {
-    setOpen(false)
+    handleOpenChange(false)
     router.push('/documents')
   }
 
@@ -92,7 +110,7 @@ export function HeaderSearch() {
             type="text"
             placeholder="Search documents... (⌘K)"
             className="w-full pl-10 pr-4 py-2.5"
-            onClick={() => setOpen(true)}
+            onClick={() => handleOpenChange(true)}
             readOnly
           />
           <kbd className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
@@ -106,14 +124,14 @@ export function HeaderSearch() {
         variant="ghost" 
         size="sm" 
         className="md:hidden"
-        onClick={() => setOpen(true)}
+        onClick={() => handleOpenChange(true)}
       >
         <Search className="h-5 w-5" />
         <span className="sr-only">Search</span>
       </Button>
 
       {/* Search Dialog */}
-      <CommandDialog open={open} onOpenChange={setOpen}>
+      <CommandDialog open={open} onOpenChange={handleOpenChange}>
         <DialogTitle className="sr-only">Search Documents</DialogTitle>
         <Command className="rounded-lg border shadow-md">
           <div className="flex items-center border-b px-3">
@@ -128,7 +146,7 @@ export function HeaderSearch() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setOpen(false)}
+              onClick={() => handleOpenChange(false)}
               className="ml-2"
             >
               <X className="h-4 w-4" />
