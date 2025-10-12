@@ -1507,7 +1507,9 @@ export function DocumentDetailsView({ documentId }: DocumentDetailsViewProps) {
       
     } else if (document && document.id === lastDocumentId) {
     }
-  }, [document, lastDocumentId])
+    // Only trigger when document ID changes, not when document object reference changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [document?.id, lastDocumentId])
 
   // Cleanup auto-save timeouts on unmount
   React.useEffect(() => {
