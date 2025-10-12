@@ -404,10 +404,30 @@ const CanvasPreviewWithFetch: React.FC<{ document: any; className?: string }> = 
               {error}
             </div>
           )}
+          {!error && !fetchedFile && (
+            <div className="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded p-2 max-w-sm mx-auto mb-3">
+              File fetch completed but no file data was returned
+            </div>
+          )}
           <div className="text-xs text-gray-500 mb-3">
-            Document exists but preview cannot be loaded
+            {doc.filePath ? 'Unable to load file from storage' : 'No file path found'}
           </div>
-          
+
+          {/* Debug info in development */}
+          {process.env.NODE_ENV === 'development' && (
+            <details className="text-left text-xs bg-gray-100 p-2 rounded mt-3 max-w-md mx-auto">
+              <summary className="cursor-pointer font-medium">Debug Info</summary>
+              <div className="mt-2 space-y-1">
+                <div><strong>ID:</strong> {doc.id}</div>
+                <div><strong>Name:</strong> {doc.name}</div>
+                <div><strong>FilePath:</strong> {doc.filePath || 'none'}</div>
+                <div><strong>MimeType:</strong> {doc.mimeType || 'none'}</div>
+                <div><strong>Has OriginalFile:</strong> {doc.originalFile ? 'yes' : 'no'}</div>
+                <div><strong>Error:</strong> {error || 'none'}</div>
+              </div>
+            </details>
+          )}
+
           {/* Fallback: Provide link to original document */}
           {doc.filePath && doc.filePath.includes('sam.gov') && (
             <div className="mt-4">
