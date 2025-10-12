@@ -34,6 +34,7 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command'
+import { DialogTitle } from '@/components/ui/dialog'
 
 export default function Dashboard() {
   const { isLoaded, isSignedIn } = useAuth()
@@ -406,6 +407,7 @@ export default function Dashboard() {
 
         {/* Search Modal */}
         <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
+          <DialogTitle className="sr-only">Search Documents</DialogTitle>
           <CommandInput
             placeholder="Search documents..."
             value={searchQuery}
