@@ -76,8 +76,94 @@ const getOriginalFileName = (docData: any): string => {
 
 // Component for handling canvas preview with fetched file content
 const CanvasPreviewWithFetch: React.FC<{ document: any; className?: string }> = ({ document: doc, className = '' }) => {
-  // TEMPORARY: Simplified version without file fetching to avoid infinite loops
-  // TODO: Re-enable full preview after fixing infinite loop issues
+  const [fetchedFile, setFetchedFile] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch file content when component mounts or document ID changes
+  useEffect(() => {
+    // If we already have the original file, use it
+    if (doc.originalFile) {
+      setFetchedFile(doc.originalFile);
+      setIsLoading(false);
+      return;
+    }
+
+    // Otherwise fetch from API
+    const fetchFile = async () => {
+      if (!doc.id) {
+        setError('No document ID available');
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch(`/api/v1/documents/${doc.id}/download`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch file: ${response.statusText}`);
+        }
+
+        const blob = await response.blob();
+        const file = new File([blob], getOriginalFileName(doc), {
+          type: doc.mimeType || 'application/octet-stream'
+        });
+
+        setFetchedFile(file);
+        setIsLoading(false);
+      } catch (err) {
+        console.error('Error fetching file:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load file');
+        setIsLoading(false);
+      }
+    };
+
+    fetchFile();
+    // Only re-fetch when document ID changes
+  }, [doc.id]);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className={`w-full h-full flex items-center justify-center bg-gray-50 ${className}`}>
+        <div className="text-center p-8">
+          <div className="text-4xl mb-4">⏳</div>
+          <div className="text-sm text-muted-foreground">Loading preview...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className={`w-full h-full flex items-center justify-center bg-gray-50 ${className}`}>
+        <div className="text-center p-8 max-w-md">
+          <div className="text-6xl mb-4">⚠️</div>
+          <div className="text-base font-medium mb-2">Failed to load preview</div>
+          <div className="text-sm text-muted-foreground mb-4">{error}</div>
+          <div className="text-xs text-muted-foreground">Please use the download button to view this file</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show file info if we have a fetched file
+  if (fetchedFile) {
+    return (
+      <div className={`w-full h-full ${className}`}>
+        <ResponsiveCanvasPreview
+          file={fetchedFile}
+          type={doc.type}
+          mimeType={doc.mimeType}
+        />
+      </div>
+    );
+  }
+
+  // Fallback - no file available
   return (
     <div className={`w-full h-full flex items-center justify-center bg-gray-50 ${className}`}>
       <div className="text-center p-8 max-w-md">
@@ -92,7 +178,7 @@ const CanvasPreviewWithFetch: React.FC<{ document: any; className?: string }> = 
           </div>
         )}
         <div className="text-xs text-muted-foreground italic">
-          Preview temporarily disabled - please use download button to view file
+          Preview not available
         </div>
       </div>
     </div>
@@ -434,10 +520,23 @@ export const FilePreview: React.FC<FilePreviewProps> = ({ document: doc, classNa
   const isPdfType = doc.type === 'pdf' || doc.mimeType === 'application/pdf';
 
   if (isPdfType) {
-      // Use CanvasPreviewWithFetch for all PDFs (works with or without originalFile)
+      const pdfUrl = getDocumentUrl(doc);
+
+      if (!pdfUrl) {
+        return (
+          <div className="flex flex-col items-center justify-center text-muted-foreground h-full">
+            <div className="text-4xl mb-3">
+              <FileText />
+            </div>
+            <p className="text-sm">PDF preview unavailable</p>
+            <p className="text-xs mt-1">{originalFileName}</p>
+          </div>
+        );
+      }
+
       return (
         <div className={`w-full h-full ${className}`}>
-          <CanvasPreviewWithFetch document={doc} className="w-full h-full" />
+          <PDFViewer url={pdfUrl} />
         </div>
       );
   }
