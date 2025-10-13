@@ -374,8 +374,7 @@ export class AccountDeletionService {
       { model: 'opportunityNote', field: 'organizationId' },
       { model: 'document', field: 'organizationId' },
       { model: 'pipeline', field: 'organizationId' },
-      { model: 'activity', field: 'organizationId' },
-      { model: 'apiKey', field: 'organizationId' }
+      { model: 'activity', field: 'organizationId' }
     ];
 
     for (const { model, field } of updates) {
@@ -389,6 +388,18 @@ export class AccountDeletionService {
         console.warn(`Failed to soft delete ${model}:`, error);
         deletedData[model] = 0;
       }
+    }
+
+    // Deactivate API keys (they don't have deletedAt field)
+    try {
+      const apiKeyResult = await db.apiKey.updateMany({
+        where: { organizationId, isActive: true },
+        data: { isActive: false }
+      });
+      deletedData.apiKey = apiKeyResult.count;
+    } catch (error) {
+      console.warn('Failed to deactivate API keys:', error);
+      deletedData.apiKey = 0;
     }
 
     // Keep but anonymize opportunities (might be needed for business analytics)
