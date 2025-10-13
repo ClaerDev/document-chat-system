@@ -2532,44 +2532,21 @@ const DocumentsPageContent = () => {
                   )}
                 </div>
               </div>
-              <div className="flex-1 flex items-center justify-center text-muted-foreground">
+              <div className="flex-1 overflow-hidden">
                 {pdfUrl ? (
-                  <div className="text-center">
-                    <File size={64} className="mx-auto mb-4 text-red-500" />
-                    <p className="text-sm font-medium">{doc.name}</p>
-                    <p className="text-xs mt-2">{formatFileSize(doc.size)}</p>
-                    <p className="text-xs mt-4">PDF ready to view</p>
-                    <div className="flex gap-2 mt-4 justify-center">
-                      <Button 
-                        variant="default" 
-                        size="sm"
-                        onClick={() => window.open(pdfUrl, '_blank')}
-                        className="bg-red-500 hover:bg-red-600"
-                      >
-                        <Eye size={16} className="mr-2" />
-                        Open PDF
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => {
-                          const link = document.createElement('a');
-                          link.href = pdfUrl;
-                          link.download = doc.name;
-                          link.click();
-                        }}
-                      >
-                        <Download size={16} className="mr-2" />
-                        Download
-                      </Button>
-                    </div>
-                  </div>
+                  <iframe
+                    src={pdfUrl}
+                    className="w-full h-full"
+                    title={doc.name}
+                  />
                 ) : (
-                  <div className="text-center">
-                    <File size={64} className="mx-auto mb-4 text-red-500" />
-                    <p className="text-sm font-medium">{doc.name}</p>
-                    <p className="text-xs mt-2">{formatFileSize(doc.size)}</p>
-                    <p className="text-xs mt-4">Demo PDF file</p>
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <File size={64} className="mx-auto mb-4 text-red-500" />
+                      <p className="text-sm font-medium">{doc.name}</p>
+                      <p className="text-xs mt-2">{formatFileSize(doc.size)}</p>
+                      <p className="text-xs mt-4">PDF not available for preview</p>
+                    </div>
                   </div>
                 )}
               </div>
