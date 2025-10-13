@@ -37,31 +37,34 @@ export function AppLayout({ children, showNavigation = true }: AppLayoutProps) {
   }
 
   return (
-    <div className="flex h-screen bg-background">
-      {/* Sidebar */}
-      <Sidebar 
-        isOpen={sidebarOpen} 
-        onClose={() => setSidebarOpen(false)} 
-        showNavigation={showNavigation}
-      />
+    <div className="flex flex-col h-screen bg-background">
+      {/* Donation Banner - At the very top */}
+      <DonationBanner />
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Header */}
-        <Header
-          onMobileMenuToggle={() => setSidebarOpen(!sidebarOpen)}
+      {/* Main app container */}
+      <div className="flex flex-1 min-h-0">
+        {/* Sidebar */}
+        <Sidebar
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
           showNavigation={showNavigation}
         />
 
-        {/* Donation Banner */}
-        <DonationBanner />
+        {/* Main content */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Header */}
+          <Header
+            onMobileMenuToggle={() => setSidebarOpen(!sidebarOpen)}
+            showNavigation={showNavigation}
+          />
 
-        {/* Page content */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="container py-6">
-            {children}
-          </div>
-        </main>
+          {/* Page content */}
+          <main className="flex-1 overflow-y-auto">
+            <div className="container py-6">
+              {children}
+            </div>
+          </main>
+        </div>
       </div>
 
       {/* Floating Chat - Temporarily disabled on documents page to test interference */}
