@@ -98,14 +98,14 @@ export async function auditMiddleware(request: NextRequest): Promise<NextRespons
   return response;
 }
 
-function getClientIP(request: NextRequest): string {
+export function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for');
   const real = request.headers.get('x-real-ip');
   const cloudflare = request.headers.get('cf-connecting-ip');
-  
+
   if (cloudflare) return cloudflare;
   if (forwarded) return forwarded.split(',')[0].trim();
   if (real) return real;
-  
+
   return request.ip || 'unknown';
 }

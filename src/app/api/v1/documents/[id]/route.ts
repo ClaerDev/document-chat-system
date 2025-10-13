@@ -12,6 +12,7 @@ import {
 import { randomBytes } from 'crypto';
 import { normalizeFilePath } from '@/lib/storage/path-utils';
 import { crudAuditLogger } from '@/lib/audit/crud-audit-logger';
+import { getClientIP } from '@/lib/audit/middleware';
 
 /**
  * @swagger
@@ -282,9 +283,7 @@ export async function GET(
           endpoint: `/api/v1/documents/${documentId}`,
           method: 'GET',
           userAgent: request.headers.get('user-agent'),
-          ipAddress: request.headers.get('x-forwarded-for') || 
-                    request.headers.get('x-real-ip') || 
-                    'unknown',
+          ipAddress: getClientIP(request),
           isConfidential: document.securityClassification !== 'PUBLIC',
           fileSize: document.size,
           hasAnalysis: !!formattedDocument.analysis
@@ -1462,9 +1461,7 @@ export async function PATCH(
           endpoint: `/api/v1/documents/${documentId}`,
           method: 'PATCH',
           userAgent: request.headers.get('user-agent'),
-          ipAddress: request.headers.get('x-forwarded-for') || 
-                    request.headers.get('x-real-ip') || 
-                    'unknown',
+          ipAddress: getClientIP(request),
           section: section || 'general',
           action: action || 'update',
           changedFields: Object.keys(updateData),
@@ -2186,9 +2183,7 @@ export async function DELETE(
           endpoint: `/api/v1/documents/${documentId}`,
           method: 'DELETE',
           userAgent: request.headers.get('user-agent'),
-          ipAddress: request.headers.get('x-forwarded-for') || 
-                    request.headers.get('x-real-ip') || 
-                    'unknown',
+          ipAddress: getClientIP(request),
           storageDeleted,
           filePath: document.filePath
         }
