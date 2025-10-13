@@ -151,20 +151,20 @@ export const NAICS_CODES = [
 ] as const
 
 
-// Government agencies (subset)
-export const AGENCIES = [
-  'Department of Defense',
-  'General Services Administration',
-  'Department of Veterans Affairs',
-  'Department of Health and Human Services',
-  'Department of Homeland Security',
-  'Department of Transportation',
-  'Department of Energy',
-  'Department of Agriculture',
-  'Department of Commerce',
-  'Department of Justice',
-  'Environmental Protection Agency',
-  'National Aeronautics and Space Administration',
+// Organization types / Client categories
+export const CLIENT_TYPES = [
+  'Enterprise',
+  'Small Business',
+  'Startup',
+  'Non-Profit',
+  'Healthcare',
+  'Financial Services',
+  'Technology',
+  'Manufacturing',
+  'Retail',
+  'Education',
+  'Consulting',
+  'Other',
 ] as const
 
 // States
@@ -222,29 +222,29 @@ export const US_STATES = [
   { code: 'DC', name: 'District of Columbia' },
 ] as const
 
-// Security clearance levels
-export const SECURITY_CLEARANCES = [
-  'Public Trust',
-  'Secret',
-  'Top Secret',
-  'Top Secret/SCI',
-  'Not Required',
+// Document access levels
+export const ACCESS_LEVELS = [
+  'Public',
+  'Internal',
+  'Confidential',
+  'Restricted',
+  'Not Specified',
 ] as const
 
-// Procurement methods/vehicles
+// Procurement methods/approaches
 export const PROCUREMENT_METHODS = [
-  'Open Market',
-  'GSA Schedule',
-  'SeaPort-e',
-  'CIO-SP3',
-  'SEWP',
-  'OASIS',
-  '8(a) STARS II',
-  'IT Schedule 70',
-  'Professional Services Schedule',
-  'VETS 2',
-  'HCaTS',
-  'Alliant 2',
+  'Direct Purchase',
+  'Request for Proposal (RFP)',
+  'Request for Quote (RFQ)',
+  'Request for Information (RFI)',
+  'Competitive Bidding',
+  'Sole Source',
+  'Framework Agreement',
+  'Master Service Agreement',
+  'Standing Purchase Order',
+  'E-Procurement Platform',
+  'Reverse Auction',
+  'Vendor Marketplace',
 ] as const
 
 // IT industry subcategories
@@ -280,7 +280,7 @@ export const CONTRACT_DURATION = [
   '1-2 years',
   '3-5 years',
   'Multi-year (5+ years)',
-  'IDIQ/Indefinite',
+  'Ongoing/Indefinite',
 ] as const
 
 // API Configuration

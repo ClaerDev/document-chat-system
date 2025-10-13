@@ -90,8 +90,8 @@ export const contractAnalyzerResultSchema = z.object({
 export const metadataAnalyzerResultSchema = z.object({
   documentType: z.nativeEnum(DocumentType).describe('Document type classification'),
   securityClassification: z.nativeEnum(SecurityClassification).describe('Security classification'),
-  setAsideType: z.string().optional().describe('Set-aside type (8(a), WOSB, etc.)'),
-  naicsCodes: z.array(z.string().regex(/^\d{6}$/)).describe('6-digit NAICS codes'),
+  setAsideType: z.string().optional().describe('Priority or special category (e.g., Small Business, Minority-Owned, Women-Owned, etc.)'),
+  naicsCodes: z.array(z.string().regex(/^\d{6}$/)).describe('6-digit NAICS industry codes'),
   tags: z.array(z.string()).describe('Document tags for categorization'),
   description: z.string().describe('Brief document description'),
   summary: z.string().describe('Document summary'),

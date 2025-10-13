@@ -45,21 +45,21 @@ export class DocumentMetadataAnalyzer extends BaseAnalyzer {
     console.log(`🔍 [METADATA ANALYZER] Text length: ${extractedText.length} characters`);
     
     try {
-      const prompt = `Analyze this government contracting document and extract key metadata with high precision.
+      const prompt = `Analyze this business document and extract key metadata with high precision.
 
 Document Name: ${documentName}
 
 Analyze and provide:
 1. documentType - One of: PROPOSAL, CONTRACT, CERTIFICATION, COMPLIANCE, TEMPLATE, SOLICITATION, AMENDMENT, CAPABILITY_STATEMENT, PAST_PERFORMANCE, OTHER
 2. securityClassification - One of: PUBLIC, INTERNAL, CONFIDENTIAL, SECRET
-3. setAsideType - If applicable: 8(a), WOSB, VOSB, HUBZone, SDVOSB, or null
+3. setAsideType - If applicable: Small Business, Minority-Owned, Women-Owned, Veteran-Owned, or other priority category, or null
 4. naicsCodes - Array of ALL 6-digit NAICS codes found (look for patterns like "NAICS: 541511", "Primary NAICS Code: 541330", "Industry Classification: 334516", or any 6-digit numbers in industry/classification context)
 5. estimatedValue - Extract contract value, budget, ceiling amount, or estimated dollar amount (e.g., "$2.5M", "$150,000 over 3 years", "Not to exceed $500K")
 6. deadline - Extract key deadlines, submission dates, proposal due dates, or important dates (e.g., "July 31, 2025", "30 days from publication", "Due by 2:00 PM EST on Dec 15, 2025")
-7. tags - **REQUIRED** Array of SPECIFIC, RELEVANT tags for government contracting categorization (5-8 tags that would help contractors find and organize this document)
+7. tags - **REQUIRED** Array of SPECIFIC, RELEVANT tags for business document categorization (5-8 tags that would help users find and organize this document)
 8. description - Brief, informative description (1-2 sentences)
 9. summary - Executive summary (3-5 sentences)
-10. keywords - RELEVANT keywords that describe the actual content, services, technologies, or contract opportunities mentioned in this document (10-15 keywords)
+10. keywords - RELEVANT keywords that describe the actual content, services, technologies, or business opportunities mentioned in this document (10-15 keywords)
 11. urgencyLevel - Based on deadlines/content: low, medium, high, critical
 12. complexityScore - Document complexity (1-10, where 10 is most complex)
 
@@ -84,9 +84,9 @@ NAICS CODES:
 
 TAGS: **CRITICAL - ALWAYS PROVIDE TAGS ARRAY**
 - **MUST ALWAYS INCLUDE** 5-8 relevant tags in the JSON response
-- Focus on ACTIONABLE tags that help categorize the document type, industry, or opportunity
-- Examples: "IT Services", "Cybersecurity", "Cloud Computing", "Professional Services", "R&D", "Defense", "Healthcare", "Energy", "Small Business Set-Aside", "GSA Schedule", "IDIQ", "Task Order"
-- Avoid generic tags like "government" or "document"
+- Focus on ACTIONABLE tags that help categorize the document type, industry, or business context
+- Examples: "IT Services", "Cybersecurity", "Cloud Computing", "Professional Services", "R&D", "Consulting", "Healthcare", "Finance", "Small Business", "Enterprise", "SaaS", "Subscription"
+- Avoid generic tags like "business" or "document"
 - Use 3-15 character tags that are searchable and meaningful
 - **NEVER return empty tags array** - always provide at least 3-5 relevant tags
 
@@ -94,21 +94,21 @@ KEYWORDS:
 - Extract keywords that describe the ACTUAL CONTENT of the document
 - Focus on technologies, services, methodologies, systems, or specific requirements mentioned
 - Include technical terms, software names, methodologies, compliance standards
-- Examples: "AWS", "Microsoft Azure", "Agile", "DevSecOps", "FISMA", "NIST", "SOC 2", "AI/ML", "Data Analytics"
-- Avoid filler words and focus on terms that would help someone understand what this contract/opportunity is about
+- Examples: "AWS", "Microsoft Azure", "Agile", "DevOps", "ISO 27001", "GDPR", "SOC 2", "AI/ML", "Data Analytics"
+- Avoid filler words and focus on terms that would help someone understand what this document/opportunity is about
 
 Return as JSON:
 {
   "documentType": "PROPOSAL",
   "securityClassification": "INTERNAL",
-  "setAsideType": "8(a)",
+  "setAsideType": "Small Business",
   "naicsCodes": ["541511", "541330", "334516"],
   "estimatedValue": "$2.5M over 3 years",
   "deadline": "July 31, 2025 by 2:00 PM EST",
-  "tags": ["IT Services", "Cybersecurity", "Cloud Computing", "AWS", "Federal", "FISMA Compliance", "DevSecOps"],
-  "description": "Government proposal for cloud infrastructure services with cybersecurity compliance requirements.",
-  "summary": "This document outlines a comprehensive proposal for federal cloud infrastructure services including AWS implementation, cybersecurity frameworks, and FISMA compliance measures for a Department of Defense contract.",
-  "keywords": ["AWS", "Microsoft Azure", "cybersecurity", "FISMA", "cloud migration", "DevSecOps", "infrastructure", "compliance", "security frameworks", "federal cloud", "DoD", "continuous monitoring", "risk assessment"],
+  "tags": ["IT Services", "Cybersecurity", "Cloud Computing", "AWS", "Enterprise", "Compliance", "DevSecOps"],
+  "description": "Business proposal for cloud infrastructure services with cybersecurity compliance requirements.",
+  "summary": "This document outlines a comprehensive proposal for enterprise cloud infrastructure services including AWS implementation, cybersecurity frameworks, and compliance measures for a major client engagement.",
+  "keywords": ["AWS", "Microsoft Azure", "cybersecurity", "ISO 27001", "cloud migration", "DevSecOps", "infrastructure", "compliance", "security frameworks", "enterprise cloud", "SOC 2", "continuous monitoring", "risk assessment"],
   "urgencyLevel": "high",
   "complexityScore": 7
 }
@@ -213,14 +213,16 @@ ${extractedText}`
       documentType = DocumentType.SOLICITATION
     }
     
-    // Check for set-aside mentions
+    // Check for business priority categories
     let setAsideType: string | undefined
-    if (lowerText.includes('8(a)') || lowerText.includes('8a ')) {
-      setAsideType = '8(a)'
-    } else if (lowerText.includes('hubzone')) {
-      setAsideType = 'HUBZone'
-    } else if (lowerText.includes('wosb')) {
-      setAsideType = 'WOSB'
+    if (lowerText.includes('small business') || lowerText.includes('sme')) {
+      setAsideType = 'Small Business'
+    } else if (lowerText.includes('minority') || lowerText.includes('mbe')) {
+      setAsideType = 'Minority-Owned'
+    } else if (lowerText.includes('women') || lowerText.includes('wbe') || lowerText.includes('woman-owned')) {
+      setAsideType = 'Women-Owned'
+    } else if (lowerText.includes('veteran') || lowerText.includes('vbe')) {
+      setAsideType = 'Veteran-Owned'
     }
     
     // Extract NAICS codes

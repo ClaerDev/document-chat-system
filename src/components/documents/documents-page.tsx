@@ -4562,7 +4562,7 @@ const DocumentsPageContent = () => {
                     
                     {selectedDocument.setAsideType && (
                       <div>
-                        <label className="text-xs text-muted-foreground uppercase tracking-wide">Set-Aside Type</label>
+                        <label className="text-xs text-muted-foreground uppercase tracking-wide">Priority Category</label>
                         <p className="text-sm break-words">{selectedDocument.setAsideType}</p>
                       </div>
                     )}
