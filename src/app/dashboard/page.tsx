@@ -27,6 +27,7 @@ import {
 } from 'lucide-react'
 import { Profile } from '@/types'
 import { HeaderSearch } from '@/components/layout/header-search'
+import { PayPalDonateButton } from '@/components/donation/paypal-donate-button'
 
 export default function Dashboard() {
   const { isLoaded, isSignedIn } = useAuth()
@@ -242,6 +243,9 @@ export default function Dashboard() {
             Your AI-powered document analysis platform is ready to help you understand and interact with your documents.
           </AlertDescription>
         </Alert>
+
+        {/* Support Free AI Banner */}
+        <PayPalDonateButton variant="card" />
 
         {/* Main Content Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
