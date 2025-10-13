@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { DonationBanner } from '@/components/donation/donation-banner'
 import {
   MessageCircle,
   FileText,
@@ -107,6 +108,10 @@ export function LandingPageClient() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+
+      {/* Donation Banner */}
+      <DonationBanner />
+
       {/* Sticky Header with Navigation */}
       <header className="sticky top-0 z-50 px-4 lg:px-6 h-14 flex items-center border-b bg-white/95 dark:bg-gray-950/95 backdrop-blur supports-[backdrop-filter]:bg-white/95 dark:supports-[backdrop-filter]:bg-gray-950/95">
         <Link className="flex items-center justify-center" href="/">
