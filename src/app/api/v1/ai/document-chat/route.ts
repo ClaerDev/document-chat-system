@@ -8,6 +8,7 @@ import { prisma } from '@/lib/prisma';
 import { AIServiceManager } from '@/lib/ai/ai-service-manager';
 import { UsageTrackingService } from '@/lib/usage-tracking';
 import { defaultVectorSearch } from '@/lib/ai/services/vector-search';
+import { crudAuditLogger } from '@/lib/audit/crud-audit-logger';
 
 const documentChatSchema = z.object({
   messages: z.array(z.object({
@@ -398,11 +399,35 @@ export async function POST(request: NextRequest) {
             // Track usage after completion
             const endTime = Date.now();
             const latency = endTime - startTime;
-            
+
             await UsageTrackingService.trackAIQueryUsage(
-              organizationId, 
+              organizationId,
               'document_chat_stream',
               completion.usage?.totalTokens || 0
+            );
+
+            // Log audit trail for document chat interaction
+            const userPrompt = messages.filter(m => m.role === 'user').pop()?.content || 'Document chat conversation';
+            const assistantResponse = completion.text || '';
+            const documentNames = documents.map(d => d.name).join(', ');
+
+            await crudAuditLogger.logAIOperation(
+              'CREATE',
+              `document_chat_${Date.now()}`,
+              `Document Chat: ${userPrompt.substring(0, 100)}`,
+              null,
+              {
+                model,
+                temperature,
+                maxTokens,
+                documentIds: documents.map(d => d.id),
+                documentNames,
+                contextMode: documentContext?.mode || 'single-document',
+                prompt: userPrompt.substring(0, 500), // Truncate for storage
+                response: assistantResponse.substring(0, 500), // Truncate for storage
+                tokensUsed: completion.usage?.totalTokens || 0,
+                latencyMs: latency
+              }
             );
           }
         });
@@ -478,11 +503,35 @@ export async function POST(request: NextRequest) {
         // Track usage
         const endTime = Date.now();
         const latency = endTime - startTime;
-        
+
         await UsageTrackingService.trackAIQueryUsage(
-          organizationId, 
+          organizationId,
           'document_chat',
           response.usage?.totalTokens || 0
+        );
+
+        // Log audit trail for document chat interaction
+        const userPrompt = messages.filter(m => m.role === 'user').pop()?.content || 'Document chat conversation';
+        const assistantResponse = response.content || '';
+        const documentNames = documents.map(d => d.name).join(', ');
+
+        await crudAuditLogger.logAIOperation(
+          'CREATE',
+          `document_chat_${Date.now()}`,
+          `Document Chat: ${userPrompt.substring(0, 100)}`,
+          null,
+          {
+            model,
+            temperature,
+            maxTokens,
+            documentIds: documents.map(d => d.id),
+            documentNames,
+            contextMode: documentContext?.mode || 'single-document',
+            prompt: userPrompt.substring(0, 500), // Truncate for storage
+            response: assistantResponse.substring(0, 500), // Truncate for storage
+            tokensUsed: response.usage?.totalTokens || 0,
+            latencyMs: latency
+          }
         );
 
         return NextResponse.json({
