@@ -410,15 +410,15 @@ export function CreateDocumentModal({
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="PROPOSAL">Proposal</SelectItem>
-                    <SelectItem value="CONTRACT">Contract</SelectItem>
-                    <SelectItem value="COMPLIANCE">Compliance</SelectItem>
-                    <SelectItem value="CERTIFICATION">Certification</SelectItem>
-                    <SelectItem value="TEMPLATE">Template</SelectItem>
-                    <SelectItem value="SOLICITATION">Solicitation</SelectItem>
-                    <SelectItem value="AMENDMENT">Amendment</SelectItem>
+                    <SelectItem value="PROPOSAL">Proposal / Bid</SelectItem>
+                    <SelectItem value="CONTRACT">Contract / Agreement</SelectItem>
+                    <SelectItem value="SOLICITATION">RFP / RFQ / Solicitation</SelectItem>
+                    <SelectItem value="AMENDMENT">Amendment / Addendum</SelectItem>
+                    <SelectItem value="COMPLIANCE">Compliance Document</SelectItem>
+                    <SelectItem value="CERTIFICATION">Certification / Accreditation</SelectItem>
                     <SelectItem value="CAPABILITY_STATEMENT">Capability Statement</SelectItem>
-                    <SelectItem value="PAST_PERFORMANCE">Past Performance</SelectItem>
+                    <SelectItem value="PAST_PERFORMANCE">Past Performance / References</SelectItem>
+                    <SelectItem value="TEMPLATE">Template</SelectItem>
                     <SelectItem value="OTHER">Other</SelectItem>
                   </SelectContent>
                 </Select>
