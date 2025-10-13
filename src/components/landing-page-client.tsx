@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { PayPalDonateButton } from '@/components/donation/paypal-donate-button'
 import {
   MessageCircle,
   FileText,
@@ -1344,13 +1343,6 @@ export function LandingPageClient() {
               No credit card required • Deploy in minutes • 100% open source
             </p>
           </div>
-        </div>
-      </section>
-
-      {/* Support Section */}
-      <section className="py-16 px-4 bg-gray-50 dark:bg-gray-900">
-        <div className="container mx-auto max-w-4xl">
-          <PayPalDonateButton variant="card" />
         </div>
       </section>
 

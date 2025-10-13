@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { Header } from './header'
 import { Sidebar } from './sidebar'
 import { FloatingChat } from '@/components/chat/floating-chat'
+import { DonationBanner } from '@/components/donation/donation-banner'
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -47,10 +48,13 @@ export function AppLayout({ children, showNavigation = true }: AppLayoutProps) {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <Header 
+        <Header
           onMobileMenuToggle={() => setSidebarOpen(!sidebarOpen)}
           showNavigation={showNavigation}
         />
+
+        {/* Donation Banner */}
+        <DonationBanner />
 
         {/* Page content */}
         <main className="flex-1 overflow-y-auto">

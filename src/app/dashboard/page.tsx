@@ -25,7 +25,6 @@ import {
 } from 'lucide-react'
 import { Profile } from '@/types'
 import { HeaderSearch } from '@/components/layout/header-search'
-import { PayPalDonateButton } from '@/components/donation/paypal-donate-button'
 
 export default function Dashboard() {
   const { isLoaded, isSignedIn } = useAuth()
@@ -357,11 +356,6 @@ export default function Dashboard() {
               </Link>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Support Free AI Banner */}
-        <div className="max-w-2xl mx-auto">
-          <PayPalDonateButton variant="card" />
         </div>
 
         {/* Hidden Search Component - controlled by trigger */}
