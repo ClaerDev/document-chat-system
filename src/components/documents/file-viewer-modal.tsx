@@ -1,11 +1,27 @@
 'use client'
 
 import React, { useState, useMemo, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Download, X, FileIcon } from 'lucide-react'
-import { PDFViewer } from './pdf-viewer'
 import { getFileTypeFromMimeType } from './file-type-utils'
+
+// Dynamically import PDFViewer to prevent SSR issues (react-pdf requires browser APIs)
+const PDFViewer = dynamic(
+  () => import('./pdf-viewer').then((mod) => ({ default: mod.PDFViewer })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-4">⏳</div>
+          <div className="text-sm text-muted-foreground">Loading PDF viewer...</div>
+        </div>
+      </div>
+    )
+  }
+)
 
 interface FileViewerModalProps {
   open: boolean

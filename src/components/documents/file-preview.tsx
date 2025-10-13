@@ -17,8 +17,6 @@ import {
   Music,
   Archive
 } from 'lucide-react'
-import { PDFViewer } from './pdf-viewer'
-
 import { ResponsiveCanvasPreview } from './responsive-canvas-preview'
 import { TextViewer } from './viewers/text-viewer'
 import { MarkdownViewer } from './viewers/markdown-viewer'
