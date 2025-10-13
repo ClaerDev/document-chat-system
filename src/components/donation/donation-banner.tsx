@@ -31,16 +31,34 @@ export function DonationBanner({
 
   useEffect(() => {
     setIsMounted(true)
-    // Check if banner was dismissed
-    const dismissed = localStorage.getItem('donation-banner-dismissed')
-    if (!dismissed) {
+
+    // Clean up old permanent dismiss key (migration)
+    const oldDismissed = localStorage.getItem('donation-banner-dismissed')
+    if (oldDismissed) {
+      localStorage.removeItem('donation-banner-dismissed')
+    }
+
+    // Check if banner was dismissed and if enough time has passed
+    const dismissedUntil = localStorage.getItem('donation-banner-dismissed-until')
+    if (dismissedUntil) {
+      const dismissedTimestamp = parseInt(dismissedUntil, 10)
+      const now = Date.now()
+      // Show banner again if 7 days have passed
+      if (now > dismissedTimestamp) {
+        setIsVisible(true)
+        localStorage.removeItem('donation-banner-dismissed-until')
+      }
+    } else {
+      // No dismiss record, show the banner
       setIsVisible(true)
     }
   }, [])
 
   const handleDismiss = () => {
     setIsVisible(false)
-    localStorage.setItem('donation-banner-dismissed', 'true')
+    // Hide banner for 7 days
+    const sevenDaysFromNow = Date.now() + (7 * 24 * 60 * 60 * 1000)
+    localStorage.setItem('donation-banner-dismissed-until', sevenDaysFromNow.toString())
   }
 
   const handleDonate = () => {
