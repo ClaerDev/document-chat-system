@@ -73,7 +73,7 @@ export function DonationBanner({
 
   return (
     <TooltipProvider>
-      <div className="sticky top-0 z-50 w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md">
+      <div className="sticky top-0 z-[60] w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-4 flex-wrap sm:flex-nowrap">
             {/* Message Section */}
