@@ -2495,7 +2495,7 @@ const DocumentsPageContent = () => {
         );
 
       case 'pdf':
-        const pdfUrl = getFileUrl(doc);
+        const pdfUrl = getDocumentUrlForPreview(doc);
         return (
           <div className="w-full h-full flex flex-col p-4">
             <div className="w-full h-full border border-border rounded-lg bg-card shadow-lg flex flex-col">

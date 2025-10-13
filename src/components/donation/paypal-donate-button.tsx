@@ -14,12 +14,18 @@ interface PayPalDonateButtonProps {
 }
 
 export function PayPalDonateButton({
-  email = 'YOUR_PAYPAL_EMAIL@example.com', // TODO: Replace with your actual PayPal email
+  email = process.env.NEXT_PUBLIC_PAYPAL_EMAIL || '',
   itemName = 'Support GovMatch AI - Free AI Models',
   currency = 'USD',
   variant = 'button',
   className = ''
 }: PayPalDonateButtonProps) {
+
+  // Don't render if no email is configured
+  if (!email) {
+    console.warn('PayPal email not configured. Set NEXT_PUBLIC_PAYPAL_EMAIL environment variable.')
+    return null
+  }
 
   // PayPal donation link
   const donateUrl = `https://www.paypal.com/donate/?business=${encodeURIComponent(email)}&item_name=${encodeURIComponent(itemName)}&currency_code=${currency}`
@@ -76,12 +82,19 @@ interface PayPalDonateFormProps {
 }
 
 export function PayPalDonateForm({
-  email = 'YOUR_PAYPAL_EMAIL@example.com', // TODO: Replace with your actual PayPal email
+  email = process.env.NEXT_PUBLIC_PAYPAL_EMAIL || '',
   itemName = 'Support GovMatch AI',
   currency = 'USD',
   presetAmounts = [5, 10, 25, 50, 100],
   className = ''
 }: PayPalDonateFormProps) {
+
+  // Don't render if no email is configured
+  if (!email) {
+    console.warn('PayPal email not configured. Set NEXT_PUBLIC_PAYPAL_EMAIL environment variable.')
+    return null
+  }
+
   return (
     <div className={className}>
       <form
