@@ -74,32 +74,92 @@ const getOriginalFileName = (docData: any): string => {
 
 // Component for handling canvas preview with fetched file content
 const CanvasPreviewWithFetch: React.FC<{ document: any; className?: string }> = ({ document: doc, className = '' }) => {
-  // TEMPORARY: Simplified version without file fetching to avoid infinite loops
-  // TODO: Re-enable full preview after fixing infinite loop issues
+  const [fetchedFile, setFetchedFile] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch file content when component mounts or document ID changes
+  useEffect(() => {
+    // If we already have the original file, use it
+    if (doc.originalFile) {
+      setFetchedFile(doc.originalFile);
+      setIsLoading(false);
+      return;
+    }
+
+    // Otherwise fetch from API
+    const fetchFile = async () => {
+      if (!doc.id) {
+        setError('No document ID available');
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch(`/api/v1/documents/${doc.id}/download`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch file: ${response.statusText}`);
+        }
+
+        const blob = await response.blob();
+        const file = new File([blob], getOriginalFileName(doc), {
+          type: doc.mimeType || 'application/octet-stream'
+        });
+
+        setFetchedFile(file);
+        setIsLoading(false);
+      } catch (err) {
+        console.error('Error fetching file for preview:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load file');
+        setIsLoading(false);
+      }
+    };
+
+    fetchFile();
+    // Only re-fetch when document ID changes (prevents infinite loops)
+  }, [doc.id]);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className={`w-full h-full flex items-center justify-center bg-gray-50 ${className}`}>
+        <div className="text-xs text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className={`w-full h-full flex items-center justify-center bg-gray-50 ${className}`}>
+        <div className="text-xs text-red-500">Error</div>
+      </div>
+    );
+  }
+
+  // Show canvas preview if we have a fetched file
+  if (fetchedFile) {
+    return (
+      <div className={`w-full h-full ${className}`}>
+        <ResponsiveCanvasPreview
+          file={fetchedFile}
+          type={doc.type}
+          mimeType={doc.mimeType}
+        />
+      </div>
+    );
+  }
+
+  // Fallback - no file available
   return (
     <div className={`w-full h-full flex items-center justify-center bg-gray-50 ${className}`}>
-      <div className="text-center p-8 max-w-md">
-        <div className="text-6xl mb-4">📄</div>
-        <div className="text-base font-medium mb-2">{getOriginalFileName(doc)}</div>
-        <div className="text-sm text-muted-foreground mb-4">
-          {doc.mimeType || 'Unknown type'}
-        </div>
-        {doc.size && (
-          <div className="text-sm text-muted-foreground mb-4">
-            Size: {typeof doc.size === 'number' ? `${(doc.size / 1024).toFixed(1)} KB` : doc.size}
-          </div>
-        )}
-        <div className="text-xs text-muted-foreground italic">
-          Preview temporarily disabled - please use download button to view file
-        </div>
-      </div>
+      <div className="text-xs text-muted-foreground">No preview</div>
     </div>
   );
 };
-
-// ORIGINAL CanvasPreviewWithFetch CODE - Deleted due to infinite loop issue
-// The component was causing React error #310 infinite loops
-// TODO: Rewrite with proper dependency management to avoid circular re-renders
 
 export const FilePreview: React.FC<FilePreviewProps> = ({ document: doc, className = '', videoFit = 'contain' }) => {
   const [iframeLoading, setIframeLoading] = useState(true);
