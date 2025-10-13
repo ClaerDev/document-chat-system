@@ -147,18 +147,7 @@ export function LogsPageClient() {
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to fetch logs');
-      const data = await response.json();
-
-      // Transform logs to extract ipAddress and userAgent from metadata if they exist there
-      if (data.logs) {
-        data.logs = data.logs.map((log: any) => ({
-          ...log,
-          ipAddress: log.ipAddress || log.metadata?.ipAddress,
-          userAgent: log.userAgent || log.metadata?.userAgent,
-        }));
-      }
-
-      return data;
+      return response.json();
     },
     enabled: !!user?.id && !!csrfToken && !csrfLoading,
   });
