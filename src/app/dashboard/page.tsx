@@ -8,7 +8,6 @@ import { AppLayout } from '@/components/layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
@@ -18,7 +17,6 @@ import {
   MessageSquare,
   FolderOpen,
   Clock,
-  AlertCircle,
   ArrowUpRight,
   Upload,
   Settings,
@@ -235,18 +233,6 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Alert for Beta Status */}
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Welcome to Document Chat</AlertTitle>
-          <AlertDescription>
-            Your AI-powered document analysis platform is ready to help you understand and interact with your documents.
-          </AlertDescription>
-        </Alert>
-
-        {/* Support Free AI Banner */}
-        <PayPalDonateButton variant="card" />
-
         {/* Main Content Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {/* Recent Documents */}
@@ -371,6 +357,11 @@ export default function Dashboard() {
               </Link>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Support Free AI Banner */}
+        <div className="max-w-2xl mx-auto">
+          <PayPalDonateButton variant="card" />
         </div>
 
         {/* Hidden Search Component - controlled by trigger */}
