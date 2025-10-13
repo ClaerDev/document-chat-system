@@ -43,7 +43,7 @@ export function DonationBanner({
     if (dismissedUntil) {
       const dismissedTimestamp = parseInt(dismissedUntil, 10)
       const now = Date.now()
-      // Show banner again if 7 days have passed
+      // Show banner again if 6 hours have passed
       if (now > dismissedTimestamp) {
         setIsVisible(true)
         localStorage.removeItem('donation-banner-dismissed-until')
@@ -56,9 +56,9 @@ export function DonationBanner({
 
   const handleDismiss = () => {
     setIsVisible(false)
-    // Hide banner for 7 days
-    const sevenDaysFromNow = Date.now() + (7 * 24 * 60 * 60 * 1000)
-    localStorage.setItem('donation-banner-dismissed-until', sevenDaysFromNow.toString())
+    // Hide banner for 6 hours
+    const sixHoursFromNow = Date.now() + (6 * 60 * 60 * 1000)
+    localStorage.setItem('donation-banner-dismissed-until', sixHoursFromNow.toString())
   }
 
   const handleDonate = () => {
