@@ -238,20 +238,6 @@ export function CleanAIChat({ organizationId, className, onCitationsUpdate, chat
   // AI settings derived from Zustand store
   const selectedModel = ai.selectedModel || 'openai/gpt-4o-mini';
 
-  // Dynamically determine provider based on selected model (calculated, not memoized to avoid circular deps)
-  const getSelectedProvider = () => {
-    if (!selectedModel) return getDefaultProvider(organizationId);
-
-    // Find which provider has this model
-    const providerWithModel = providers.find(p =>
-      p.models.some(m => m.id === selectedModel || m.name === selectedModel)
-    );
-
-    return providerWithModel?.id || getDefaultProvider(organizationId);
-  };
-
-  const selectedProvider = getSelectedProvider();
-
   // Initialize mounted state and default text model
   useEffect(() => {
     setIsMounted(true);
@@ -559,6 +545,18 @@ export function CleanAIChat({ organizationId, className, onCitationsUpdate, chat
 
     return Array.from(providerMap.values());
   }, [models, imageRouter.models]);
+
+  // Dynamically determine provider based on selected model (must be after providers)
+  const selectedProvider = useMemo(() => {
+    if (!selectedModel) return getDefaultProvider(organizationId);
+
+    // Find which provider has this model
+    const providerWithModel = providers.find(p =>
+      p.models.some(m => m.id === selectedModel || m.name === selectedModel)
+    );
+
+    return providerWithModel?.id || getDefaultProvider(organizationId);
+  }, [selectedModel, providers, organizationId]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
