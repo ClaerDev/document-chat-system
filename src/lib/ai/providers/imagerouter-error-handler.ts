@@ -527,7 +527,8 @@ export class ImageRouterErrorHandler {
       case 'transient':
         return 'Temporary service issue. Retrying automatically.';
       default:
-        return 'An unexpected error occurred. Please try again or contact support.';
+        // For debugging: return the actual error message for unknown errors
+        return `ImageRouter error: ${error.message || error.toString()}`;
     }
   }
 
