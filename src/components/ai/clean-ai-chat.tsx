@@ -656,6 +656,7 @@ export function CleanAIChat({ organizationId, className, onCitationsUpdate, chat
     if (newImageMode) {
       // Toggle ON: Disable OpenRouter and enable ImageRouter
       console.log('🎨 Image mode toggle ON - disabling OpenRouter, enabling ImageRouter');
+      // Silently disable OpenRouter without triggering its handler
       if (features.openRouterEnabled) {
         ai.toggleFeature('openRouterEnabled', false);
       }
@@ -2475,18 +2476,9 @@ Would you like me to dive deeper into any aspects of your question?
                                       console.log('✅ Auto-selecting first OpenRouter model:', modelToSet);
                                       ai.setSelectedModel(modelToSet);
                                     }
-                                  } else {
-                                    // Turning OFF OpenRouter - turn ON ImageRouter if available
-                                    console.log('🔄 OpenRouter disabled - checking ImageRouter availability');
-                                    const imageProvider = providers.find(p => p.id === 'imagerouter');
-                                    if (imageProvider && imageProvider.models.length > 0) {
-                                      console.log('✅ Enabling ImageRouter and selecting first model');
-                                      setImageGenerationMode(true);
-                                      const firstImageModel = imageProvider.models[0];
-                                      const modelToSet = firstImageModel.id || firstImageModel.name;
-                                      ai.setSelectedModel(modelToSet);
-                                    }
                                   }
+                                  // Note: When OpenRouter is turned OFF, we don't automatically enable ImageRouter
+                                  // to avoid infinite loops. User must explicitly enable ImageRouter.
                                 }}
                                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                                   features.openRouterEnabled ? 'bg-primary' : 'bg-muted-foreground/30'

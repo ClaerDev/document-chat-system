@@ -360,10 +360,16 @@ export async function POST(request: NextRequest) {
     // Get AI service manager and ImageRouter adapter
     const aiManager = AIServiceManager.getInstance();
     const imageRouterAdapter = aiManager.getProvider('imagerouter') as ImageRouterAdapter;
-    
+
+    console.log('🔍 Media API - ImageRouter availability check:', {
+      adapterExists: !!imageRouterAdapter,
+      adapterType: imageRouterAdapter ? imageRouterAdapter.constructor.name : 'null',
+      registeredProviders: Object.keys(aiManager['registry']['providers'] || {})
+    });
+
     if (!imageRouterAdapter) {
       // Always return demo image when ImageRouter is not available
-      console.log('ImageRouter not available, returning demo image');
+      console.log('❌ ImageRouter not available, returning demo image');
       
       // Generate a demo image with the user's prompt
       const demoSvg = `<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
