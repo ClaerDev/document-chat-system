@@ -357,8 +357,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get AI service manager and ImageRouter adapter
+    // Get AI service manager and ensure initialization is complete
     const aiManager = AIServiceManager.getInstance();
+
+    // Ensure providers are initialized (they initialize asynchronously in constructor)
+    try {
+      console.log('🔄 Ensuring AI providers are initialized...');
+      await aiManager.initialize();
+      console.log('✅ AI providers initialization complete');
+    } catch (error) {
+      console.error('❌ Failed to initialize AI providers:', error);
+    }
 
     // Get ImageRouter status to debug availability
     try {
