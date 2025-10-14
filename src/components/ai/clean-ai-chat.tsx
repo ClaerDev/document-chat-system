@@ -641,12 +641,16 @@ export function CleanAIChat({ organizationId, className, onCitationsUpdate, chat
   const handleImageGenerationToggle = async () => {
     const newImageMode = !imageGenerationMode;
     setImageGenerationMode(newImageMode);
-    
+
     if (newImageMode) {
-      // Toggle ON: Find ImageRouter provider and select its first model (same as manual selection)
-      console.log('🎨 Image mode toggle ON - searching for ImageRouter provider...');
+      // Toggle ON: Disable OpenRouter and enable ImageRouter
+      console.log('🎨 Image mode toggle ON - disabling OpenRouter, enabling ImageRouter');
+      if (features.openRouterEnabled) {
+        ai.toggleFeature('openRouterEnabled', false);
+      }
+
       console.log('📊 Current providers:', providers.map(p => ({ id: p.id, models: p.models.length })));
-      
+
       const imageProvider = providers.find(p => p.id === 'imagerouter');
       if (imageProvider && imageProvider.models.length > 0) {
         const firstImageModel = imageProvider.models[0];
@@ -659,30 +663,30 @@ export function CleanAIChat({ organizationId, className, onCitationsUpdate, chat
         // Use id if available, fallback to name (to match store behavior)
         const modelToSet = firstImageModel.id || firstImageModel.name;
         ai.setSelectedModel(modelToSet);
-        
+
         // Force a small delay to ensure store is updated
         setTimeout(() => {
-          console.log('🔄 Verifying model selection:', { 
-            requested: modelToSet, 
+          console.log('🔄 Verifying model selection:', {
+            requested: modelToSet,
             current: ai.selectedModel,
             success: ai.selectedModel === modelToSet
           });
         }, 100);
       } else {
         console.warn('⚠️ ImageRouter provider not found or no models. Attempting to load...');
-        
+
         // Try to load ImageRouter models if not available
         if (imageRouter.models.length === 0 && !imageRouter.isLoading) {
           try {
             console.log('🔄 Loading ImageRouter models...');
             imageRouter.actions.setLoading(true);
-            
+
             const response = await fetch('/api/v1/ai/providers/imagerouter/models');
             if (response.ok) {
               const models = await response.json();
               imageRouter.actions.setModels(models);
               console.log('✅ ImageRouter models loaded, retrying selection...');
-              
+
               // Retry selection after loading
               const updatedImageProvider = providers.find(p => p.id === 'imagerouter');
               if (updatedImageProvider && updatedImageProvider.models.length > 0) {
@@ -716,10 +720,14 @@ export function CleanAIChat({ organizationId, className, onCitationsUpdate, chat
         }
       }
     } else {
-      // Toggle OFF: Select first OpenRouter model (not auto mode)
-      console.log('💬 Image mode toggle OFF - selecting first OpenRouter model');
+      // Toggle OFF: Enable OpenRouter and disable ImageRouter, select first OpenRouter model
+      console.log('💬 Image mode toggle OFF - enabling OpenRouter, selecting first model');
+      if (!features.openRouterEnabled) {
+        ai.toggleFeature('openRouterEnabled', true);
+      }
+
       console.log('📊 Current providers for OFF toggle:', providers.map(p => ({ id: p.id, models: p.models.length })));
-      
+
       // Find OpenRouter provider and select its first model
       const openRouterProvider = providers.find(p => p.id === 'openrouter');
       if (openRouterProvider && openRouterProvider.models.length > 0) {
@@ -732,11 +740,11 @@ export function CleanAIChat({ organizationId, className, onCitationsUpdate, chat
           using: modelToSet
         });
         ai.setSelectedModel(modelToSet);
-        
+
         // Force a small delay to ensure store is updated
         setTimeout(() => {
-          console.log('🔄 Verifying OFF toggle model selection:', { 
-            requested: modelToSet, 
+          console.log('🔄 Verifying OFF toggle model selection:', {
+            requested: modelToSet,
             current: ai.selectedModel,
             success: ai.selectedModel === modelToSet
           });
@@ -2432,7 +2440,27 @@ Would you like me to dive deeper into any aspects of your question?
                               </div>
                               <button
                                 type="button"
-                                onClick={() => ai.toggleFeature('openRouterEnabled', !features.openRouterEnabled)}
+                                onClick={() => {
+                                  const newValue = !features.openRouterEnabled;
+                                  ai.toggleFeature('openRouterEnabled', newValue);
+
+                                  // If turning ON OpenRouter, turn OFF ImageRouter
+                                  if (newValue && imageGenerationMode) {
+                                    console.log('🔄 OpenRouter enabled - disabling ImageRouter');
+                                    setImageGenerationMode(false);
+                                  }
+
+                                  // Auto-select first OpenRouter model when enabled
+                                  if (newValue) {
+                                    const openRouterProvider = providers.find(p => p.id === 'openrouter');
+                                    if (openRouterProvider && openRouterProvider.models.length > 0) {
+                                      const firstModel = openRouterProvider.models[0];
+                                      const modelToSet = firstModel.id || firstModel.name;
+                                      console.log('✅ Auto-selecting first OpenRouter model:', modelToSet);
+                                      ai.setSelectedModel(modelToSet);
+                                    }
+                                  }
+                                }}
                                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                                   features.openRouterEnabled ? 'bg-primary' : 'bg-muted-foreground/30'
                                 }`}
