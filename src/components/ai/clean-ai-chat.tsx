@@ -238,8 +238,8 @@ export function CleanAIChat({ organizationId, className, onCitationsUpdate, chat
   // AI settings derived from Zustand store
   const selectedModel = ai.selectedModel || 'openai/gpt-4o-mini';
 
-  // Dynamically determine provider based on selected model
-  const selectedProvider = useMemo(() => {
+  // Dynamically determine provider based on selected model (calculated, not memoized to avoid circular deps)
+  const getSelectedProvider = () => {
     if (!selectedModel) return getDefaultProvider(organizationId);
 
     // Find which provider has this model
@@ -248,7 +248,9 @@ export function CleanAIChat({ organizationId, className, onCitationsUpdate, chat
     );
 
     return providerWithModel?.id || getDefaultProvider(organizationId);
-  }, [selectedModel, providers, organizationId]);
+  };
+
+  const selectedProvider = getSelectedProvider();
 
   // Initialize mounted state and default text model
   useEffect(() => {
