@@ -6,6 +6,23 @@
 # file to your Vercel project. It's designed for open-source contributors
 # and makes it easy to deploy your own instance.
 #
+# IMPORTANT: Required API Keys
+# ============================
+# The following API keys must be configured in your .env.local file:
+#
+# - OPENROUTER_API_KEY: For accessing OpenRouter AI models
+# - OPENAI_API_KEY: For OpenAI models (GPT-4, etc.)
+# - ANTHROPIC_API_KEY: For Claude models
+# - IMAGEROUTER_API_KEY: For image/video generation models (DALL-E, Midjourney, etc.)
+#   Get your key at: https://imagerouter.io
+# - PINECONE_API_KEY: For vector search functionality
+# - INNGEST_EVENT_KEY: For background job processing
+# - INNGEST_SIGNING_KEY: For Inngest webhook security
+# - Database connection strings (Supabase/PostgreSQL)
+# - Stripe API keys for payments
+#
+# This script will automatically sync ALL variables from .env.local to Vercel.
+#
 # Usage:
 #   ./scripts/setup-vercel.sh [OPTIONS]
 #
