@@ -1775,6 +1775,10 @@ Would you like me to dive deeper into any aspects of your question?
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
+
+    // Collapse the tools panel when sending a message
+    setShowToolsPanel(false);
+
     await sendMessage(input);
   };
 
@@ -2429,27 +2433,14 @@ Would you like me to dive deeper into any aspects of your question?
                       type="button"
                       onClick={() => setActiveToolsTab('files')}
                       className={`flex-1 px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium transition-colors ${
-                        activeToolsTab === 'files' 
-                          ? 'text-foreground bg-muted' 
+                        activeToolsTab === 'files'
+                          ? 'text-foreground bg-muted'
                           : 'text-muted-foreground hover:text-foreground'
                       }`}
                     >
                       <FileText className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1 sm:mr-2" />
                       <span className="hidden sm:inline">Files</span>
                       <span className="sm:hidden">Files</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveToolsTab('apps')}
-                      className={`flex-1 px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium transition-colors ${
-                        activeToolsTab === 'apps' 
-                          ? 'text-foreground bg-muted' 
-                          : 'text-muted-foreground hover:text-foreground'
-                      }`}
-                    >
-                      <Github className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1 sm:mr-2" />
-                      <span className="hidden sm:inline">Apps</span>
-                      <span className="sm:hidden">Apps</span>
                     </button>
                   </div>
 
@@ -2693,35 +2684,6 @@ Would you like me to dive deeper into any aspects of your question?
                       </div>
                     )}
 
-                    {activeToolsTab === 'apps' && (
-                      <div className="space-y-3">
-                        <button
-                          type="button"
-                          className="w-full p-3 text-left bg-muted hover:bg-muted/80 rounded-lg transition-colors"
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <Github className="h-5 w-5 text-muted-foreground" />
-                              <span className="text-foreground">GitHub</span>
-                            </div>
-                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                          </div>
-                        </button>
-                        
-                        <button
-                          type="button"
-                          className="w-full p-3 text-left bg-muted hover:bg-muted/80 rounded-lg transition-colors"
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <Folder className="h-5 w-5 text-muted-foreground" />
-                              <span className="text-foreground">Project Folders</span>
-                            </div>
-                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                          </div>
-                        </button>
-                      </div>
-                    )}
                   </div>
                 </div>
               )}
