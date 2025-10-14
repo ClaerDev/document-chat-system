@@ -1887,14 +1887,14 @@ Would you like me to dive deeper into any aspects of your question?
           // For documents, extract text using hybrid file processor
           try {
             console.log(`🔄 Extracting text from ${processedFile.name}...`);
-            
+
             // Process with our hybrid file processor (server-side with browser fallback)
             const result = await hybridFileProcessor.processFileWithFallback(
               processedFile, // Pass the File object directly
               {
-                maxTextLength: 500000, // 500k chars max
+                maxTextLength: 2000000, // 2M chars max - enough for large PDFs
                 extractMetadata: true,
-                timeout: 30000
+                timeout: 60000 // Increase timeout for large files
               }
             );
 

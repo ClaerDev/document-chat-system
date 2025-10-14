@@ -24,9 +24,9 @@ export async function POST(request: NextRequest) {
       buffer,
       file.type || 'application/octet-stream',
       {
-        maxTextLength: 500000, // 500k chars max
+        maxTextLength: 2000000, // 2M chars max - enough for large PDFs
         extractMetadata: true,
-        timeout: 30000
+        timeout: 60000 // Increase timeout for large files
       }
     );
 

@@ -296,10 +296,11 @@ export class BrowserFileProcessor {
       let text = '';
       
       console.log(`🔄 Processing PDF with ${pdf.numPages} pages...`);
-      
-      // Limit pages for performance (large PDFs can be slow in browser)
-      const maxPages = Math.min(pdf.numPages, 50); // Process up to 50 pages in browser
-      
+
+      // Process all pages - don't limit for better extraction
+      // Large PDFs will be handled by server-side processing anyway
+      const maxPages = pdf.numPages;
+
       for (let i = 1; i <= maxPages; i++) {
         try {
           const page = await pdf.getPage(i);
