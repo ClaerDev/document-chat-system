@@ -274,12 +274,16 @@ type MediaGenerationRequest = z.infer<typeof mediaGenerationSchema>;
  * POST /api/v1/ai/media - Generate media using AI
  */
 export async function POST(request: NextRequest) {
+  console.log('🎬 Media API - Handler called');
+
   try {
+    console.log('🎬 Media API - Inside try block');
+
     // Check if this is an internal call from the enhanced-chat API
     const isInternalCall = request.headers.get('X-Internal-Call') === 'true' ||
-                          request.headers.get('user-agent')?.includes('node') || 
+                          request.headers.get('user-agent')?.includes('node') ||
                           request.url.includes('localhost');
-    
+
     console.log('🔍 Media API - Is internal call:', isInternalCall);
     console.log('🔍 Media API - X-Internal-Call header:', request.headers.get('X-Internal-Call'));
     console.log('🔍 Media API - User agent:', request.headers.get('user-agent'));
@@ -358,7 +362,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Get AI service manager and ensure initialization is complete
+    console.log('📦 Getting AIServiceManager instance...');
     const aiManager = AIServiceManager.getInstance();
+    console.log('✅ AIServiceManager instance obtained');
 
     // Ensure providers are initialized (they initialize asynchronously in constructor)
     try {
@@ -367,6 +373,7 @@ export async function POST(request: NextRequest) {
       console.log('✅ AI providers initialization complete');
     } catch (error) {
       console.error('❌ Failed to initialize AI providers:', error);
+      throw error; // Re-throw to see the actual error
     }
 
     // Get ImageRouter status to debug availability
