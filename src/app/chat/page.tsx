@@ -6,6 +6,7 @@ import { CleanAIChat } from '@/components/ai/clean-ai-chat';
 import { CitationsPanel } from '@/components/chat/citations-panel';
 import { DocumentChatToggle } from '@/components/chat/document-chat-toggle';
 import { DocumentScopeSelector } from '@/components/chat/document-scope-selector';
+import { DonationBanner } from '@/components/donation/donation-banner';
 import { useAuth } from '@clerk/nextjs';
 import { useState, useEffect } from 'react';
 import { ChatState, DEFAULT_GENERAL_STATE } from '@/types/chat';
@@ -111,24 +112,28 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex h-screen bg-background">
-      {/* Sidebar */}
-      <Sidebar 
-        isOpen={sidebarOpen} 
-        onClose={() => setSidebarOpen(false)} 
-        showNavigation={true}
-      />
+    <div className="flex flex-col h-screen bg-background">
+      {/* Donation Banner */}
+      <DonationBanner />
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Header */}
-        <Header 
-          onMobileMenuToggle={() => setSidebarOpen(!sidebarOpen)}
+      <div className="flex flex-1 min-h-0">
+        {/* Sidebar */}
+        <Sidebar
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
           showNavigation={true}
         />
 
-        {/* Chat content with settings panel */}
-        <main className="flex-1 overflow-hidden flex" style={{ height: 'calc(100vh - 4rem)' }}>
+        {/* Main content */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Header */}
+          <Header
+            onMobileMenuToggle={() => setSidebarOpen(!sidebarOpen)}
+            showNavigation={true}
+          />
+
+          {/* Chat content with settings panel */}
+          <main className="flex-1 overflow-hidden flex" style={{ height: 'calc(100vh - 8rem)' }}>
           {/* Chat area */}
           <div className="flex-1 flex flex-col">
             {/* Chat header with document chat controls and settings */}
@@ -203,6 +208,7 @@ export default function ChatPage() {
             citations={activeCitations}
           />
         </main>
+        </div>
       </div>
     </div>
   );
