@@ -309,15 +309,10 @@ export class ImageRouterAdapter extends AIProviderAdapter {
   async generateMedia(request: UnifiedMediaGenerationRequest): Promise<UnifiedMediaGenerationResponse> {
     const startTime = Date.now();
     const organizationId = request.metadata?.organizationId;
-    
+
     try {
-      // Security validation
-      if (process.env.NODE_ENV === 'production' && request.metadata?.httpRequest) {
-        const csrfResult = await validateCSRFInAPIRoute(request.metadata.httpRequest);
-        if (!csrfResult.valid) {
-          throw new ValidationError(`CSRF validation failed: ${csrfResult.error}`);
-        }
-      }
+      // Note: CSRF validation is handled at the API route level (/api/v1/ai/media/route.ts)
+      // not here in the adapter. The ImageRouter API headers are set in makeRequest() method.
 
       // Usage tracking
       if (organizationId) {
