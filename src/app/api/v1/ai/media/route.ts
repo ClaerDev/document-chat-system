@@ -402,10 +402,19 @@ export async function POST(request: NextRequest) {
 
     // Build unified request with model validation
     let modelToUse = requestData.model;
-    
+
+    console.log('🔍 Media API - Model validation:', {
+      receivedModel: requestData.model,
+      modelToUse: modelToUse,
+      willFallback: !modelToUse || modelToUse === 'auto'
+    });
+
     // Only fallback if model is specifically 'auto' or empty - keep all other models
     if (!modelToUse || modelToUse === 'auto') {
+      console.log('⚠️ No model specified or auto, using fallback: test/test');
       modelToUse = 'test/test';
+    } else {
+      console.log('✅ Using specified model:', modelToUse);
     }
     
     const unifiedRequest: UnifiedMediaGenerationRequest = {

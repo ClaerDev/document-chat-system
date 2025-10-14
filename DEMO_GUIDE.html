@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Chat System - Complete Demo Guide</title>
+    <style>
+        @media print {
+            body {
+                font-size: 11pt;
+                line-height: 1.4;
+            }
+            h1 {
+                page-break-before: always;
+                margin-top: 0;
+            }
+            h1:first-child {
+                page-break-before: avoid;
+            }
+            h2, h3 {
+                page-break-after: avoid;
+            }
+            pre, blockquote {
+                page-break-inside: avoid;
+            }
+            table {
+                page-break-inside: avoid;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: #fff;
+        }
+
+        h1 {
+            color: #2563eb;
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 10px;
+            margin-top: 40px;
+            font-size: 32px;
+        }
+
+        h1:first-child {
+            margin-top: 0;
+        }
+
+        h2 {
+            color: #1e40af;
+            margin-top: 35px;
+            font-size: 24px;
+            border-bottom: 2px solid #93c5fd;
+            padding-bottom: 5px;
+        }
+
+        h3 {
+            color: #1e3a8a;
+            margin-top: 25px;
+            font-size: 18px;
+        }
+
+        h4 {
+            color: #1e40af;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        code {
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+            color: #dc2626;
+        }
+
+        pre {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        pre code {
+            background: transparent;
+            color: #f3f4f6;
+            padding: 0;
+        }
+
+        blockquote {
+            border-left: 4px solid #2563eb;
+            padding-left: 20px;
+            margin-left: 0;
+            font-style: italic;
+            background: #eff6ff;
+            padding: 15px 20px;
+            border-radius: 0 5px 5px 0;
+        }
+
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        a {
+            color: #2563eb;
+            text-decoration: none;
+            word-break: break-word;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #d1d5db;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #f3f4f6;
+            font-weight: 600;
+        }
+
+        hr {
+            border: none;
+            border-top: 2px solid #e5e7eb;
+            margin: 40px 0;
+        }
+
+        .emoji {
+            font-size: 1.2em;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-right: 5px;
+        }
+
+        .badge-primary {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .checkbox {
+            margin-right: 8px;
+        }
+
+        .highlight-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .info-box {
+            background: #eff6ff;
+            border-left: 4px solid #2563eb;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .success-box {
+            background: #f0fdf4;
+            border-left: 4px solid #22c55e;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+        }
+
+        strong {
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+            z-index: 1000;
+        }
+
+        .print-button:hover {
+            background: #1d4ed8;
+        }
+
+        @media print {
+            .print-button {
+                display: none;
+            }
+        }
+
+        .toc {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 30px 0;
+        }
+
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .toc li {
+            margin: 8px 0;
+        }
+
+        .toc a {
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <button class="print-button" onclick="window.print()">🖨️ Print to PDF</button>
+
+    <h1>Document Chat System - Complete Demo Guide</h1>
+
+    <div style="color: #6b7280; margin-bottom: 30px;">
+        <p><strong>Total Duration</strong>: ~8-10 minutes</p>
+        <p><strong>Target Audience</strong>: Developers, Product Managers, Potential Users</p>
+        <p><strong>Recording Setup</strong>: Screen recording with voiceover</p>
+    </div>
+
+    <hr>
+
+    <div class="toc">
+        <h2>📋 Table of Contents</h2>
+        <ul>
+            <li><a href="#pre-demo-checklist">1. Pre-Demo Checklist</a></li>
+            <li><a href="#demo-documents">2. Demo Documents - Download Links</a></li>
+            <li><a href="#demo-script">3. Demo Script - Step by Step</a></li>
+            <li><a href="#alternative-flows">4. Alternative Demo Flows</a></li>
+            <li><a href="#tips">5. Tips for a Great Demo</a></li>
+            <li><a href="#sample-questions">6. Sample Questions to Ask AI</a></li>
+            <li><a href="#post-demo">7. Post-Demo Checklist</a></li>
+            <li><a href="#contribution">8. Contribution Opportunities</a></li>
+            <li><a href="#resources">9. Resources & Links</a></li>
+            <li><a href="#video-template">10. Video Description Template</a></li>
+        </ul>
+    </div>
+
+    <hr>
+
+    <h2 id="pre-demo-checklist">Pre-Demo Checklist</h2>
+
+    <h3>Before You Start Recording:</h3>
+
+    <h4>Technical Setup:</h4>
+    <ul>
+        <li>☐ Clear browser cache and cookies</li>
+        <li>☐ Close unnecessary browser tabs</li>
+        <li>☐ Disable browser extensions (except essentials)</li>
+        <li>☐ Set screen resolution to 1920x1080 (standard HD)</li>
+        <li>☐ Zoom level at 100% for best visibility</li>
+        <li>☐ Test microphone and audio levels</li>
+        <li>☐ Hide desktop icons and set clean wallpaper</li>
+    </ul>
+
+    <h4>Application Setup:</h4>
+    <ul>
+        <li>☐ Have AI API keys configured (OpenRouter or OpenAI)</li>
+        <li>☐ Prepare a clean demo user account (or be ready to sign up)</li>
+        <li>☐ Have Inngest dashboard open in another tab (optional)</li>
+    </ul>
+
+    <h4>Documents Setup:</h4>
+    <ul>
+        <li>☐ Download test documents (see section below)</li>
+        <li>☐ 1 PDF document (e.g., Next.js documentation)</li>
+        <li>☐ 1 DOCX document (e.g., business proposal)</li>
+        <li>☐ 1 TXT/MD document (e.g., meeting notes)</li>
+        <li>☐ Rename files to descriptive names</li>
+        <li>☐ Place documents in an easy-to-find folder</li>
+        <li>☐ Verify documents open correctly</li>
+    </ul>
+
+    <hr class="page-break">
+
+    <h2 id="demo-documents">Demo Documents - Download Links</h2>
+
+    <div class="info-box">
+        <p><strong>📝 Note:</strong> All documents listed are publicly available and free to download.</p>
+    </div>
+
+    <h3>1. 📄 PDF Document - Technical Documentation</h3>
+
+    <div class="success-box">
+        <h4>✅ RECOMMENDED: Next.js v14 Documentation</h4>
+        <ul>
+            <li><strong>Direct Download:</strong> <a href="https://github.com/nextjsargentina/next.js-docs/raw/main/public/pdf/next.js_v14_documentation.pdf">next.js_v14_documentation.pdf</a></li>
+            <li><strong>File Size:</strong> ~5-10 MB</li>
+            <li><strong>Why it's good:</strong> Professional, well-structured technical documentation with multiple sections</li>
+        </ul>
+        <p><strong>Demo Questions:</strong></p>
+        <ul>
+            <li>"What is the App Router in Next.js?"</li>
+            <li>"How do I implement Server Components?"</li>
+            <li>"What are the key differences between App Router and Pages Router?"</li>
+            <li>"Summarize the data fetching strategies in Next.js"</li>
+        </ul>
+    </div>
+
+    <h4>Alternative Options:</h4>
+    <ul>
+        <li><strong>React Beginners Handbook:</strong> <a href="https://www.lcg.ufrj.br/nodejs/books/react-beginners-handbook.pdf">Download PDF</a> (~2-3 MB)</li>
+        <li><strong>30 Days of React:</strong> <a href="https://www.newline.co/fullstack-react/assets/media/sGEMe/MNzue/30-days-of-react-ebook-fullstackio.pdf">Download PDF</a> (~1-2 MB)</li>
+        <li><strong>TutorialsPoint React:</strong> <a href="https://www.tutorialspoint.com/reactjs/reactjs_tutorial.pdf">Download PDF</a> (~2-4 MB)</li>
+    </ul>
+
+    <hr>
+
+    <h3>2. 📝 DOCX Document - Business Proposal</h3>
+
+    <div class="success-box">
+        <h4>✅ RECOMMENDED: Laerdal Business Proposal Template</h4>
+        <ul>
+            <li><strong>Direct Download:</strong> <a href="https://laerdal.com/cdn-4911c4/globalassets/documents/business-proposal-template.docx">business-proposal-template.docx</a></li>
+            <li><strong>File Size:</strong> ~50-100 KB</li>
+            <li><strong>Why it's good:</strong> Real DOCX file, clean structure, professional template</li>
+        </ul>
+        <p><strong>Demo Questions:</strong></p>
+        <ul>
+            <li>"What are the main sections in this proposal?"</li>
+            <li>"What is the project scope?"</li>
+            <li>"Summarize the deliverables"</li>
+            <li>"What is the timeline for this project?"</li>
+        </ul>
+    </div>
+
+    <h4>Alternative Options:</h4>
+    <ul>
+        <li><strong>ProjectManager.com:</strong> <a href="https://www.projectmanager.com/wp-content/uploads/2015/12/Project-Proposal-Template.docx">Download DOCX</a> (~100-200 KB)</li>
+        <li><strong>Webflow Template:</strong> <a href="https://assets.website-files.com/5d6e0e6372061dc771830f3c/6161843cf762cd66ec4bc0e0_Business%20Proposal%20Template.docx">Download DOCX</a> (~50-100 KB)</li>
+    </ul>
+
+    <hr>
+
+    <h3>3. 📋 TXT/MD Document - Meeting Notes</h3>
+
+    <div class="success-box">
+        <h4>✅ RECOMMENDED: Create Your Own Sample</h4>
+        <p>Create a file called <code>meeting-notes.md</code> with this content:</p>
+    </div>
+
+    <pre><code># Product Team Meeting - January 15, 2025
+
+## Attendees
+- Sarah Johnson (Product Manager)
+- Michael Chen (Lead Developer)
+- Emily Rodriguez (UX Designer)
+- David Kim (QA Engineer)
+
+## Agenda
+1. Q1 Roadmap Review
+2. New Feature Proposals
+3. Bug Triage
+4. Action Items
+
+## Discussion
+
+### Q1 Roadmap Review
+We reviewed the Q1 2025 roadmap and agreed on three priority features:
+- AI-powered document search
+- Multi-language support
+- Mobile app beta
+
+### New Feature Proposals
+Emily presented the new dashboard redesign. The team agreed to move
+forward with the prototype. Michael raised concerns about API rate
+limits which need to be addressed before launch.
+
+### Bug Triage
+- BUG-1234: Login timeout issue - Assigned to Michael (High Priority)
+- BUG-1235: PDF rendering on Safari - Assigned to David (Medium Priority)
+- BUG-1236: Email notifications delay - Assigned to Sarah (Low Priority)
+
+## Action Items
+- [ ] Sarah: Finalize Q1 OKRs by Jan 20
+- [ ] Michael: Fix login timeout bug by Jan 18
+- [ ] Emily: Share dashboard prototype with stakeholders by Jan 22
+- [ ] David: Complete Safari testing by Jan 19
+- [ ] Team: Review mobile app requirements before Feb 1
+
+## Next Meeting
+January 22, 2025 at 2:00 PM PST</code></pre>
+
+    <p><strong>Demo Questions:</strong></p>
+    <ul>
+        <li>"What was discussed in this meeting?"</li>
+        <li>"List all the attendees"</li>
+        <li>"What are the action items?"</li>
+        <li>"Who is responsible for each task?"</li>
+    </ul>
+
+    <hr>
+
+    <div class="highlight-box">
+        <h3>🎯 Best Combination for Demo</h3>
+        <p><strong>For maximum impact, use these three:</strong></p>
+        <ol>
+            <li><strong>PDF:</strong> Next.js v14 Documentation (technical, multi-chapter)</li>
+            <li><strong>DOCX:</strong> Laerdal Business Proposal Template (professional, structured)</li>
+            <li><strong>MD:</strong> Create your own meeting notes (realistic, queryable)</li>
+        </ol>
+        <p>This combination shows:</p>
+        <ul>
+            <li>✅ Multiple file format support</li>
+            <li>✅ Different document types (technical, business, notes)</li>
+            <li>✅ Real-world use cases</li>
+            <li>✅ Various content structures</li>
+            <li>✅ Good variety for semantic search demo</li>
+        </ul>
+    </div>
+
+    <hr class="page-break">
+
+    <h2 id="demo-script">Demo Script - Step by Step</h2>
+
+    <h3>[0:00 - 0:30] Introduction (30 seconds)</h3>
+
+    <p><strong>🎬 VISUAL:</strong> Start on landing page (<code>http://localhost:3000</code>)</p>
+
+    <p><strong>🎤 SCRIPT:</strong></p>
+    <blockquote>
+        <p>"Hi everyone! Today I'm excited to show you the Document Chat System - an open-source platform that lets you upload documents and have intelligent conversations with them using AI.</p>
+        <p><strong>Important note:</strong> This is an active open-source project that's currently under development. While the core features you'll see today are working, there are many planned features we haven't built yet. We're actively looking for developers to join us and help build this thing out. If you're interested in contributing, check out the GitHub repository - we'd love to have you!</p>
+        <p>The system is perfect for knowledge management, research, customer support, or any scenario where you need to extract insights from your documents quickly."</p>
+    </blockquote>
+
+    <p><strong>ACTION:</strong></p>
+    <ul>
+        <li>Briefly scroll down the landing page to show features</li>
+        <li>Highlight key badges (MIT License, Next.js 15, React 19, Open Source)</li>
+        <li>Point out the GitHub star button if visible</li>
+    </ul>
+
+    <hr>
+
+    <h3>[0:30 - 1:30] Sign Up & Onboarding (1 minute)</h3>
+
+    <p><strong>🎬 VISUAL:</strong> Click "Get Started" or "Sign Up" button</p>
+
+    <p><strong>🎤 SCRIPT:</strong></p>
+    <blockquote>
+        <p>"Let's get started. The system uses Clerk for enterprise-grade authentication, which means you can sign up with email, Google, or other providers. It's completely secure with multi-tenant isolation built in."</p>
+    </blockquote>
+
+    <p><strong>ACTION:</strong></p>
+    <ol>
+        <li>Click "Sign Up"</li>
+        <li>Sign up with email or Google (whichever is faster)</li>
+        <li>Complete any profile information if prompted</li>
+        <li>Show the redirect to dashboard or profile page</li>
+    </ol>
+
+    <div class="info-box">
+        <p><strong>TIMING NOTE:</strong> This might take 30-60 seconds, so keep talking:</p>
+        <blockquote>"The authentication is handled by Clerk, which provides features like SSO, MFA, and organization management out of the box. Perfect for enterprise deployments."</blockquote>
+    </div>
+
+    <hr>
+
+    <h3>[1:30 - 2:30] Dashboard Overview (1 minute)</h3>
+
+    <p><strong>🎬 VISUAL:</strong> Dashboard page (<code>/dashboard</code>)</p>
+
+    <p><strong>🎤 SCRIPT:</strong></p>
+    <blockquote>
+        <p>"Here's our dashboard. This gives you a quick overview of your document library, recent activity, and usage statistics. The interface is built with shadcn/ui and Tailwind CSS, so it's fully responsive and supports dark mode."</p>
+    </blockquote>
+
+    <p><strong>ACTION:</strong></p>
+    <ul>
+        <li>Point out key metrics (if any documents exist)</li>
+        <li>Toggle dark mode on and off to show theming</li>
+        <li>Briefly mention navigation items (Documents, Chat, Profile, Settings)</li>
+    </ul>
+
+    <hr>
+
+    <h3>[2:30 - 4:30] Document Upload & Processing (2 minutes)</h3>
+
+    <p><strong>🎬 VISUAL:</strong> Navigate to Documents page (<code>/documents</code>)</p>
+
+    <p><strong>🎤 SCRIPT:</strong></p>
+    <blockquote>
+        <p>"Now let's upload some documents. The system supports multiple formats: PDFs, Word documents, text files, markdown, and even images with OCR support."</p>
+    </blockquote>
+
+    <p><strong>ACTION:</strong></p>
+    <ol>
+        <li>Click "Upload Document" or "Create New Document" button</li>
+        <li>Upload your first document (PDF is most impressive)</li>
+        <li>While uploading, explain:</li>
+    </ol>
+
+    <blockquote>
+        <p>"When you upload a document, several things happen in the background. The file is stored securely in Supabase Storage, and then Inngest kicks off background jobs to process it. This includes text extraction, chunking the content for better search, generating embeddings using OpenAI, and storing those vectors in Pinecone for semantic search."</p>
+    </blockquote>
+
+    <ol start="4">
+        <li>Show the document status changing from "Pending" → "Processing" → "Completed"</li>
+        <li>Upload a second document (DOCX or TXT) to show batch processing</li>
+    </ol>
+
+    <div class="info-box">
+        <p><strong>OPTIONAL:</strong> Open Inngest dashboard in another tab to show the jobs running:</p>
+        <blockquote>"If I switch over to the Inngest dashboard, you can see the background jobs processing in real-time. This is all serverless and scales automatically."</blockquote>
+    </div>
+
+    <hr>
+
+    <h3>[4:30 - 6:00] Document Management Features (1.5 minutes)</h3>
+
+    <p><strong>🎬 VISUAL:</strong> Stay on Documents page</p>
+
+    <p><strong>🎤 SCRIPT:</strong></p>
+    <blockquote>
+        <p>"The document management system is quite powerful. Let me show you a few features."</p>
+    </blockquote>
+
+    <p><strong>ACTION:</strong></p>
+
+    <p>1. <strong>Create a folder:</strong></p>
+    <ul>
+        <li>Click "New Folder"</li>
+        <li>Name it (e.g., "Research Papers")</li>
+        <li>Show folder creation</li>
+    </ul>
+
+    <p>2. <strong>Organize documents:</strong></p>
+    <ul>
+        <li>Drag and drop a document into the folder</li>
+        <li>Show folder hierarchy</li>
+    </ul>
+
+    <p>3. <strong>Document details:</strong></p>
+    <ul>
+        <li>Click on a completed document</li>
+        <li>Show document viewer/details panel</li>
+        <li>Point out metadata (file size, pages, word count, processing status)</li>
+        <li>Show any extracted sections or summaries</li>
+    </ul>
+
+    <blockquote>
+        <p>"You can organize documents into folders, view detailed metadata, and even see the processing results like extracted sections and summaries. All of this happens automatically."</p>
+    </blockquote>
+
+    <hr class="page-break">
+
+    <h3>[6:00 - 8:00] AI Chat with Documents (2 minutes) - <span style="color: #dc2626;">MAIN FEATURE</span></h3>
+
+    <p><strong>🎬 VISUAL:</strong> Navigate to Chat page (<code>/chat</code>) or open chat from document</p>
+
+    <p><strong>🎤 SCRIPT:</strong></p>
+    <blockquote>
+        <p>"Now for the exciting part - let's have a conversation with our documents. The AI can answer questions, summarize content, extract specific information, and even compare multiple documents."</p>
+    </blockquote>
+
+    <p><strong>ACTION:</strong></p>
+    <ol>
+        <li>Select one or more documents from the sidebar/document picker</li>
+        <li>Ask a specific question about the document content (use prepared questions)</li>
+        <li>Show the AI streaming response in real-time</li>
+    </ol>
+
+    <p><strong>🎤 SCRIPT</strong> (while response streams):</p>
+    <blockquote>
+        <p>"Notice how the response streams in real-time. The system uses vector search to find the most relevant chunks from your documents, then sends those as context to the AI. You can use OpenRouter to access over 100 models, including GPT-4, Claude, Llama, and Mistral."</p>
+    </blockquote>
+
+    <ol start="4">
+        <li>Ask a follow-up question to show conversation context</li>
+        <li>Point out citations/sources if shown:</li>
+    </ol>
+
+    <blockquote>
+        <p>"The AI includes citations showing which parts of your documents it's referencing. This is crucial for accuracy and trust."</p>
+    </blockquote>
+
+    <p>6. <strong>Switch AI models</strong> (if you have time):</p>
+    <ul>
+        <li>Go to settings or model selector</li>
+        <li>Switch from GPT-4 to Claude or another model</li>
+        <li>Ask the same question to show different responses</li>
+    </ul>
+
+    <hr>
+
+    <h3>[8:00 - 9:00] Settings & Configuration (1 minute)</h3>
+
+    <p><strong>🎬 VISUAL:</strong> Navigate to Settings page (<code>/settings</code>)</p>
+
+    <p><strong>🎤 SCRIPT:</strong></p>
+    <blockquote>
+        <p>"Let's quickly look at the settings. One of the unique features of this system is that it supports 'Bring Your Own Key' - or BYOK."</p>
+    </blockquote>
+
+    <p><strong>ACTION:</strong></p>
+    <ol>
+        <li>Open Settings page</li>
+        <li>Show API Keys section</li>
+    </ol>
+
+    <blockquote>
+        <p>"Users can provide their own API keys from OpenRouter, OpenAI, or Anthropic. These keys are encrypted with AES-256 and stored in the browser's local storage. They're never sent to our servers, which means users have complete privacy and transparency about their AI usage and costs."</p>
+    </blockquote>
+
+    <p>3. Show other settings briefly:</p>
+    <ul>
+        <li>Profile settings</li>
+        <li>Organization settings (if applicable)</li>
+        <li>Theme preferences</li>
+        <li>Notification settings</li>
+    </ul>
+
+    <hr>
+
+    <h3>[9:00 - 9:30] Technical Highlights (30 seconds)</h3>
+
+    <p><strong>🎬 VISUAL:</strong> Stay on current page or show GitHub README</p>
+
+    <p><strong>🎤 SCRIPT:</strong></p>
+    <blockquote>
+        <p>"Let me quickly highlight the tech stack. This is built with Next.js 15, React 19, and TypeScript. It uses Prisma with PostgreSQL for the database, Clerk for authentication, and Inngest for background job processing. For AI, it integrates with OpenRouter, OpenAI, and Anthropic through the Vercel AI SDK. Vector search is powered by Pinecone or pgvector."</p>
+    </blockquote>
+
+    <p><strong>ACTION:</strong> You can show:</p>
+    <ul>
+        <li>Quick glimpse of file structure in VS Code</li>
+        <li>Or show the README with tech stack</li>
+        <li>Or show the package.json</li>
+    </ul>
+
+    <blockquote>
+        <p>"It's 100% open source with an MIT license, so you can deploy it yourself, modify it for your needs, or even turn it into a SaaS business with the built-in Stripe billing integration."</p>
+    </blockquote>
+
+    <hr>
+
+    <h3>[9:30 - 10:00] Closing & Call to Action (30 seconds)</h3>
+
+    <p><strong>🎬 VISUAL:</strong> Navigate back to landing page or GitHub repo</p>
+
+    <p><strong>🎤 SCRIPT:</strong></p>
+    <blockquote>
+        <p>"That's the Document Chat System! What you've seen today is just the beginning. While the core features are working, we have an ambitious roadmap ahead - and this is where YOU come in.</p>
+
+        <p><strong>We're actively seeking developers to contribute to this project</strong>. Whether you're a frontend developer who wants to improve the UI, a backend engineer interested in optimizing the AI pipeline, or someone who just wants to add a feature you think would be cool - we'd love your help. This is a great opportunity to work with modern tech like Next.js 15, React 19, and AI integration.</p>
+
+        <p>Check out the GitHub repository - it has comprehensive documentation, a detailed architecture guide, and issues labeled 'good first issue' if you're just getting started. There's also a one-click deploy button if you just want to try it out.</p>
+
+        <p>Star the repo, fork it, submit a PR, or join the discussions. Let's build something amazing together. Thanks for watching!"</p>
+    </blockquote>
+
+    <p><strong>ACTION:</strong></p>
+    <ul>
+        <li>Show GitHub URL prominently on screen</li>
+        <li>Point to "Issues" tab if visible</li>
+        <li>Show "Star" and "Fork" buttons</li>
+        <li>Show "Deploy to Vercel" button</li>
+        <li>End recording with GitHub URL visible</li>
+    </ul>
+
+    <hr class="page-break">
+
+    <h2 id="alternative-flows">Alternative Demo Flows</h2>
+
+    <h3>For Developer-Focused Demo (10-15 minutes):</h3>
+    <p>Add these sections:</p>
+    <ul>
+        <li><strong>Code walkthrough</strong> (2-3 minutes): Show key files like Inngest functions, AI service manager, Prisma schema</li>
+        <li><strong>API endpoints</strong> (1-2 minutes): Demonstrate API calls with Postman/cURL</li>
+        <li><strong>Deployment process</strong> (2-3 minutes): Show the Vercel setup script and environment configuration</li>
+        <li><strong>Customization</strong> (1-2 minutes): Show how to add a new AI provider or modify the UI</li>
+    </ul>
+
+    <h3>For Business-Focused Demo (5-7 minutes):</h3>
+    <p>Condense technical details:</p>
+    <ul>
+        <li>Skip settings and technical highlights</li>
+        <li>Focus more on use cases and business value</li>
+        <li>Show multiple document types and real-world scenarios</li>
+        <li>Emphasize security, multi-tenancy, and optional billing</li>
+    </ul>
+
+    <h3>For Quick Overview Demo (3-5 minutes):</h3>
+    <p>Speed through:</p>
+    <ul>
+        <li><strong>Introduction:</strong> 15 seconds</li>
+        <li><strong>Sign up:</strong> Skip (use existing account)</li>
+        <li><strong>Upload:</strong> 1 document only (45 seconds)</li>
+        <li><strong>Chat:</strong> 1 question only (1 minute)</li>
+        <li><strong>Closing:</strong> 30 seconds</li>
+    </ul>
+
+    <hr class="page-break">
+
+    <h2 id="tips">Tips for a Great Demo Recording</h2>
+
+    <h3>Acknowledging Work-in-Progress Features:</h3>
+
+    <div class="highlight-box">
+        <p><strong>IMPORTANT:</strong> Be transparent about the project's current state!</p>
+
+        <p>During the demo, if you encounter:</p>
+        <ul>
+            <li><strong>Missing features:</strong> Say "This feature is planned but not yet implemented - this is a great contribution opportunity!"</li>
+            <li><strong>UI rough edges:</strong> Say "The UI is functional but we're looking for designers to help polish it"</li>
+            <li><strong>Performance issues:</strong> Say "We're aware of this and it's on the roadmap - contributions welcome!"</li>
+            <li><strong>Bugs or glitches:</strong> Don't hide them! Say "This is an active development project, and we're working through issues like this. If you know how to fix it, we'd love a PR!"</li>
+        </ul>
+    </div>
+
+    <h4>Example phrases to use:</h4>
+    <ul>
+        <li>"This is a work in progress, and we're actively improving it"</li>
+        <li>"This area needs some love - perfect opportunity for contributors"</li>
+        <li>"We have big plans for this section - check out the roadmap in the GitHub issues"</li>
+        <li>"If you have ideas on how to improve this, open an issue or discussion"</li>
+    </ul>
+
+    <h3>Pacing & Delivery:</h3>
+    <ul>
+        <li><strong>Speak clearly and at a moderate pace</strong> - viewers can always speed up</li>
+        <li><strong>Pause briefly</strong> after each major action to let viewers process</li>
+        <li><strong>Use transitions:</strong> "Now let's...", "Next, I'll show you...", "Notice how..."</li>
+        <li><strong>Avoid filler words:</strong> "um", "uh", "like", "you know"</li>
+        <li><strong>Be honest and transparent</strong> about what's working and what's not</li>
+    </ul>
+
+    <h3>Visual Best Practices:</h3>
+    <ul>
+        <li><strong>Use a cursor highlighter</strong> to make mouse movements visible</li>
+        <li><strong>Zoom in</strong> on important UI elements when explaining them</li>
+        <li><strong>Hide sensitive information:</strong> email addresses, API keys, real document content</li>
+        <li><strong>Use dummy data</strong> for documents if needed</li>
+        <li><strong>Keep animations smooth</strong> - wait for transitions to complete before moving on</li>
+    </ul>
+
+    <h3>Common Mistakes to Avoid:</h3>
+    <ul>
+        <li>❌ Talking too fast or too slow</li>
+        <li>❌ Skipping error handling (show how the system handles errors gracefully)</li>
+        <li>❌ Not explaining what's happening during loading states</li>
+        <li>❌ Forgetting to show the "wow" moment (AI responding with accurate answers)</li>
+        <li>❌ Technical jargon overload for non-technical audiences</li>
+    </ul>
+
+    <h3>What Makes a Demo Compelling:</h3>
+    <ul>
+        <li>✅ Show a real problem being solved</li>
+        <li>✅ Use realistic documents and questions</li>
+        <li>✅ Demonstrate speed and responsiveness</li>
+        <li>✅ Highlight unique features (BYOK, multi-provider, background processing)</li>
+        <li>✅ Show both simple and complex use cases</li>
+        <li>✅ End with a clear next step for viewers</li>
+    </ul>
+
+    <hr class="page-break">
+
+    <h2 id="sample-questions">Sample Questions to Ask the AI</h2>
+
+    <p>Choose questions that showcase intelligence and accuracy:</p>
+
+    <h3>For Technical Documents (Next.js Documentation):</h3>
+    <ul>
+        <li>"What is the main architecture described in this document?"</li>
+        <li>"What is the App Router in Next.js?"</li>
+        <li>"How do I implement Server Components?"</li>
+        <li>"What are the key differences between App Router and Pages Router?"</li>
+        <li>"List all the security features mentioned"</li>
+        <li>"Summarize the data fetching strategies in Next.js"</li>
+    </ul>
+
+    <h3>For Business Documents (Proposal Template):</h3>
+    <ul>
+        <li>"What are the main sections in this proposal?"</li>
+        <li>"What is the project scope?"</li>
+        <li>"What is the proposed budget for this project?"</li>
+        <li>"Summarize the deliverables"</li>
+        <li>"What are the key risks identified?"</li>
+        <li>"What is the timeline for this project?"</li>
+        <li>"Who are the stakeholders mentioned?"</li>
+    </ul>
+
+    <h3>For Meeting Notes:</h3>
+    <ul>
+        <li>"What was discussed in this meeting?"</li>
+        <li>"List all the attendees"</li>
+        <li>"What are the action items?"</li>
+        <li>"Who is responsible for each task?"</li>
+        <li>"What are the deadlines mentioned?"</li>
+        <li>"Summarize the Q1 roadmap priorities"</li>
+    </ul>
+
+    <h3>For Research Papers (if using ArXiv papers):</h3>
+    <ul>
+        <li>"What methodology did the authors use?"</li>
+        <li>"What were the main findings?"</li>
+        <li>"What are the limitations of this study?"</li>
+        <li>"How does this compare to [another approach]?"</li>
+    </ul>
+
+    <h3>General Impressive Questions:</h3>
+    <ul>
+        <li>"Create a 3-point summary of this document"</li>
+        <li>"Extract all dates and deadlines"</li>
+        <li>"What questions does this document answer?"</li>
+        <li>"Compare the main points between document A and document B"</li>
+    </ul>
+
+    <hr class="page-break">
+
+    <h2 id="post-demo">Post-Demo Checklist</h2>
+
+    <p>After recording:</p>
+    <ul>
+        <li>☐ Review the recording for audio quality</li>
+        <li>☐ Check for any sensitive information that needs blurring</li>
+        <li>☐ Add captions/subtitles for accessibility</li>
+        <li>☐ Add intro/outro cards with branding</li>
+        <li>☐ Add timestamps in video description (use template below)</li>
+        <li>☐ Compress video for faster loading</li>
+        <li>☐ Upload to YouTube/Vimeo with good SEO (title, description, tags)</li>
+        <li>☐ Share on social media (Twitter, LinkedIn, Product Hunt, Reddit)</li>
+        <li>☐ Add to GitHub README as a demo link</li>
+        <li>☐ Pin to GitHub Discussions</li>
+    </ul>
+
+    <hr class="page-break">
+
+    <h2 id="contribution">Contribution Opportunities to Highlight</h2>
+
+    <p>If viewers ask "How can I contribute?", mention these areas:</p>
+
+    <h3>🎨 Frontend/UI Contributions:</h3>
+    <ul>
+        <li>Improve the document viewer interface</li>
+        <li>Polish the chat UI with better animations</li>
+        <li>Enhance mobile responsiveness</li>
+        <li>Add dark mode improvements</li>
+        <li>Create better loading states and skeleton screens</li>
+    </ul>
+
+    <h3>⚙️ Backend/Infrastructure:</h3>
+    <ul>
+        <li>Optimize document processing pipeline</li>
+        <li>Improve vector search performance</li>
+        <li>Add support for more file formats (Excel, PowerPoint, etc.)</li>
+        <li>Enhance error handling and logging</li>
+        <li>Implement caching strategies</li>
+    </ul>
+
+    <h3>🤖 AI/ML Features:</h3>
+    <ul>
+        <li>Add support for more AI providers</li>
+        <li>Implement document summarization</li>
+        <li>Add entity extraction and tagging</li>
+        <li>Create document comparison features</li>
+        <li>Implement multilingual support</li>
+    </ul>
+
+    <h3>📚 Documentation:</h3>
+    <ul>
+        <li>Improve setup guides</li>
+        <li>Create video tutorials</li>
+        <li>Write blog posts about architecture</li>
+        <li>Document API endpoints</li>
+        <li>Create contribution guidelines</li>
+    </ul>
+
+    <h3>🧪 Testing:</h3>
+    <ul>
+        <li>Write unit tests</li>
+        <li>Add integration tests</li>
+        <li>Create end-to-end tests</li>
+        <li>Test different file formats</li>
+        <li>Performance testing</li>
+    </ul>
+
+    <h3>🐛 Bug Fixes:</h3>
+    <ul>
+        <li>Check GitHub Issues for open bugs</li>
+        <li>Reproduce and document bugs</li>
+        <li>Submit bug fix PRs</li>
+        <li>Help triage issues</li>
+    </ul>
+
+    <div class="info-box">
+        <p><strong>GitHub Labels to Look For:</strong></p>
+        <ul>
+            <li><code>good first issue</code> - Perfect for newcomers</li>
+            <li><code>help wanted</code> - Areas where we need help</li>
+            <li><code>enhancement</code> - New features to build</li>
+            <li><code>bug</code> - Issues to fix</li>
+            <li><code>documentation</code> - Docs improvements needed</li>
+        </ul>
+    </div>
+
+    <hr class="page-break">
+
+    <h2 id="resources">Resources</h2>
+
+    <ul>
+        <li><strong>GitHub Repository:</strong> <a href="https://github.com/watat83/document-chat-system">https://github.com/watat83/document-chat-system</a></li>
+        <li><strong>Live Demo</strong> (if deployed): [Your Vercel URL]</li>
+        <li><strong>Documentation:</strong> See README.md in the repository</li>
+        <li><strong>Contributing Guide:</strong> Check CONTRIBUTING.md</li>
+        <li><strong>Discussions:</strong> GitHub Discussions for questions and ideas</li>
+        <li><strong>Issues:</strong> GitHub Issues for bugs and feature requests</li>
+    </ul>
+
+    <hr class="page-break">
+
+    <h2 id="video-template">Video Description Template</h2>
+
+    <p>Use this in your YouTube/social media description:</p>
+
+    <pre><code>🚀 Document Chat System - Open Source Document AI Platform
+
+An open-source platform for intelligent document management and AI-powered
+conversations. Built with Next.js 15, React 19, and TypeScript.
+
+⚠️ **This is an active open-source project seeking contributors!** We're
+building this in public and would love your help. Whether you're a developer,
+designer, or technical writer - there's a place for you.
+
+🔗 Links:
+- GitHub: https://github.com/watat83/document-chat-system
+- Star the repo: https://github.com/watat83/document-chat-system/stargazers
+- Issues: https://github.com/watat83/document-chat-system/issues
+- Discussions: https://github.com/watat83/document-chat-system/discussions
+
+⏱️ Timestamps:
+0:00 - Introduction & Project Overview
+0:30 - Sign Up & Authentication
+1:30 - Dashboard Tour
+2:30 - Document Upload & Processing
+4:30 - Document Management Features
+6:00 - AI Chat Demo (Main Feature)
+8:00 - Settings & Configuration
+9:00 - Tech Stack Overview
+9:30 - Call to Action & How to Contribute
+
+🛠️ Tech Stack:
+- Frontend: Next.js 15, React 19, TypeScript, Tailwind CSS
+- Backend: Prisma ORM, PostgreSQL, Clerk Auth
+- AI: OpenRouter, OpenAI, Anthropic (Vercel AI SDK)
+- Background Jobs: Inngest
+- Vector Search: Pinecone / pgvector
+- Deployment: Vercel, Docker
+
+💡 Contribution Areas:
+- Frontend/UI improvements
+- Backend optimization
+- AI/ML features
+- Documentation
+- Testing
+- Bug fixes
+
+📝 License: MIT - Feel free to use, modify, and deploy!
+
+👋 Want to contribute? Check out the Issues tab and look for
+"good first issue" labels!
+
+#opensource #nextjs #react #typescript #ai #machinelearning
+#documentai #openai #anthropic #vectorsearch #prisma #inngest</code></pre>
+
+    <hr class="page-break">
+
+    <h2>💡 Pro Tips Summary</h2>
+
+    <ol>
+        <li><strong>File Names:</strong> Rename downloaded files to descriptive names before uploading
+            <ul>
+                <li>❌ <code>business-proposal-template.docx</code></li>
+                <li>✅ <code>Q1_Marketing_Proposal.docx</code></li>
+            </ul>
+        </li>
+        <li><strong>Content Verification:</strong> Quickly skim each document to understand the content before demo</li>
+        <li><strong>Prepare Questions:</strong> Write down 3-5 questions per document that will have impressive answers</li>
+        <li><strong>Test Upload:</strong> Do a test upload before recording to ensure files process correctly</li>
+        <li><strong>Backup Plan:</strong> Have backup documents ready in case one fails to process</li>
+        <li><strong>File Sizes:</strong> Smaller files (< 5MB) process faster and are better for demos</li>
+        <li><strong>Be Transparent:</strong> Don't hide bugs or missing features - turn them into contribution opportunities!</li>
+        <li><strong>Show the "Wow" Moment:</strong> The AI chat responding accurately is your main selling point</li>
+        <li><strong>Keep It Real:</strong> Use realistic documents and questions that showcase real-world use cases</li>
+        <li><strong>Call to Action:</strong> End with a clear, strong call for contributors</li>
+    </ol>
+
+    <hr>
+
+    <div class="success-box">
+        <h3>Final Notes</h3>
+        <p>Good luck with your demo recording! 🎬 🚀</p>
+        <p><strong>Remember:</strong> Authenticity is key. Show the project as it is, celebrate what works, acknowledge what needs work, and invite people to join the journey. Open source is about building together!</p>
+        <p><strong>Last Updated:</strong> January 2025</p>
+    </div>
+
+    <hr>
+
+    <div class="highlight-box">
+        <h3>Need Help?</h3>
+        <p>If any links are broken or you need alternative documents:</p>
+        <ol>
+            <li>Check the GitHub issues for this repo</li>
+            <li>Search for "sample [file type] download" on Google</li>
+            <li>Use your own documents (if comfortable sharing)</li>
+            <li>Create synthetic documents with ChatGPT</li>
+        </ol>
+    </div>
+
+    <hr>
+
+    <div style="text-align: center; padding: 40px 0; color: #6b7280;">
+        <p style="font-size: 14px;">Document Chat System - Demo Guide</p>
+        <p style="font-size: 12px;">Generated from DEMO_GUIDE.md</p>
+        <p style="font-size: 12px; margin-top: 20px;">To convert to PDF: Click the "Print to PDF" button above or use Ctrl/Cmd+P</p>
+    </div>
+
+</body>
+</html>

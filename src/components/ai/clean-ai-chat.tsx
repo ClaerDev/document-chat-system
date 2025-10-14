@@ -1472,8 +1472,13 @@ Provide accurate, helpful, and professional assistance.`
           userId: userId,
         }
       };
-      
-      console.log('🎨 Sending request to media API:', requestBody);
+
+      console.log('🎨 Sending request to media API with model:', {
+        selectedModel,
+        aiStoreModel: ai.selectedModel,
+        imageGenerationMode,
+        requestBody
+      });
       
       const response = await fetch('/api/v1/ai/media', {
         method: 'POST',
