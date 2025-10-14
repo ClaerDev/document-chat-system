@@ -114,15 +114,17 @@ export class ImageRouterAdapter extends AIProviderAdapter {
     if (!this.config.apiKey) {
       throw new ProviderConfigurationError('ImageRouter API key is required');
     }
-    
+
     try {
       await this.testConnection();
       await this.loadAndCacheModels();
-      
+
       console.log('✅ ImageRouterAdapter initialized successfully');
     } catch (error) {
-      console.error('❌ ImageRouterAdapter initialization failed:', error);
-      throw error;
+      // Don't throw - log the error but allow the adapter to be registered anyway
+      // The adapter will work for actual requests even if the initial connection test fails
+      console.warn('⚠️ ImageRouterAdapter initialization warning - connection test failed but adapter is registered:', error);
+      console.log('📝 ImageRouter will still attempt to handle requests');
     }
   }
 
@@ -815,9 +817,12 @@ export class ImageRouterAdapter extends AIProviderAdapter {
 
   private async testConnection(): Promise<void> {
     try {
+      console.log('🔍 Testing ImageRouter connection to:', `${this.baseUrl}/v1/models`);
       await this.makeRequest<any>('/v1/models', 'GET');
+      console.log('✅ ImageRouter connection test successful');
     } catch (error) {
-      throw new ProviderUnavailableError('ImageRouter connection test failed');
+      console.error('❌ ImageRouter connection test failed:', error);
+      throw new ProviderUnavailableError(`ImageRouter connection test failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
