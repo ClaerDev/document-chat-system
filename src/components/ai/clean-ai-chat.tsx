@@ -778,6 +778,15 @@ export function CleanAIChat({ organizationId, className, onCitationsUpdate, chat
     // Create attached files from documents
     const attachedFiles: AttachedFile[] = [];
     for (const doc of documents) {
+      console.log('📎 Processing document for attachment:', {
+        name: doc.name,
+        hasContent: !!doc.content,
+        contentLength: doc.content?.length || 0,
+        hasAnnotations: !!doc.annotations,
+        isProcessed: doc.annotations?.isProcessed,
+        processedTextLength: doc.annotations?.processedText?.length || 0
+      });
+
       const attachedFile: AttachedFile = {
         id: doc.id,
         name: doc.name,
@@ -787,13 +796,19 @@ export function CleanAIChat({ organizationId, className, onCitationsUpdate, chat
         file: doc.file,
         base64: doc.base64,
         annotations: doc.annotations, // Include cached annotations for cost optimization
-        // File processing fields
-        processedText: doc.annotations?.processedText,
-        isProcessed: doc.annotations?.isProcessed || false,
+        // File processing fields - use doc.content as fallback if annotations not available
+        processedText: doc.annotations?.processedText || doc.content,
+        isProcessed: doc.annotations?.isProcessed || !!doc.content,
         processingError: doc.annotations?.processingError,
         processingMethod: doc.annotations?.processingMethod
       };
       attachedFiles.push(attachedFile);
+
+      console.log('✅ Created attachedFile:', {
+        name: attachedFile.name,
+        isProcessed: attachedFile.isProcessed,
+        processedTextLength: attachedFile.processedText?.length || 0
+      });
     }
 
     const userMessage: ChatMessage = {
