@@ -589,14 +589,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generic error response - always include details for debugging
+    // Generic error response - always include full details for debugging
     return NextResponse.json(
       {
         success: false,
         error: 'Internal server error during media generation',
         details: error.message,
         errorName: error.name,
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        errorString: String(error),
+        errorJSON: JSON.stringify(error, Object.getOwnPropertyNames(error)),
+        stack: error.stack // Always include stack for now
       },
       { status: 500 }
     );
