@@ -234,10 +234,21 @@ export function CleanAIChat({ organizationId, className, onCitationsUpdate, chat
   
   // Model selection modal state
   const [modalMode, setModalMode] = useState<'text' | 'media'>('text');
-  
+
   // AI settings derived from Zustand store
-  const selectedProvider = getDefaultProvider(organizationId);
   const selectedModel = ai.selectedModel || 'openai/gpt-4o-mini';
+
+  // Dynamically determine provider based on selected model
+  const selectedProvider = useMemo(() => {
+    if (!selectedModel) return getDefaultProvider(organizationId);
+
+    // Find which provider has this model
+    const providerWithModel = providers.find(p =>
+      p.models.some(m => m.id === selectedModel || m.name === selectedModel)
+    );
+
+    return providerWithModel?.id || getDefaultProvider(organizationId);
+  }, [selectedModel, providers, organizationId]);
 
   // Initialize mounted state and default text model
   useEffect(() => {
@@ -2449,19 +2460,30 @@ Would you like me to dive deeper into any aspects of your question?
                                   const newValue = !features.openRouterEnabled;
                                   ai.toggleFeature('openRouterEnabled', newValue);
 
-                                  // If turning ON OpenRouter, turn OFF ImageRouter
-                                  if (newValue && imageGenerationMode) {
-                                    console.log('🔄 OpenRouter enabled - disabling ImageRouter');
-                                    setImageGenerationMode(false);
-                                  }
-
-                                  // Auto-select first OpenRouter model when enabled
                                   if (newValue) {
+                                    // Turning ON OpenRouter - turn OFF ImageRouter
+                                    if (imageGenerationMode) {
+                                      console.log('🔄 OpenRouter enabled - disabling ImageRouter');
+                                      setImageGenerationMode(false);
+                                    }
+
+                                    // Auto-select first OpenRouter model
                                     const openRouterProvider = providers.find(p => p.id === 'openrouter');
                                     if (openRouterProvider && openRouterProvider.models.length > 0) {
                                       const firstModel = openRouterProvider.models[0];
                                       const modelToSet = firstModel.id || firstModel.name;
                                       console.log('✅ Auto-selecting first OpenRouter model:', modelToSet);
+                                      ai.setSelectedModel(modelToSet);
+                                    }
+                                  } else {
+                                    // Turning OFF OpenRouter - turn ON ImageRouter if available
+                                    console.log('🔄 OpenRouter disabled - checking ImageRouter availability');
+                                    const imageProvider = providers.find(p => p.id === 'imagerouter');
+                                    if (imageProvider && imageProvider.models.length > 0) {
+                                      console.log('✅ Enabling ImageRouter and selecting first model');
+                                      setImageGenerationMode(true);
+                                      const firstImageModel = imageProvider.models[0];
+                                      const modelToSet = firstImageModel.id || firstImageModel.name;
                                       ai.setSelectedModel(modelToSet);
                                     }
                                   }
