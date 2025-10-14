@@ -839,13 +839,15 @@ export class ImageRouterAdapter extends AIProviderAdapter {
       'imagerouter-api',
       async () => {
         const url = `${this.baseUrl}${endpoint}`;
-        
+
         const response = await fetch(url, {
           method,
           headers: {
             'Authorization': `Bearer ${this.config.apiKey}`,
             'Content-Type': 'application/json',
-            'User-Agent': 'Document-Chat-System/1.0'
+            'User-Agent': 'Document-Chat-System/1.0',
+            'X-CSRF-Token': this.config.apiKey, // Add CSRF token for ImageRouter API
+            'X-API-Key': this.config.apiKey // Some APIs use this instead of Authorization
           },
           body: body ? JSON.stringify(body) : undefined,
           signal: AbortSignal.timeout(this.config.timeout)
@@ -866,12 +868,14 @@ export class ImageRouterAdapter extends AIProviderAdapter {
       'imagerouter-api',
       async () => {
         const url = `${this.baseUrl}${endpoint}`;
-        
+
         const response = await fetch(url, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${this.config.apiKey}`,
-            'User-Agent': 'Document-Chat-System/1.0'
+            'User-Agent': 'Document-Chat-System/1.0',
+            'X-CSRF-Token': this.config.apiKey, // Add CSRF token for ImageRouter API
+            'X-API-Key': this.config.apiKey // Some APIs use this instead of Authorization
             // Don't set Content-Type for FormData - browser will set it with boundary
           },
           body: formData,
