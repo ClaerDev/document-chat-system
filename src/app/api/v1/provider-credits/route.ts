@@ -143,7 +143,7 @@ async function getOpenAICredits() {
 
 /**
  * OpenRouter Credits - Fetch from API
- * https://openrouter.ai/docs#limits
+ * https://openrouter.ai/docs/api-reference/credits/get-credits
  */
 async function getOpenRouterCredits() {
   const apiKey = process.env.OPENROUTER_API_KEY
@@ -164,18 +164,24 @@ async function getOpenRouterCredits() {
       throw new Error(`OpenRouter API returned ${response.status}`)
     }
 
-    const data = await response.json()
+    const result = await response.json()
 
-    // OpenRouter returns credits in dollars
-    const totalCredits = data.total_credits || 0
-    const usedCredits = data.used_credits || 0
-    const remainingCredits = totalCredits - usedCredits
+    // Response format: { data: { total_credits: number, total_usage: number } }
+    const totalCredits = result.data?.total_credits || 0
+    const totalUsage = result.data?.total_usage || 0
+    const remainingCredits = totalCredits - totalUsage
+
+    console.log('OpenRouter credits fetched:', {
+      total_credits: totalCredits,
+      total_usage: totalUsage,
+      remaining: remainingCredits
+    })
 
     return {
       available: true,
       provider: 'OpenRouter',
       balance: totalCredits > 0 ? `$${remainingCredits.toFixed(2)}` : 'Pay-as-you-go',
-      used: `$${usedCredits.toFixed(2)}`,
+      used: `$${totalUsage.toFixed(2)}`,
       limit: totalCredits > 0 ? `$${totalCredits.toFixed(2)}` : 'Unlimited',
       status: 'active',
       link: 'https://openrouter.ai/credits'
