@@ -267,6 +267,29 @@ export function LandingPageClient() {
                 </Button>
               </Link>
             </div>
+
+            {/* YouTube Video Demo */}
+            <div className="w-full max-w-4xl mx-auto pt-8">
+              <div className="relative rounded-xl overflow-hidden shadow-2xl border-4 border-gray-200 dark:border-gray-700">
+                <div className="aspect-video">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src="https://www.youtube.com/embed/P42nlCmicVM?si=SKnyKRVOJpAC9kDn"
+                    title="Document Chat System Demo"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                    className="absolute inset-0"
+                  />
+                </div>
+              </div>
+              <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
+                Watch the complete demo and walkthrough
+              </p>
+            </div>
+
             <div className="flex flex-col sm:flex-row items-center gap-4 text-sm text-gray-600 dark:text-gray-400 pt-4">
               <div className="flex items-center gap-2">
                 <Shield className="h-4 w-4 text-green-600" />
