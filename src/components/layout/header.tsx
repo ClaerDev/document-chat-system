@@ -25,7 +25,7 @@ export function Header({ onMobileMenuToggle, showNavigation = true }: HeaderProp
     <header className="sticky top-[52px] z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container">
         <div className="flex h-16 items-center justify-between">
-          {/* Left side - Logo and mobile menu */}
+          {/* Left side - Mobile menu only */}
           <div className="flex items-center gap-4">
             {onMobileMenuToggle && showNavigation && (
               <Button
@@ -38,17 +38,6 @@ export function Header({ onMobileMenuToggle, showNavigation = true }: HeaderProp
                 <span className="sr-only">Toggle menu</span>
               </Button>
             )}
-            
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-government to-government/80 flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-base">DC</span>
-              </div>
-              <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-government to-government/80 bg-clip-text text-transparent">
-                  Document Chat
-                </h1>
-              </div>
-            </div>
           </div>
 
           {/* Search */}
