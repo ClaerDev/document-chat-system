@@ -43,6 +43,25 @@ import {
 
 import { ChatState } from '@/types/chat';
 
+// Utility function to ensure content is always a string
+const ensureStringContent = (content: any): string => {
+  if (content === null || content === undefined) return '';
+  if (typeof content === 'string') return content;
+  if (typeof content === 'number' || typeof content === 'boolean') return String(content);
+  if (Array.isArray(content)) {
+    return content.map(ensureStringContent).join('');
+  }
+  if (typeof content === 'object') {
+    // If it's a React element or complex object, stringify it
+    try {
+      return JSON.stringify(content, null, 2);
+    } catch (e) {
+      return String(content);
+    }
+  }
+  return String(content);
+};
+
 interface CleanAIChatProps {
   organizationId: string;
   className?: string;
@@ -1270,7 +1289,9 @@ Provide accurate, helpful, and professional assistance.`
         }
         
         // Simulate streaming for JSON responses
-        const content = responseData.content || responseData.message || 'No content received';
+        const rawContent = responseData.content || responseData.message || 'No content received';
+        // Ensure content is always a string
+        const content = ensureStringContent(rawContent);
         const actualModel = responseData.model || selectedModel;
         
         // Update the currently used model to show the actual model from the API
@@ -1393,7 +1414,9 @@ Provide accurate, helpful, and professional assistance.`
                   
                   if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta && parsed.choices[0].delta.content) {
                     const newContent = parsed.choices[0].delta.content;
-                    fullContent += newContent;
+                    // Ensure content is always a string
+                    const stringContent = ensureStringContent(newContent);
+                    fullContent += stringContent;
                     setCurrentStreamingMessage(fullContent);
                   }
                 } catch (e) {
