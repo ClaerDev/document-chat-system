@@ -372,14 +372,24 @@ export default function Dashboard() {
                           <ExternalLink className="h-3 w-3" />
                         </a>
                       </div>
-                      {providerCredits.openrouter.balance && (
+                      {providerCredits.openrouter.balance && providerCredits.openrouter.balance !== 'Pay-as-you-go' && (
                         <div className="text-xs text-muted-foreground">
-                          Limit: <span className="font-medium text-foreground">{providerCredits.openrouter.balance}</span>
+                          <span className="font-medium text-green-600">Remaining: {providerCredits.openrouter.balance}</span>
                         </div>
                       )}
                       {providerCredits.openrouter.used && (
                         <div className="text-xs text-muted-foreground">
                           Used: <span className="font-medium text-foreground">{providerCredits.openrouter.used}</span>
+                        </div>
+                      )}
+                      {providerCredits.openrouter.limit && (
+                        <div className="text-xs text-muted-foreground">
+                          Total Limit: <span className="font-medium text-foreground">{providerCredits.openrouter.limit}</span>
+                        </div>
+                      )}
+                      {providerCredits.openrouter.balance === 'Pay-as-you-go' && (
+                        <div className="text-xs text-muted-foreground">
+                          <span className="font-medium text-blue-600">Pay-as-you-go billing</span>
                         </div>
                       )}
                       {providerCredits.openrouter.message && (
