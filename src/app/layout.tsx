@@ -7,6 +7,7 @@ import { LoadingProvider } from '@/components/providers/loading-provider'
 import { NotificationProvider } from '@/contexts/notification-context'
 import { BadgeNotificationProvider } from '@/contexts/badge-notification-context'
 import { GlobalErrorProvider } from '@/contexts/global-error-context'
+import { GoogleAnalytics } from '@/components/analytics/google-analytics'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -25,6 +26,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <body className={inter.className} suppressHydrationWarning={true}>
+          <GoogleAnalytics />
           <QueryProvider>
             <ThemeProvider
               attribute="class"
