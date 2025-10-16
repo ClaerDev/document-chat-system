@@ -529,11 +529,14 @@ export const EnhancedMessageRenderer: React.FC<EnhancedMessageRendererProps> = (
   attachedFiles = [],
   citations = []
 }) => {
+  // Ensure content is always a string
+  const stringContent = typeof content === 'string' ? content : String(content || '');
+
   // Track rendered video IDs to prevent duplicates in inline rendering
   const renderedVideoIds = new Set<string>();
 
   // Inject YouTube URLs for video titles without URLs (fallback solution)
-  let contentWithURLs = injectYouTubeURLs(content);
+  let contentWithURLs = injectYouTubeURLs(stringContent);
 
   // Check if content should render a trading chart
   const chartDetection = shouldRenderChart(contentWithURLs);
@@ -571,8 +574,19 @@ export const EnhancedMessageRenderer: React.FC<EnhancedMessageRendererProps> = (
   const markdownComponents = {
     // Enhanced link component with direct media rendering
     a: ({ children, href, ...props }: any) => {
+      // Ensure children is properly rendered
+      const renderChildren = () => {
+        if (typeof children === 'string') return children;
+        if (Array.isArray(children)) {
+          return children.map((child, idx) =>
+            typeof child === 'string' ? child : String(child || '')
+          ).join('');
+        }
+        return String(children || '');
+      };
+
       if (!href) {
-        return <span>{children}</span>;
+        return <span>{renderChildren()}</span>;
       }
       
       // Check if it's a video platform link that can be embedded
@@ -887,11 +901,28 @@ export const EnhancedMessageRenderer: React.FC<EnhancedMessageRendererProps> = (
     },
     
     // Enhanced paragraph
-    p: ({ children, ...props }: any) => (
-      <p className="text-base text-foreground leading-relaxed mb-4" {...props}>
-        {children}
-      </p>
-    ),
+    p: ({ children, ...props }: any) => {
+      // Handle children that might be objects
+      const renderChildren = () => {
+        if (!children) return null;
+        if (typeof children === 'string') return children;
+        if (Array.isArray(children)) {
+          return children.map((child, idx) => {
+            if (React.isValidElement(child)) return child;
+            if (typeof child === 'string') return child;
+            return String(child || '');
+          });
+        }
+        if (React.isValidElement(children)) return children;
+        return String(children);
+      };
+
+      return (
+        <p className="text-base text-foreground leading-relaxed mb-4" {...props}>
+          {renderChildren()}
+        </p>
+      );
+    },
     
     // Enhanced emphasis
     strong: ({ children, ...props }: any) => (
