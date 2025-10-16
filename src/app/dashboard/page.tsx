@@ -21,7 +21,12 @@ import {
   Upload,
   Settings,
   TrendingUp,
-  Search
+  Search,
+  CreditCard,
+  DollarSign,
+  Zap,
+  AlertCircle,
+  ExternalLink
 } from 'lucide-react'
 import { Profile } from '@/types'
 import { HeaderSearch } from '@/components/layout/header-search'
@@ -43,6 +48,8 @@ export default function Dashboard() {
   const [recentDocuments, setRecentDocuments] = useState<any[]>([])
   const [documentsLoading, setDocumentsLoading] = useState(true)
   const [triggerSearch, setTriggerSearch] = useState(false)
+  const [providerCredits, setProviderCredits] = useState<any>(null)
+  const [creditsLoading, setCreditsLoading] = useState(true)
 
   const fetchStats = useCallback(async () => {
     try {
@@ -74,6 +81,21 @@ export default function Dashboard() {
     } finally {
       setStatsLoading(false)
       setDocumentsLoading(false)
+    }
+  }, [])
+
+  const fetchProviderCredits = useCallback(async () => {
+    try {
+      const response = await fetch('/api/v1/provider-credits')
+      const data = await response.json()
+
+      if (data.success) {
+        setProviderCredits(data.credits)
+      }
+    } catch (error) {
+      console.error('Error fetching provider credits:', error)
+    } finally {
+      setCreditsLoading(false)
     }
   }, [])
 
@@ -130,9 +152,10 @@ export default function Dashboard() {
       setTimeout(() => {
         fetchProfile()
         fetchStats()
+        fetchProviderCredits()
       }, 0)
     }
-  }, [isLoaded, isSignedIn, fetchProfile, fetchStats])
+  }, [isLoaded, isSignedIn, fetchProfile, fetchStats, fetchProviderCredits])
 
   
   // Don't render anything on server-side to prevent hydration mismatch
@@ -306,6 +329,183 @@ export default function Dashboard() {
                     </Link>
                   ))}
                 </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* API Credits Monitor */}
+          <Card className="col-span-full lg:col-span-1">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center text-base">
+                <CreditCard className="mr-2 h-4 w-4" />
+                API Credits & Usage
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Monitor your AI provider balances
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3 pb-4">
+              {creditsLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 dark:border-gray-100"></div>
+                </div>
+              ) : !providerCredits ? (
+                <div className="text-center py-4 text-sm text-muted-foreground">
+                  Unable to load credits
+                </div>
+              ) : (
+                <>
+                  {providerCredits.openrouter?.available && (
+                    <div className="p-3 rounded-lg border bg-card hover:bg-accent/5 transition-colors">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Zap className="h-4 w-4 text-orange-600" />
+                          <span className="font-semibold text-sm">OpenRouter</span>
+                        </div>
+                        <a
+                          href={providerCredits.openrouter.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center gap-1"
+                        >
+                          Manage
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+                      {providerCredits.openrouter.balance && (
+                        <div className="text-xs text-muted-foreground">
+                          Limit: <span className="font-medium text-foreground">{providerCredits.openrouter.balance}</span>
+                        </div>
+                      )}
+                      {providerCredits.openrouter.used && (
+                        <div className="text-xs text-muted-foreground">
+                          Used: <span className="font-medium text-foreground">{providerCredits.openrouter.used}</span>
+                        </div>
+                      )}
+                      {providerCredits.openrouter.message && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {providerCredits.openrouter.message}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {providerCredits.openai?.available && (
+                    <div className="p-3 rounded-lg border bg-card hover:bg-accent/5 transition-colors">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Zap className="h-4 w-4 text-green-600" />
+                          <span className="font-semibold text-sm">OpenAI</span>
+                        </div>
+                        <a
+                          href={providerCredits.openai.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center gap-1"
+                        >
+                          Billing
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {providerCredits.openai.message || 'Active'}
+                      </div>
+                    </div>
+                  )}
+
+                  {providerCredits.anthropic?.available && (
+                    <div className="p-3 rounded-lg border bg-card hover:bg-accent/5 transition-colors">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Zap className="h-4 w-4 text-purple-600" />
+                          <span className="font-semibold text-sm">Anthropic</span>
+                        </div>
+                        <a
+                          href={providerCredits.anthropic.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center gap-1"
+                        >
+                          Billing
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {providerCredits.anthropic.message || 'Active'}
+                      </div>
+                    </div>
+                  )}
+
+                  {providerCredits.imagerouter?.available && (
+                    <div className="p-3 rounded-lg border bg-card hover:bg-accent/5 transition-colors">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <Zap className="h-4 w-4 text-pink-600" />
+                          <span className="font-semibold text-sm">ImageRouter</span>
+                        </div>
+                        <a
+                          href={providerCredits.imagerouter.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center gap-1"
+                        >
+                          Dashboard
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+                      {providerCredits.imagerouter.balance && (
+                        <div className="text-xs text-muted-foreground">
+                          Balance: <span className="font-medium text-foreground">{providerCredits.imagerouter.balance}</span>
+                        </div>
+                      )}
+                      {providerCredits.imagerouter.message && !providerCredits.imagerouter.balance && (
+                        <div className="text-xs text-muted-foreground">
+                          {providerCredits.imagerouter.message}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {providerCredits.pinecone?.available && (
+                    <div className="p-3 rounded-lg border bg-card hover:bg-accent/5 transition-colors">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="h-4 w-4 text-blue-600" />
+                          <span className="font-semibold text-sm">Pinecone</span>
+                        </div>
+                        <a
+                          href={providerCredits.pinecone.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center gap-1"
+                        >
+                          Usage
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {providerCredits.pinecone.message || 'Active'}
+                      </div>
+                    </div>
+                  )}
+
+                  {!providerCredits.openrouter?.available &&
+                   !providerCredits.openai?.available &&
+                   !providerCredits.anthropic?.available &&
+                   !providerCredits.imagerouter?.available &&
+                   !providerCredits.pinecone?.available && (
+                    <div className="flex flex-col items-center justify-center text-center py-4">
+                      <AlertCircle className="h-8 w-8 text-yellow-600 mb-2" />
+                      <p className="text-sm text-muted-foreground">No API providers configured</p>
+                      <Link href="/settings" className="mt-2">
+                        <Button variant="outline" size="sm">
+                          <Settings className="mr-2 h-3 w-3" />
+                          Configure APIs
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
+                </>
               )}
             </CardContent>
           </Card>
