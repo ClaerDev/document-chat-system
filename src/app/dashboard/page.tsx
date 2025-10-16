@@ -407,32 +407,26 @@ export default function Dashboard() {
                           <ExternalLink className="h-3 w-3" />
                         </a>
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        {providerCredits.openai.message || 'Active'}
-                      </div>
-                    </div>
-                  )}
-
-                  {providerCredits.anthropic?.available && (
-                    <div className="p-3 rounded-lg border bg-card hover:bg-accent/5 transition-colors">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <Zap className="h-4 w-4 text-purple-600" />
-                          <span className="font-semibold text-sm">Anthropic</span>
+                      {providerCredits.openai.balance && providerCredits.openai.balance !== 'Unknown' && (
+                        <div className="text-xs text-muted-foreground">
+                          Balance: <span className="font-medium text-foreground">{providerCredits.openai.balance}</span>
                         </div>
-                        <a
-                          href={providerCredits.anthropic.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center gap-1"
-                        >
-                          Billing
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {providerCredits.anthropic.message || 'Active'}
-                      </div>
+                      )}
+                      {providerCredits.openai.used && providerCredits.openai.used !== 'Unknown' && (
+                        <div className="text-xs text-muted-foreground">
+                          Used: <span className="font-medium text-foreground">{providerCredits.openai.used}</span>
+                        </div>
+                      )}
+                      {providerCredits.openai.limit && providerCredits.openai.limit !== 'Unknown' && (
+                        <div className="text-xs text-muted-foreground">
+                          Limit: <span className="font-medium text-foreground">{providerCredits.openai.limit}</span>
+                        </div>
+                      )}
+                      {providerCredits.openai.message && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {providerCredits.openai.message}
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -466,34 +460,9 @@ export default function Dashboard() {
                     </div>
                   )}
 
-                  {providerCredits.pinecone?.available && (
-                    <div className="p-3 rounded-lg border bg-card hover:bg-accent/5 transition-colors">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <DollarSign className="h-4 w-4 text-blue-600" />
-                          <span className="font-semibold text-sm">Pinecone</span>
-                        </div>
-                        <a
-                          href={providerCredits.pinecone.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center gap-1"
-                        >
-                          Usage
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {providerCredits.pinecone.message || 'Active'}
-                      </div>
-                    </div>
-                  )}
-
                   {!providerCredits.openrouter?.available &&
                    !providerCredits.openai?.available &&
-                   !providerCredits.anthropic?.available &&
-                   !providerCredits.imagerouter?.available &&
-                   !providerCredits.pinecone?.available && (
+                   !providerCredits.imagerouter?.available && (
                     <div className="flex flex-col items-center justify-center text-center py-4">
                       <AlertCircle className="h-8 w-8 text-yellow-600 mb-2" />
                       <p className="text-sm text-muted-foreground">No API providers configured</p>

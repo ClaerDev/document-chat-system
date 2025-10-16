@@ -20,9 +20,7 @@ export async function GET() {
     const credits = {
       openai: await getOpenAICredits(),
       openrouter: await getOpenRouterCredits(),
-      anthropic: await getAnthropicCredits(),
       imagerouter: await getImageRouterCredits(),
-      pinecone: await getPineconeUsage(),
     }
 
     return NextResponse.json({
@@ -40,6 +38,7 @@ export async function GET() {
 
 /**
  * OpenAI Credits - Fetch from billing API
+ * https://platform.openai.com/docs/api-reference/usage
  */
 async function getOpenAICredits() {
   const apiKey = process.env.OPENAI_API_KEY
@@ -49,21 +48,94 @@ async function getOpenAICredits() {
   }
 
   try {
-    // OpenAI doesn't have a direct balance API, but we can get usage
-    // For now, return configured status
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    }
+
+    // Fetch credit grants (for free trial credits)
+    const creditGrantsResponse = await fetch(
+      'https://api.openai.com/dashboard/billing/credit_grants',
+      { headers }
+    )
+
+    // Fetch subscription details
+    const subscriptionResponse = await fetch(
+      'https://api.openai.com/v1/dashboard/billing/subscription',
+      { headers }
+    )
+
+    // Get usage for current month
+    const now = new Date()
+    const startDate = new Date(now.getFullYear(), now.getMonth(), 1)
+      .toISOString()
+      .split('T')[0]
+    const endDate = now.toISOString().split('T')[0]
+
+    const usageResponse = await fetch(
+      `https://api.openai.com/dashboard/billing/usage?start_date=${startDate}&end_date=${endDate}`,
+      { headers }
+    )
+
+    let creditGrants = null
+    let subscription = null
+    let usage = null
+
+    if (creditGrantsResponse.ok) {
+      creditGrants = await creditGrantsResponse.json()
+    }
+
+    if (subscriptionResponse.ok) {
+      subscription = await subscriptionResponse.json()
+    }
+
+    if (usageResponse.ok) {
+      usage = await usageResponse.json()
+    }
+
+    // Calculate remaining credits
+    let balance = 'Unknown'
+    let used = 'Unknown'
+    let limit = 'Unknown'
+
+    // Check for credit grants (free trial)
+    if (creditGrants && creditGrants.total_granted) {
+      const totalGranted = creditGrants.total_granted / 100 // Convert cents to dollars
+      const totalUsed = creditGrants.total_used / 100
+      const remaining = totalGranted - totalUsed
+
+      balance = `$${remaining.toFixed(2)}`
+      used = `$${totalUsed.toFixed(2)}`
+      limit = `$${totalGranted.toFixed(2)}`
+    }
+
+    // Check subscription (paid accounts)
+    if (subscription && subscription.hard_limit_usd) {
+      limit = `$${subscription.hard_limit_usd.toFixed(2)}`
+    }
+
+    // Get current month usage
+    if (usage && usage.total_usage) {
+      const monthUsage = usage.total_usage / 100
+      used = `$${monthUsage.toFixed(2)}`
+    }
+
     return {
       available: true,
       provider: 'OpenAI',
+      balance,
+      used,
+      limit,
       status: 'active',
-      message: 'Pay-as-you-go billing',
       link: 'https://platform.openai.com/account/billing/overview'
     }
   } catch (error) {
+    console.error('Error fetching OpenAI credits:', error)
     return {
       available: true,
       provider: 'OpenAI',
       status: 'unknown',
-      error: 'Unable to fetch usage',
+      message: 'Unable to fetch usage - check billing dashboard',
       link: 'https://platform.openai.com/account/billing/overview'
     }
   }
@@ -71,6 +143,7 @@ async function getOpenAICredits() {
 
 /**
  * OpenRouter Credits - Fetch from API
+ * https://openrouter.ai/docs#limits
  */
 async function getOpenRouterCredits() {
   const apiKey = process.env.OPENROUTER_API_KEY
@@ -80,54 +153,42 @@ async function getOpenRouterCredits() {
   }
 
   try {
-    const response = await fetch('https://openrouter.ai/api/v1/auth/key', {
+    // Use the correct endpoint for credit balance
+    const response = await fetch('https://openrouter.ai/api/v1/credits', {
       headers: {
         'Authorization': `Bearer ${apiKey}`,
       },
     })
 
     if (!response.ok) {
-      throw new Error('Failed to fetch OpenRouter credits')
+      throw new Error(`OpenRouter API returned ${response.status}`)
     }
 
     const data = await response.json()
 
+    // OpenRouter returns credits in dollars
+    const totalCredits = data.total_credits || 0
+    const usedCredits = data.used_credits || 0
+    const remainingCredits = totalCredits - usedCredits
+
     return {
       available: true,
       provider: 'OpenRouter',
-      balance: data.data?.limit ? `$${(data.data.limit / 100).toFixed(2)}` : 'Unlimited',
-      used: data.data?.usage ? `$${(data.data.usage / 100).toFixed(2)}` : '$0.00',
+      balance: totalCredits > 0 ? `$${remainingCredits.toFixed(2)}` : 'Pay-as-you-go',
+      used: `$${usedCredits.toFixed(2)}`,
+      limit: totalCredits > 0 ? `$${totalCredits.toFixed(2)}` : 'Unlimited',
       status: 'active',
       link: 'https://openrouter.ai/credits'
     }
   } catch (error) {
+    console.error('Error fetching OpenRouter credits:', error)
     return {
       available: true,
       provider: 'OpenRouter',
-      status: 'active',
-      message: 'Pay-as-you-go billing',
+      status: 'unknown',
+      message: 'Unable to fetch credits - check dashboard',
       link: 'https://openrouter.ai/credits'
     }
-  }
-}
-
-/**
- * Anthropic Credits
- */
-async function getAnthropicCredits() {
-  const apiKey = process.env.ANTHROPIC_API_KEY
-
-  if (!apiKey) {
-    return { available: false, message: 'API key not configured' }
-  }
-
-  // Anthropic doesn't have a public balance API
-  return {
-    available: true,
-    provider: 'Anthropic',
-    status: 'active',
-    message: 'Pay-as-you-go billing',
-    link: 'https://console.anthropic.com/settings/billing'
   }
 }
 
@@ -172,32 +233,13 @@ async function getImageRouterCredits() {
       link: 'https://imagerouter.io/dashboard'
     }
   } catch (error) {
+    console.error('Error fetching ImageRouter credits:', error)
     return {
       available: true,
       provider: 'ImageRouter',
-      status: 'active',
-      message: 'Active subscription',
+      status: 'unknown',
+      message: 'Unable to fetch credits - check dashboard',
       link: 'https://imagerouter.io/dashboard'
     }
-  }
-}
-
-/**
- * Pinecone Usage
- */
-async function getPineconeUsage() {
-  const apiKey = process.env.PINECONE_API_KEY
-
-  if (!apiKey) {
-    return { available: false, message: 'API key not configured' }
-  }
-
-  // Pinecone doesn't have a direct usage API that's easily accessible
-  return {
-    available: true,
-    provider: 'Pinecone',
-    status: 'active',
-    message: 'Serverless plan - pay per usage',
-    link: 'https://app.pinecone.io/organizations'
   }
 }
