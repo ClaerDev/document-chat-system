@@ -28,11 +28,9 @@
 
 <div align="center">
 
-https://github.com/watat83/document-chat-system/raw/main/docs/demo-video.mp4
+[![Document Chat System Demo](https://img.youtube.com/vi/P42nlCmicVM/0.jpg)](https://www.youtube.com/watch?v=P42nlCmicVM)
 
 *Complete walkthrough - from document upload to AI-powered conversations*
-
-**[Also available on YouTube](https://www.youtube.com/watch?v=P42nlCmicVM)**
 
 </div>
 
