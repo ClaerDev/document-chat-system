@@ -8,6 +8,7 @@ import { NotificationProvider } from '@/contexts/notification-context'
 import { BadgeNotificationProvider } from '@/contexts/badge-notification-context'
 import { GlobalErrorProvider } from '@/contexts/global-error-context'
 import { GoogleAnalytics } from '@/components/analytics/google-analytics'
+import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -48,6 +49,7 @@ export default function RootLayout({
               </LoadingProvider>
             </ThemeProvider>
           </QueryProvider>
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
