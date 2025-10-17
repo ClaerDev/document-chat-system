@@ -22,6 +22,20 @@
 [Contributing](#contributing) •
 [License](#license)
 
+---
+
+## 🎥 Demo & Walkthrough
+
+<div align="center">
+
+https://github.com/user-attachments/assets/demo-video.mp4
+
+*Complete walkthrough - from document upload to AI-powered conversations*
+
+**[Also available on YouTube](https://www.youtube.com/watch?v=P42nlCmicVM)**
+
+</div>
+
 </div>
 
 ---
