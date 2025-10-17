@@ -28,7 +28,7 @@
 
 <div align="center">
 
-https://github.com/watat83/document-chat-system/assets/demo-video.mp4
+https://github.com/watat83/document-chat-system/raw/main/docs/demo-video.mp4
 
 *Complete walkthrough - from document upload to AI-powered conversations*
 
