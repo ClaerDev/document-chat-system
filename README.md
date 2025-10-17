@@ -28,9 +28,9 @@
 
 <div align="center">
 
-![Demo Video](docs/demo-video.mp4)
+[![Document Chat System Demo](https://img.youtube.com/vi/P42nlCmicVM/maxresdefault.jpg)](https://www.youtube.com/watch?v=P42nlCmicVM)
 
-*Complete walkthrough - from document upload to AI-powered conversations*
+*Click the thumbnail above to watch the complete walkthrough - from document upload to AI-powered conversations*
 
 </div>
 
