@@ -8,6 +8,7 @@ import { NotificationProvider } from '@/contexts/notification-context'
 import { BadgeNotificationProvider } from '@/contexts/badge-notification-context'
 import { GlobalErrorProvider } from '@/contexts/global-error-context'
 import { Analytics } from '@vercel/analytics/next'
+import { ChunkErrorHandler } from '@/components/error-boundary/chunk-error-handler'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -26,6 +27,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <body className={inter.className} suppressHydrationWarning={true}>
+          <ChunkErrorHandler />
           <QueryProvider>
             <ThemeProvider
               attribute="class"
