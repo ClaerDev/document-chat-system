@@ -66,14 +66,14 @@ export function DonationBanner({
     window.open(donateUrl, '_blank')
   }
 
-  // Prevent SSR mismatch by not rendering until mounted
+  // Prevent SSR mismatch by rendering a placeholder with same height
   if (!isMounted || !isVisible) {
-    return null
+    return <div className="h-0" suppressHydrationWarning />
   }
 
   return (
     <TooltipProvider>
-      <div className="sticky top-0 z-[60] w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md">
+      <div className="sticky top-0 z-[60] w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md" suppressHydrationWarning>
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-4 flex-wrap sm:flex-nowrap">
             {/* Message Section */}
