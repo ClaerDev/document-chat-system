@@ -193,11 +193,17 @@ export function FloatingChat() {
             )
           }
         } else {
+          // Clone the response so we can try reading it as JSON or text
+          const clonedResponse = profileResponse.clone()
           let errorData
           try {
             errorData = await profileResponse.json()
           } catch {
-            errorData = await profileResponse.text()
+            try {
+              errorData = await clonedResponse.text()
+            } catch {
+              errorData = 'Could not read error response'
+            }
           }
           console.error(
             '❌ Profile endpoint failed:',

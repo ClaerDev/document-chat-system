@@ -57,6 +57,7 @@ export function AppLayout({ children, showNavigation = true }: AppLayoutProps) {
           <Header
             onMobileMenuToggle={() => setSidebarOpen(!sidebarOpen)}
             showNavigation={showNavigation}
+            donationBannerVisible={donationBannerVisible}
           />
 
           {/* Page content */}

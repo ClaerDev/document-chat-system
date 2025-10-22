@@ -255,7 +255,7 @@ export function LandingPageClient() {
                 Deploy your own instance with optional billing to monetize as a SaaS.
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
+            <div className="flex flex-col sm:flex-row gap-4 w-full max-w-3xl mx-auto">
               <Link href="/sign-up" className="flex-1">
                 <Button size="lg" className="w-full">
                   <Sparkles className="mr-2 h-5 w-5" />

@@ -11,9 +11,10 @@ import { Menu } from 'lucide-react'
 interface HeaderProps {
   onMobileMenuToggle?: () => void
   showNavigation?: boolean
+  donationBannerVisible?: boolean
 }
 
-export function Header({ onMobileMenuToggle, showNavigation = true }: HeaderProps) {
+export function Header({ onMobileMenuToggle, showNavigation = true, donationBannerVisible = true }: HeaderProps) {
   const { isSignedIn } = useAuth()
   const [mounted, setMounted] = React.useState(false)
 
@@ -22,7 +23,7 @@ export function Header({ onMobileMenuToggle, showNavigation = true }: HeaderProp
   }, [])
 
   return (
-    <header className="sticky top-[52px] z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className={`sticky ${donationBannerVisible ? 'top-[52px]' : 'top-0'} z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300`}>
       <div className="container">
         <div className="flex h-16 items-center justify-between">
           {/* Left side - Mobile menu only */}
