@@ -16,11 +16,14 @@
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fwatat83%2Fdocument-chat-system&env=DATABASE_URL,NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,CLERK_SECRET_KEY,NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY,INNGEST_EVENT_KEY,INNGEST_SIGNING_KEY&envDescription=Required%20environment%20variables%20for%20Document%20Chat%20System&envLink=https%3A%2F%2Fgithub.com%2Fwatat83%2Fdocument-chat-system%2Fblob%2Fmain%2F.env.example&project-name=document-chat-system&repository-name=document-chat-system)
 
+[![Join our Discord](https://img.shields.io/badge/Discord-Join%20Community-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/ubWcC2PS)
+
 [Features](#features) •
 [Quick Start](#quick-start) •
 [Documentation](#documentation) •
 [Contributing](#contributing) •
-[License](#license)
+[License](#license) •
+[Discord](#community)
 
 ---
 
@@ -1458,6 +1461,21 @@ git push origin feature/amazing-feature
 - Update documentation
 - Use conventional commits
 - Keep PRs focused and small
+
+---
+
+## Community
+
+Join our growing community of developers and users!
+
+[![Discord](https://img.shields.io/badge/Discord-Join%20Chat-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/ubWcC2PS)
+
+- 💬 **Discord**: Get help, share ideas, and connect with other users
+- 🐛 **GitHub Issues**: Report bugs and request features
+- 🌟 **GitHub Discussions**: Ask questions and share your projects
+- 🐦 **Twitter/X**: Follow [@watat83](https://twitter.com/watat83) for updates
+
+We're building something great together. Your feedback and contributions make this project better for everyone!
 
 ---
 

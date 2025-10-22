@@ -34,7 +34,8 @@ import {
   Network,
   Github,
   Menu,
-  X
+  X,
+  MessageSquare
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
@@ -264,6 +265,12 @@ export function LandingPageClient() {
                 <Button variant="outline" size="lg" className="w-full">
                   <GitBranch className="mr-2 h-5 w-5" />
                   View on GitHub
+                </Button>
+              </Link>
+              <Link href="https://discord.gg/ubWcC2PS" target="_blank" rel="noopener noreferrer" className="flex-1">
+                <Button variant="outline" size="lg" className="w-full">
+                  <MessageSquare className="mr-2 h-5 w-5" />
+                  Join Discord
                 </Button>
               </Link>
             </div>
@@ -1382,6 +1389,9 @@ export function LandingPageClient() {
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
           <Link className="text-xs hover:underline underline-offset-4" href="https://github.com/watat83/document-chat-system">
             GitHub
+          </Link>
+          <Link className="text-xs hover:underline underline-offset-4" href="https://discord.gg/ubWcC2PS" target="_blank" rel="noopener noreferrer">
+            Discord
           </Link>
           <Link className="text-xs hover:underline underline-offset-4" href="https://github.com/watat83/document-chat-system/blob/main/README.md">
             Documentation
