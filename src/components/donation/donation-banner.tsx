@@ -73,9 +73,14 @@ export function DonationBanner({
     window.open(donateUrl, '_blank')
   }
 
-  // Prevent SSR mismatch by rendering a placeholder with same height
-  if (!isMounted || !isVisible) {
-    return <div className="h-0" suppressHydrationWarning />
+  // Don't render until mounted to prevent SSR mismatch
+  if (!isMounted) {
+    return null
+  }
+
+  // Don't render if banner is dismissed
+  if (!isVisible) {
+    return null
   }
 
   return (

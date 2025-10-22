@@ -15,6 +15,7 @@ interface AppLayoutProps {
 export function AppLayout({ children, showNavigation = true }: AppLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [donationBannerVisible, setDonationBannerVisible] = useState(true)
   const pathname = usePathname()
 
   useEffect(() => {
@@ -39,7 +40,7 @@ export function AppLayout({ children, showNavigation = true }: AppLayoutProps) {
   return (
     <div className="flex flex-col h-screen bg-background">
       {/* Donation Banner - At the very top */}
-      <DonationBanner />
+      <DonationBanner onVisibilityChange={setDonationBannerVisible} />
 
       {/* Main app container */}
       <div className="flex flex-1 min-h-0">
