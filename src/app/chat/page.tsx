@@ -24,6 +24,7 @@ export default function ChatPage() {
   const [availableFolders, setAvailableFolders] = useState<Array<{id: string, name: string}>>([]);
   const [documentsLoading, setDocumentsLoading] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [donationBannerVisible, setDonationBannerVisible] = useState(true);
 
   // Set hydration state
   useEffect(() => {
@@ -114,7 +115,7 @@ export default function ChatPage() {
   return (
     <div className="flex flex-col h-screen bg-background">
       {/* Donation Banner */}
-      <DonationBanner />
+      <DonationBanner onVisibilityChange={setDonationBannerVisible} />
 
       <div className="flex flex-1 min-h-0">
         {/* Sidebar */}
@@ -130,6 +131,7 @@ export default function ChatPage() {
           <Header
             onMobileMenuToggle={() => setSidebarOpen(!sidebarOpen)}
             showNavigation={true}
+            donationBannerVisible={donationBannerVisible}
           />
 
           {/* Chat content with settings panel */}
