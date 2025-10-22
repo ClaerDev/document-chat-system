@@ -14,12 +14,14 @@ interface DonationBannerProps {
   email?: string
   itemName?: string
   currency?: string
+  onVisibilityChange?: (isVisible: boolean) => void
 }
 
 export function DonationBanner({
   email = process.env.NEXT_PUBLIC_PAYPAL_EMAIL || '',
   itemName = 'Support Document Chat - Free AI Models',
-  currency = 'USD'
+  currency = 'USD',
+  onVisibilityChange
 }: DonationBannerProps) {
   const [isVisible, setIsVisible] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
@@ -46,16 +48,21 @@ export function DonationBanner({
       // Show banner again if 6 hours have passed
       if (now > dismissedTimestamp) {
         setIsVisible(true)
+        onVisibilityChange?.(true)
         localStorage.removeItem('donation-banner-dismissed-until')
+      } else {
+        onVisibilityChange?.(false)
       }
     } else {
       // No dismiss record, show the banner
       setIsVisible(true)
+      onVisibilityChange?.(true)
     }
-  }, [])
+  }, [onVisibilityChange])
 
   const handleDismiss = () => {
     setIsVisible(false)
+    onVisibilityChange?.(false)
     // Hide banner for 6 hours
     const sixHoursFromNow = Date.now() + (6 * 60 * 60 * 1000)
     localStorage.setItem('donation-banner-dismissed-until', sixHoursFromNow.toString())
