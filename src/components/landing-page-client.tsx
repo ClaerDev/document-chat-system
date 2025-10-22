@@ -114,7 +114,7 @@ export function LandingPageClient() {
       <DonationBanner />
 
       {/* Sticky Header with Navigation - positioned below donation banner */}
-      <header className="sticky top-[52px] z-40 px-4 lg:px-6 h-14 flex items-center border-b bg-white/95 dark:bg-gray-950/95 backdrop-blur supports-[backdrop-filter]:bg-white/95 dark:supports-[backdrop-filter]:bg-gray-950/95">
+      <header className="sticky top-[48px] z-40 px-4 lg:px-6 h-14 flex items-center border-b bg-white/95 dark:bg-gray-950/95 backdrop-blur supports-[backdrop-filter]:bg-white/95 dark:supports-[backdrop-filter]:bg-gray-950/95">
         <Link className="flex items-center justify-center" href="/">
           <Files className="h-6 w-6 text-blue-600 dark:text-blue-400 sm:mr-2" />
           <span className="font-bold text-lg hidden sm:inline">Document Chat System</span>
