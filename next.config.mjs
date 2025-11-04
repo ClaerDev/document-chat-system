@@ -18,7 +18,7 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, dev }) => {
     // Fix Node.js modules not available in browser
     if (!isServer) {
       config.resolve.fallback = {
@@ -33,6 +33,25 @@ const nextConfig = {
         'nock': false,
       };
     }
+
+    // Optimize file watching in development to prevent "too many open files" error
+    if (dev) {
+      config.watchOptions = {
+        ...config.watchOptions,
+        poll: 1000, // Check for changes every second
+        aggregateTimeout: 300, // Delay rebuild after first change
+        ignored: [
+          '**/node_modules/**',
+          '**/.git/**',
+          '**/.next/**',
+          '**/dist/**',
+          '**/build/**',
+          '**/.vercel/**',
+          '**/.cache/**',
+        ],
+      };
+    }
+
     return config;
   },
   images: {

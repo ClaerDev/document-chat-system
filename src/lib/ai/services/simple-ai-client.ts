@@ -234,9 +234,20 @@ export class SimpleAIClient {
           `❌ [AI CLIENT] API request failed: ${response.status} ${response.statusText}`
         )
         console.error(`❌ [AI CLIENT] Error response: ${errorText}`)
-        throw new Error(
-          `AI API request failed: ${response.status} ${response.statusText} - ${errorText}`
-        )
+
+        // Parse error response to check for quota issues
+        let errorMessage = `AI API request failed: ${response.status} ${response.statusText} - ${errorText}`
+        try {
+          const errorData = JSON.parse(errorText)
+          if (errorData.error?.code === 'insufficient_quota' || response.status === 429) {
+            errorMessage = '⚠️ OpenAI API Quota Exceeded. Please add credits to your OpenAI account at https://platform.openai.com/account/billing'
+            console.error('💳 OpenAI quota exceeded. Visit https://platform.openai.com/account/billing to add credits.')
+          }
+        } catch (e) {
+          // If error parsing fails, use the default error message
+        }
+
+        throw new Error(errorMessage)
       }
 
       console.log(`📥 [AI CLIENT] Parsing JSON response...`)

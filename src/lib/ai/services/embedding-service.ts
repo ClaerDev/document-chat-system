@@ -366,9 +366,20 @@ export class EmbeddingService {
           `❌ OpenAI API error: ${response.status} ${response.statusText}`,
           errorText
         )
-        throw new Error(
-          `OpenAI API error: ${response.status} ${response.statusText} - ${errorText}`
-        )
+
+        // Parse error response to check for quota issues
+        let errorMessage = `OpenAI API error: ${response.status} ${response.statusText} - ${errorText}`
+        try {
+          const errorData = JSON.parse(errorText)
+          if (errorData.error?.code === 'insufficient_quota' || response.status === 429) {
+            errorMessage = '⚠️ OpenAI API Quota Exceeded. Please add credits to your OpenAI account at https://platform.openai.com/account/billing'
+            console.error('💳 OpenAI quota exceeded. Visit https://platform.openai.com/account/billing to add credits.')
+          }
+        } catch (e) {
+          // If error parsing fails, use the default error message
+        }
+
+        throw new Error(errorMessage)
       }
 
       const data = await response.json()

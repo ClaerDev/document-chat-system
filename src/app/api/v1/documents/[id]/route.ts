@@ -174,8 +174,6 @@ export async function GET(
       securityClassification: document.securityClassification,
       workflowStatus: document.workflowStatus,
       tags: document.tags || [],
-      setAsideType: document.setAsideType,
-      naicsCodes: document.naicsCodes || [],
       isEditable: document.isEditable,
       
       // Extracted content
@@ -383,12 +381,10 @@ export async function PUT(
 
     const { id: documentId } = await params
     const body = await request.json()
-    const { name, folderId, tags, documentType, contractAnalysis, description, setAsideType, naicsCodes, entities } = body
-    
+    const { name, folderId, tags, documentType, contractAnalysis, description, entities } = body
+
     console.log('🚨🚨🚨 API RECEIVED DATA:')
     console.log('  - documentId:', documentId)
-    console.log('  - setAsideType:', setAsideType, 'type:', typeof setAsideType)
-    console.log('  - naicsCodes:', naicsCodes, 'type:', typeof naicsCodes, 'isArray:', Array.isArray(naicsCodes))
     console.log('  - tags:', tags, 'type:', typeof tags, 'isArray:', Array.isArray(tags))
     console.log('  - entities:', entities, 'type:', typeof entities, 'isArray:', Array.isArray(entities))
     console.log('  - contractAnalysis:', contractAnalysis)
@@ -471,11 +467,9 @@ export async function PUT(
       ...(tags !== undefined && { tags: tags }),
       ...(documentType && { documentType: documentType }),
       ...(description && { description: description }),
-      ...(setAsideType !== undefined && { setAsideType: setAsideType }),
-      ...(naicsCodes !== undefined && { naicsCodes: naicsCodes }),
       updatedAt: new Date()
     }
-    
+
     console.log('🚨 FINAL UPDATE DATA BEING SENT TO DATABASE:', JSON.stringify(updateData, null, 2))
     
     // Update the document
@@ -483,10 +477,8 @@ export async function PUT(
       where: { id: documentId },
       data: updateData
     })
-    
+
     console.log('🚨 DATABASE UPDATE RESULT:')
-    console.log('  - updatedDocument.setAsideType:', updatedDocument.setAsideType)
-    console.log('  - updatedDocument.naicsCodes:', updatedDocument.naicsCodes)
     console.log('  - updatedDocument.tags:', updatedDocument.tags)
     
     // Handle contract analysis update separately
@@ -615,9 +607,6 @@ export async function PUT(
       processingError: ((completeDocument.processing as any)?.events?.find((e: any) => e.success === false)?.error),
       securityClassification: completeDocument.securityClassification,
       tags: completeDocument.tags || [],
-      setAsideType: completeDocument.setAsideType,
-      naicsCodes: completeDocument.naicsCodes || [],
-      
       // Computed/derived fields
       type: getFileTypeFromMimeType(completeDocument.mimeType, completeDocument.name),
       filePath: `/api/v1/documents/${completeDocument.id}/download`,
@@ -847,14 +836,6 @@ export async function PUT(
  *                     items:
  *                       type: string
  *                     example: ["important", "contract"]
- *                   setAsideType:
- *                     type: string
- *                     example: "8(a)"
- *                   naicsCodes:
- *                     type: array
- *                     items:
- *                       type: string
- *                     example: ["541511", "541512"]
  *               - title: Section Update
  *                 type: object
  *                 description: JSON field section update
@@ -1059,14 +1040,12 @@ export async function PATCH(
     // Get existing document to verify access
     const existingDocument = await prisma.document.findUnique({
       where: { id: documentId },
-      select: { 
-        id: true, 
+      select: {
+        id: true,
         organizationId: true,
         uploadedById: true,
         name: true,
         tags: true,
-        setAsideType: true,
-        naicsCodes: true,
         documentType: true,
         description: true,
         content: true,
@@ -1115,8 +1094,6 @@ export async function PATCH(
     // Only update fields that are explicitly provided
     if (body.name !== undefined) updateData.name = body.name
     if (body.tags !== undefined) updateData.tags = body.tags
-    if (body.setAsideType !== undefined) updateData.setAsideType = body.setAsideType
-    if (body.naicsCodes !== undefined) updateData.naicsCodes = body.naicsCodes
     if (body.documentType !== undefined) updateData.documentType = body.documentType
     if (body.description !== undefined) updateData.description = body.description
     if (body.content !== undefined) {
@@ -1307,9 +1284,7 @@ export async function PATCH(
       processingError: ((completeDocument.processing as any)?.events?.find((e: any) => e.success === false)?.error),
       securityClassification: completeDocument.securityClassification,
       tags: completeDocument.tags || [],
-      setAsideType: completeDocument.setAsideType,
-      naicsCodes: completeDocument.naicsCodes || [],
-      
+
       type: getFileTypeFromMimeType(completeDocument.mimeType, completeDocument.name),
       filePath: `/api/v1/documents/${completeDocument.id}/download`,
       uploadDate: completeDocument.createdAt.toISOString(),
@@ -1440,8 +1415,6 @@ export async function PATCH(
       documentId,
       updatedFields: Object.keys(updateData),
       finalDocument: {
-        setAsideType: transformedDocument.setAsideType,
-        naicsCodes: transformedDocument.naicsCodes,
         tags: transformedDocument.tags
       },
       contentKeywords: transformedDocument.aiData?.content?.keywords,
@@ -1979,10 +1952,8 @@ async function fetchCompleteDocument(documentId: string) {
     securityClassification: document.securityClassification,
     workflowStatus: document.workflowStatus,
     tags: document.tags || [],
-    setAsideType: document.setAsideType,
-    naicsCodes: document.naicsCodes || [],
     isEditable: document.isEditable,
-    
+
     // Extracted content
     extractedText: document.extractedText,
     summary: document.summary,

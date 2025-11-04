@@ -162,8 +162,6 @@ export interface Document {
   // User metadata
   description: string | null
   tags: string[]
-  setAsideType: string | null
-  naicsCodes: string[]
   isEditable: boolean
 
   // JSON fields (consolidated data)
@@ -495,8 +493,6 @@ export interface DocumentCreateInput {
   workflowStatus?: WorkflowStatus
   description?: string
   tags?: string[]
-  setAsideType?: string
-  naicsCodes?: string[]
   autoProcess?: boolean
 }
 
@@ -511,8 +507,6 @@ export interface DocumentUpdateInput {
   summary?: string
   description?: string | null
   tags?: string[]
-  setAsideType?: string | null
-  naicsCodes?: string[]
   isEditable?: boolean
 
   // JSON field updates
