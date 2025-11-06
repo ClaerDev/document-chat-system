@@ -228,10 +228,10 @@ export function CleanAIChat({ organizationId, className, onCitationsUpdate, chat
   
   // Image generation mode toggle
   const [imageGenerationMode, setImageGenerationMode] = useState(false);
-  
+
   // Citations state for callback
-  
-  
+  const [activeCitations, setActiveCitations] = useState<Citation[]>([]);
+
   // Textarea ref for auto-resize
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
