@@ -109,6 +109,9 @@ export class EmbeddingService {
 
       // Process chunks in batches
       const embeddingChunks: DocumentEmbeddings['chunks'] = []
+      let failedBatches = 0
+      const failedChunkIds: string[] = []
+
       console.log(
         `📦 Processing ${chunks.length} chunks in batches of ${this.config.batchSize}...`
       )
@@ -198,26 +201,56 @@ export class EmbeddingService {
           )
         })
         } catch (batchError) {
-          console.error(`❌ Batch ${Math.floor(i / this.config.batchSize) + 1} processing failed:`, batchError)
-          
+          const batchNumber = Math.floor(i / this.config.batchSize) + 1
+          const errorMessage = batchError instanceof Error ? batchError.message : 'Unknown error'
+
+          console.error(`❌ Batch ${batchNumber} processing failed:`, batchError)
+
+          // Track failed batch for reporting
+          failedBatches++
+          failedChunkIds.push(...batch.map(c => c.id))
+
           // Send progress callback with error
           if (progressCallback) {
             await progressCallback(
-              `Batch ${Math.floor(i / this.config.batchSize) + 1} failed: ${batchError instanceof Error ? batchError.message : 'Unknown error'}`,
+              `Batch ${batchNumber} failed (${failedBatches} total failures): ${errorMessage}`,
               Math.round((i / chunks.length) * 70) + 30,
               i,
               chunks.length
             )
           }
-          
-          throw new Error(`Batch processing failed: ${batchError instanceof Error ? batchError.message : 'Unknown error'}`)
+
+          // Log the failure but continue processing remaining batches
+          console.warn(`⚠️ Continuing with remaining batches. Failed batch ${batchNumber} will be retried later.`)
+          continue; // Continue to next batch instead of throwing
         }
       }
 
       // Return embedding references for database storage
-      console.log(
-        `✅ Embedding generation complete! Generated ${embeddingChunks.length} embeddings in ${Date.now() - startTime}ms`
-      )
+      const successfulChunks = embeddingChunks.length
+      const totalBatches = Math.ceil(chunks.length / this.config.batchSize)
+      const processingTime = Date.now() - startTime
+
+      if (failedBatches > 0) {
+        console.warn(
+          `⚠️ Embedding generation completed with ${failedBatches} failed batches. ` +
+          `Successfully processed ${successfulChunks}/${chunks.length} chunks in ${processingTime}ms`
+        )
+        console.warn(`Failed chunk IDs:`, failedChunkIds)
+
+        // If more than 50% of batches failed, throw error
+        if (failedBatches > totalBatches / 2) {
+          throw new Error(
+            `Embedding generation critically failed: ${failedBatches}/${totalBatches} batches failed. ` +
+            `Only ${successfulChunks}/${chunks.length} chunks processed successfully.`
+          )
+        }
+      } else {
+        console.log(
+          `✅ Embedding generation complete! Generated ${embeddingChunks.length} embeddings in ${processingTime}ms`
+        )
+      }
+
       return {
         documentId: document.id,
         documentTitle: document.name,
@@ -227,6 +260,9 @@ export class EmbeddingService {
         dimensions: this.config.dimensions,
         totalChunks: chunks.length,
         lastProcessed: new Date().toISOString(),
+        partialFailure: failedBatches > 0,
+        failedBatches: failedBatches,
+        failedChunkIds: failedChunkIds,
       }
     } catch (error) {
       console.error('❌ Embedding generation failed:', error)

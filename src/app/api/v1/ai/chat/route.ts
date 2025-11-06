@@ -4,6 +4,7 @@ import { z } from 'zod';
 import OpenAI from 'openai';
 import { prisma } from '@/lib/db';
 import { crudAuditLogger } from '@/lib/audit/crud-audit-logger';
+import { checkRateLimit, rateLimitConfigs } from '@/lib/rate-limit';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -123,6 +124,28 @@ export async function POST(request: NextRequest) {
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Rate limiting for AI requests (prevents cost explosion)
+    const rateLimitResult = await checkRateLimit(request, rateLimitConfigs.ai, 'ai-chat');
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          error: 'Rate limit exceeded',
+          message: rateLimitConfigs.ai.message,
+          limit: rateLimitResult.limit,
+          remaining: rateLimitResult.remaining,
+          resetTime: rateLimitResult.resetTime
+        },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+            'X-RateLimit-Reset': rateLimitResult.resetTime.toISOString(),
+          }
+        }
+      );
     }
 
     const body = await request.json();

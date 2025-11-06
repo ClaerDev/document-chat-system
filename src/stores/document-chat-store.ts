@@ -1036,11 +1036,17 @@ const createDocumentsSlice = (set: any, get: any): DocumentsSlice => ({
     try {
       const fileType = getFileTypeFromMimeType(input.file.type, input.file.name)
       
+      // SECURITY: This function should NOT be used in production
+      // It's only for testing/development purposes
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('simulateDocumentUpload is not allowed in production');
+      }
+
       const newDocument: Document = {
         // Core fields
         id: `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         organizationId: input.organizationId,
-        uploadedById: 'current_user', // TODO: Get from auth context
+        uploadedById: input.uploadedById || 'test_user', // Must be provided in real implementation
         folderId: input.folderId,
         
         // File information
@@ -1898,13 +1904,10 @@ export const useDocumentChatSystemStore = create<DocumentChatSystemStore>()(
           },
 
           createFolder: async (name, parentId, description, color) => {
-            return documentsSlice.createFolder({
-              name,
-              parentId,
-              description,
-              color,
-              organizationId: 'default_org', // TODO: Get from context
-            })
+            // DEPRECATED: This method is for backward compatibility only
+            // Use documentsSlice.createFolder with proper organizationId
+            console.warn('createFolder: Using deprecated backward compatibility method. Please update to use documentsSlice.createFolder directly with organizationId.');
+            throw new Error('createFolder backward compatibility method requires organizationId parameter. Use documentsSlice.createFolder instead.');
           },
 
           updateFolder: async (folderId, updates) => {
