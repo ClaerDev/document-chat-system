@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server';
 import { z } from 'zod';
 import { dbConfig, updateOrgConfig, getOrgConfig, DatabaseConfig } from '@/lib/config/database-config';
 import { checkRateLimit, rateLimitConfigs } from '@/lib/rate-limit';
+import { verifyAdminAccess } from '@/lib/auth/admin-auth';
 
 /**
  * @swagger
@@ -76,8 +77,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // TODO: Verify user has admin access to this organization
-    // This would check user's role in the organization
+    // Verify user has admin access to this organization
+    const authResult = await verifyAdminAccess(organizationId);
+    if (!authResult.authorized) {
+      return NextResponse.json(
+        { error: authResult.error },
+        { status: authResult.statusCode || 403 }
+      );
+    }
 
     let data;
     if (category) {
@@ -192,10 +199,16 @@ export async function PUT(request: NextRequest) {
 
     const { organizationId, category, settings } = validation.data;
 
-    // TODO: Verify user has admin access to this organization
-    // This would check user's role in the organization
+    // Verify user has admin access to this organization
+    const authResult = await verifyAdminAccess(organizationId);
+    if (!authResult.authorized) {
+      return NextResponse.json(
+        { error: authResult.error },
+        { status: authResult.statusCode || 403 }
+      );
+    }
 
-    await updateOrgConfig(organizationId, category, settings, userId);
+    await updateOrgConfig(organizationId, category, settings, authResult.userId!);
 
     return NextResponse.json({
       success: true,
@@ -279,9 +292,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: Verify user has admin access to this organization
+    // Verify user has admin access to this organization
+    const authResult = await verifyAdminAccess(organizationId);
+    if (!authResult.authorized) {
+      return NextResponse.json(
+        { error: authResult.error },
+        { status: authResult.statusCode || 403 }
+      );
+    }
 
-    await dbConfig.initializeOrgDefaults(organizationId, userId);
+    await dbConfig.initializeOrgDefaults(organizationId, authResult.userId!);
 
     return NextResponse.json({
       success: true,

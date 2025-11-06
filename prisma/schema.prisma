@@ -59,10 +59,10 @@ model Organization {
   batchProcessingJobs BatchProcessing[]
 
   // Audit and Security Relations
-  auditLogs            AuditLog[]
-  auditLogRetentions   AuditLogRetention[]
-  auditLogExports      AuditLogExport[]
-  securityIncidents    SecurityIncident[]
+  auditLogs          AuditLog[]
+  auditLogRetentions AuditLogRetention[]
+  auditLogExports    AuditLogExport[]
+  securityIncidents  SecurityIncident[]
 
   @@map("organizations")
 }
@@ -86,11 +86,11 @@ model User {
   lastActiveAt DateTime?
 
   // Relations
-  organization             Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  createdFolders           Folder[]                @relation("FolderCreatedBy")
-  activities               Activity[]
-  documents                Document[]
-  apiKeys                  ApiKey[]
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdFolders Folder[]     @relation("FolderCreatedBy")
+  activities     Activity[]
+  documents      Document[]
+  apiKeys        ApiKey[]
 
   // Notifications
   notifications            Notification[]
@@ -104,7 +104,7 @@ model User {
   batchProcessingJobs BatchProcessing[]
 
   // Audit and Security Relations
-  auditLogs       AuditLog[] @relation("AuditLogUser")
+  auditLogs       AuditLog[]       @relation("AuditLogUser")
   auditLogExports AuditLogExport[] @relation("AuditLogExportUser")
 
   // Profile Relations
@@ -178,9 +178,9 @@ model Document {
   summary       String?
 
   // User metadata
-  description  String?
-  tags         String[]
-  isEditable   Boolean  @default(true)
+  description String?
+  tags        String[]
+  isEditable  Boolean  @default(true)
 
   // JSON fields (consolidated data replacing 14+ models)
   content    Json // DocumentContent - sections, tables, images
@@ -197,12 +197,16 @@ model Document {
   deletedAt DateTime?
 
   // Relations
-  organization  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  uploadedBy    User         @relation(fields: [uploadedById], references: [id])
-  folder        Folder?      @relation(fields: [folderId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  uploadedBy   User         @relation(fields: [uploadedById], references: [id])
+  folder       Folder?      @relation(fields: [folderId], references: [id])
 
   @@index([organizationId, uploadedById])
   @@index([organizationId, folderId])
+  @@index([organizationId, createdAt])
+  @@index([organizationId, documentType, createdAt])
+  @@index([organizationId, workflowStatus])
+  @@index([uploadedById, createdAt])
   @@index([documentType])
   @@index([workflowStatus])
   @@map("documents")
@@ -867,7 +871,9 @@ model AIMetric {
 
   @@index([organizationId, createdAt])
   @@index([organizationId, provider, createdAt])
+  @@index([organizationId, operation, createdAt])
   @@index([provider, model, createdAt])
+  @@index([provider, model, success, createdAt])
   @@index([requestId])
   @@map("ai_metrics")
 }
@@ -1069,60 +1075,60 @@ model AuditLog {
   createdAt      DateTime @default(now())
 
   // Event Classification
-  eventType    AuditEventType
-  category     AuditCategory
-  severity     AuditSeverity @default(INFO)
-  source       String // Application component or module
+  eventType AuditEventType
+  category  AuditCategory
+  severity  AuditSeverity  @default(INFO)
+  source    String // Application component or module
 
   // Event Details
-  action       String // Specific action performed (CREATE, READ, UPDATE, DELETE, LOGIN, etc.)
-  resource     String? // Resource type affected (USER, DOCUMENT, etc.)
-  resourceId   String? // Specific resource ID
-  entityType   String? // Entity type for structured logging
-  entityId     String? // Entity ID for tracking
+  action     String // Specific action performed (CREATE, READ, UPDATE, DELETE, LOGIN, etc.)
+  resource   String? // Resource type affected (USER, DOCUMENT, etc.)
+  resourceId String? // Specific resource ID
+  entityType String? // Entity type for structured logging
+  entityId   String? // Entity ID for tracking
 
   // Session and Request Context
-  sessionId    String? // User session identifier
-  requestId    String? // Request correlation ID
-  ipAddress    String? // Client IP address
-  userAgent    String? // Client user agent
-  endpoint     String? // API endpoint or page accessed
-  httpMethod   String? // HTTP method (GET, POST, etc.)
-  statusCode   Int? // HTTP response status code
+  sessionId  String? // User session identifier
+  requestId  String? // Request correlation ID
+  ipAddress  String? // Client IP address
+  userAgent  String? // Client user agent
+  endpoint   String? // API endpoint or page accessed
+  httpMethod String? // HTTP method (GET, POST, etc.)
+  statusCode Int? // HTTP response status code
 
   // Event Content and Context
-  message      String // Human-readable audit message
-  description  String? // Detailed description of the event
-  oldValues    Json? // Previous state (for updates/deletes)
-  newValues    Json? // New state (for creates/updates)
-  metadata     Json? // Additional context data
+  message     String // Human-readable audit message
+  description String? // Detailed description of the event
+  oldValues   Json? // Previous state (for updates/deletes)
+  newValues   Json? // New state (for creates/updates)
+  metadata    Json? // Additional context data
 
   // Compliance and Retention
-  retentionPeriod String @default("7_YEARS") // Retention period requirement
-  complianceFlag  Boolean @default(false) // Mark for compliance-specific events
-  tags           String[] // Tags for categorization and search
+  retentionPeriod String   @default("7_YEARS") // Retention period requirement
+  complianceFlag  Boolean  @default(false) // Mark for compliance-specific events
+  tags            String[] // Tags for categorization and search
 
   // Performance and Debugging
-  duration       Int? // Operation duration in milliseconds
-  errorMessage   String? // Error details if applicable
-  stackTrace     String? @db.Text // Full stack trace for errors
+  duration     Int? // Operation duration in milliseconds
+  errorMessage String? // Error details if applicable
+  stackTrace   String? @db.Text // Full stack trace for errors
 
   // Data Integrity and Security
-  checksum       String? // Checksum for tamper detection
-  encrypted      Boolean @default(false) // Whether sensitive data is encrypted
+  checksum  String? // Checksum for tamper detection
+  encrypted Boolean @default(false) // Whether sensitive data is encrypted
 
   // Geographic and Regulatory
-  dataLocation   String? // Where data is processed/stored
-  jurisdiction   String? // Legal jurisdiction for compliance
+  dataLocation String? // Where data is processed/stored
+  jurisdiction String? // Legal jurisdiction for compliance
 
   // Relations
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   user         User?        @relation("AuditLogUser", fields: [userId], references: [id], onDelete: SetNull)
 
   // Related audit events for correlation
-  parentLogId  String? // Parent audit event for grouped operations
-  parentLog    AuditLog? @relation("AuditLogHierarchy", fields: [parentLogId], references: [id])
-  childLogs    AuditLog[] @relation("AuditLogHierarchy")
+  parentLogId String? // Parent audit event for grouped operations
+  parentLog   AuditLog?  @relation("AuditLogHierarchy", fields: [parentLogId], references: [id])
+  childLogs   AuditLog[] @relation("AuditLogHierarchy")
 
   @@index([organizationId, createdAt])
   @@index([organizationId, eventType, createdAt])
@@ -1146,14 +1152,14 @@ model AuditLogRetention {
   updatedAt      DateTime @updatedAt
 
   // Retention Policy
-  policyName     String
-  category       AuditCategory
-  retentionDays  Int // Number of days to retain logs
-  archiveAfter   Int? // Days before archiving to cold storage
+  policyName    String
+  category      AuditCategory
+  retentionDays Int // Number of days to retain logs
+  archiveAfter  Int? // Days before archiving to cold storage
 
   // Compliance Requirements
   complianceFramework String[] // SOC2, FedRAMP, NIST, etc.
-  legalBasis         String? // Legal requirement for retention
+  legalBasis          String? // Legal requirement for retention
 
   // Policy Settings
   isActive       Boolean @default(true)
@@ -1161,11 +1167,11 @@ model AuditLogRetention {
   archiveEnabled Boolean @default(true) // Enable archiving to cold storage
 
   // Metadata
-  description    String?
-  createdBy      String // User who created the policy
+  description String?
+  createdBy   String // User who created the policy
 
   // Relations
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@unique([organizationId, category])
   @@index([organizationId, isActive])
@@ -1174,45 +1180,45 @@ model AuditLogRetention {
 }
 
 model AuditLogExport {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   organizationId String
   userId         String
-  createdAt      DateTime @default(now())
+  createdAt      DateTime  @default(now())
   completedAt    DateTime?
 
   // Export Parameters
-  startDate      DateTime
-  endDate        DateTime
-  categories     AuditCategory[]
-  eventTypes     AuditEventType[]
-  format         ExportFormat @default(JSON)
+  startDate  DateTime
+  endDate    DateTime
+  categories AuditCategory[]
+  eventTypes AuditEventType[]
+  format     ExportFormat     @default(JSON)
 
   // Export Status
-  status         ExportStatus @default(PENDING)
-  progress       Int @default(0) // 0-100 percentage
-  totalRecords   Int?
-  exportedRecords Int @default(0)
+  status          ExportStatus @default(PENDING)
+  progress        Int          @default(0) // 0-100 percentage
+  totalRecords    Int?
+  exportedRecords Int          @default(0)
 
   // File Information
-  fileName       String?
-  filePath       String? // Storage path in Supabase
-  fileSize       Int? // File size in bytes
-  downloadUrl    String? // Signed URL for download
-  expiresAt      DateTime? // When download URL expires
+  fileName    String?
+  filePath    String? // Storage path in Supabase
+  fileSize    Int? // File size in bytes
+  downloadUrl String? // Signed URL for download
+  expiresAt   DateTime? // When download URL expires
 
   // Security and Integrity
-  checksum       String? // File checksum for integrity
-  encrypted      Boolean @default(true)
-  accessedBy     String[] // Users who accessed the export
-  accessCount    Int @default(0)
+  checksum    String? // File checksum for integrity
+  encrypted   Boolean  @default(true)
+  accessedBy  String[] // Users who accessed the export
+  accessCount Int      @default(0)
 
   // Error Handling
-  errorMessage   String?
-  retryCount     Int @default(0)
+  errorMessage String?
+  retryCount   Int     @default(0)
 
   // Compliance
-  purpose        String? // Business purpose for export
-  approvedBy     String? // Approval for sensitive data export
+  purpose    String? // Business purpose for export
+  approvedBy String? // Approval for sensitive data export
 
   // Relations
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -1227,33 +1233,33 @@ model AuditLogExport {
 }
 
 model SecurityIncident {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   organizationId String
-  detectedAt     DateTime @default(now())
+  detectedAt     DateTime  @default(now())
   reportedAt     DateTime?
   resolvedAt     DateTime?
 
   // Incident Classification
-  incidentType   SecurityIncidentType
-  severity       SecuritySeverity
-  status         SecurityIncidentStatus @default(DETECTED)
-  confidence     Float @default(0.8) // 0.0-1.0 confidence score
+  incidentType SecurityIncidentType
+  severity     SecuritySeverity
+  status       SecurityIncidentStatus @default(DETECTED)
+  confidence   Float                  @default(0.8) // 0.0-1.0 confidence score
 
   // Incident Details
-  title          String
-  description    String @db.Text
-  source         String // Detection source (manual, automated, etc.)
+  title           String
+  description     String   @db.Text
+  source          String // Detection source (manual, automated, etc.)
   affectedSystems String[] // Systems impacted
 
   // Investigation and Response
-  investigatedBy String[] // User IDs of investigators
+  investigatedBy  String[] // User IDs of investigators
   responseActions Json? // Actions taken to respond
-  rootCause      String? @db.Text
-  lessons        String? @db.Text
+  rootCause       String?  @db.Text
+  lessons         String?  @db.Text
 
   // Impact Assessment
-  dataCompromised Boolean @default(false)
-  usersAffected   Int @default(0)
+  dataCompromised Boolean  @default(false)
+  usersAffected   Int      @default(0)
   estimatedCost   Decimal?
 
   // External Reporting
@@ -1261,11 +1267,11 @@ model SecurityIncident {
   regulatoryReporting   Json? // Details of regulatory reporting
 
   // Related Audit Logs
-  relatedLogIds  String[] // IDs of related audit logs
+  relatedLogIds String[] // IDs of related audit logs
 
   // Metadata
-  tags           String[]
-  attachments    Json? // Evidence and documentation
+  tags        String[]
+  attachments Json? // Evidence and documentation
 
   // Relations
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)

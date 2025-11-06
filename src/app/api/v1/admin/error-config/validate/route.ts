@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { validateEnvVar, configToEnvVars } from '@/lib/config/error-config-persistence'
 import { validateConfig } from '@/lib/config/error-config'
+import { isAdmin } from '@/lib/auth/admin-auth'
 
 /**
  * @swagger
@@ -77,11 +78,14 @@ import { validateConfig } from '@/lib/config/error-config'
  */
 export async function POST(request: NextRequest) {
   try {
-    // TODO: Add authentication middleware
-    // const user = await getCurrentUser(request)
-    // if (!user || !user.isAdmin) {
-    //   return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
-    // }
+    // Verify admin access
+    const isAdminUser = await isAdmin();
+    if (!isAdminUser) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized - Admin access required' },
+        { status: 401 }
+      );
+    }
 
     const body = await request.json()
     const validationSchema = z.object({

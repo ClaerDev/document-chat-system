@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getErrorConfig, type ErrorConfig } from '@/lib/config/error-config'
-import { 
-  getCurrentEnvVarOverrides, 
-  updateEnvVars, 
+import {
+  getCurrentEnvVarOverrides,
+  updateEnvVars,
   removeEnvVarOverrides,
   resetToEnvDefaults,
   validateEnvVar,
@@ -12,6 +12,7 @@ import {
   envVarsToConfig,
   type EnvVarOverrides
 } from '@/lib/config/error-config-persistence'
+import { isAdmin } from '@/lib/auth/admin-auth'
 
 /**
  * @swagger
@@ -59,11 +60,14 @@ import {
  */
 export async function GET(request: NextRequest) {
   try {
-    // TODO: Add authentication middleware
-    // const user = await getCurrentUser(request)
-    // if (!user || !user.isAdmin) {
-    //   return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
-    // }
+    // Verify admin access
+    const isAdminUser = await isAdmin();
+    if (!isAdminUser) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized - Admin access required' },
+        { status: 401 }
+      );
+    }
 
     const config = getErrorConfig()
     const envVarOverrides = await getCurrentEnvVarOverrides()
@@ -148,11 +152,14 @@ export async function GET(request: NextRequest) {
  */
 export async function PUT(request: NextRequest) {
   try {
-    // TODO: Add authentication middleware
-    // const user = await getCurrentUser(request)
-    // if (!user || !user.isAdmin) {
-    //   return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
-    // }
+    // Verify admin access
+    const isAdminUser = await isAdmin();
+    if (!isAdminUser) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized - Admin access required' },
+        { status: 401 }
+      );
+    }
 
     const body = await request.json()
     const updateSchema = z.object({
@@ -277,11 +284,14 @@ export async function PUT(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
-    // TODO: Add authentication middleware
-    // const user = await getCurrentUser(request)
-    // if (!user || !user.isAdmin) {
-    //   return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
-    // }
+    // Verify admin access
+    const isAdminUser = await isAdmin();
+    if (!isAdminUser) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized - Admin access required' },
+        { status: 401 }
+      );
+    }
 
     const { searchParams } = new URL(request.url)
     const keysParam = searchParams.get('keys')
