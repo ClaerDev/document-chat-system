@@ -31,7 +31,6 @@ interface PageContext {
 }
 
 export function FloatingChat() {
-  const [mounted, setMounted] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [position, setPosition] = useState<Position>('bottom-right')
@@ -65,10 +64,8 @@ export function FloatingChat() {
   const fetchingOrgIdRef = useRef<boolean>(false)
   const lastFetchedOrgIdRef = useRef<string | null>(null)
 
-  // Set mounted state to prevent hydration mismatches
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  // Note: Mounted state removed to prevent hydration mismatches
+  // The parent AppLayout handles the mounting logic
 
   // Fetch organization ID when user is loaded
   useEffect(() => {
@@ -631,9 +628,9 @@ export function FloatingChat() {
     }
   }
 
-  // Don't show chat until mounted or if user is not signed in or on document detail page
-  if (!mounted || !isSignedIn || pageContext?.isDocumentDetailPage) {
-    return null
+  // Don't show chat if user is not signed in or on document detail page
+  if (!isSignedIn || pageContext?.isDocumentDetailPage) {
+    return <div suppressHydrationWarning /> // Return empty div to prevent hydration mismatch
   }
 
   return (

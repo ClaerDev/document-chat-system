@@ -14,16 +14,11 @@ interface AppLayoutProps {
 
 export function AppLayout({ children, showNavigation = true }: AppLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [mounted, setMounted] = useState(false)
   const [donationBannerVisible, setDonationBannerVisible] = useState(true)
   const pathname = usePathname()
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
   // Temporarily disable FloatingChat on documents page to test interference
-  const shouldShowFloatingChat = mounted && showNavigation && !pathname.startsWith('/documents')
+  const shouldShowFloatingChat = showNavigation && !pathname.startsWith('/documents')
 
   if (!showNavigation) {
     return (

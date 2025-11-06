@@ -73,14 +73,11 @@ export function DonationBanner({
     window.open(donateUrl, '_blank')
   }
 
-  // Don't render until mounted to prevent SSR mismatch
-  if (!isMounted) {
-    return null
-  }
-
-  // Don't render if banner is dismissed
-  if (!isVisible) {
-    return null
+  // Don't render if banner is dismissed or not mounted
+  // Use suppressHydrationWarning to prevent mismatch during hydration
+  if (!isMounted || !isVisible) {
+    // Return empty div with same structure to prevent hydration mismatch
+    return <div suppressHydrationWarning />
   }
 
   return (
