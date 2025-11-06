@@ -1,4 +1,4 @@
-# Document Chat System - AI-Powered Document Analysis & Intelligent Conversations
+# Chat With Your PDFs Using AI - RAG Document Intelligence Platform
 
 <div align="center">
 
@@ -10,7 +10,7 @@
 [![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma)](https://www.prisma.io/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
 
-**Transform documents into intelligent conversations with AI. Open-source document chat platform with semantic search, RAG (Retrieval Augmented Generation), and multi-provider AI support (OpenRouter, OpenAI, Anthropic).**
+**Transform PDFs & documents into intelligent AI conversations. Production-ready RAG (Retrieval Augmented Generation) platform with semantic search, vector embeddings, and multi-provider AI (OpenRouter, OpenAI, Anthropic). Build ChatGPT for your documents in minutes.**
 
 > 🚀 **Production-ready** • 🔍 **Semantic search with vector embeddings** • 💬 **Natural language Q&A** • 📄 **Multi-format support** • 🎨 **Beautiful modern UI** • 🔐 **Enterprise security**
 
@@ -78,8 +78,18 @@
 - **💳 Optional SaaS Billing** - Integrated Stripe billing system with customizable pricing plans for monetization.
 - **⚡ Background Processing** - Inngest handles document processing, vectorization, and AI analysis asynchronously.
 - **🎨 Modern UI** - Beautiful, responsive interface with dark mode built using shadcn/ui and Tailwind CSS.
-- **🔐 Enterprise Security** - AES-256 encryption, Row-Level Security (RLS), and Clerk authentication.
+- **🔐 Enterprise Security** - AES-256 encryption, Row-Level Security (RLS), Clerk authentication, and role-based access control.
 - **🐳 Production Ready** - Dockerfile included, deploy to Vercel/Railway/Render in minutes with one-click setup.
+
+### 🔒 Recent Security & Performance Updates (Nov 2025)
+
+- **✅ Critical Security Fixes** - Fixed missing admin authentication on configuration endpoints, preventing unauthorized access
+- **✅ Database Performance** - Added 9 strategic indexes for 3-10x faster queries on document lists and AI analytics
+- **✅ Cost Protection** - Implemented rate limiting on AI endpoints to prevent API cost explosion (10 req/min production)
+- **✅ Reliability** - Improved batch processing with graceful partial failure handling for large document vectorization
+- **✅ Production Hardening** - Removed mock data security risks and deprecated unsafe backward-compatibility methods
+
+See [SECURITY_FIXES_2025-11-05.md](SECURITY_FIXES_2025-11-05.md) for detailed changelog.
 
 ---
 
