@@ -142,17 +142,11 @@ async function fetchUsageData(organizationId: string, period: string) {
       return acc;
     }, {} as Record<string, number>);
 
-    // Get actual saved searches count directly from SavedSearch table
-    // This ensures accuracy regardless of usage tracking
-    const actualSavedSearchCount = await db.savedSearch.count({
-      where: {
-        organizationId,
-        deletedAt: null
-      }
-    });
-
-    // Override usage tracking for SAVED_SEARCH with actual count
-    usageTotals.SAVED_SEARCH = actualSavedSearchCount;
+    // Note: SavedSearch model has been removed from schema
+    // Using usage tracking data for SAVED_SEARCH count instead
+    // If you need to re-enable this feature, add SavedSearch model to prisma/schema.prisma
+    // For now, SAVED_SEARCH count comes from usage tracking or defaults to 0
+    usageTotals.SAVED_SEARCH = usageTotals.SAVED_SEARCH || 0;
 
     // Get limits from subscription
     const limits = subscription?.limits as any || {
