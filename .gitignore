@@ -134,3 +134,6 @@ backup-preservation.log
 # Local file uploads
 /public/uploads/*
 !/public/uploads/.gitkeep
+
+# Internal documentation (keep local only)
+CLAUDE.md
