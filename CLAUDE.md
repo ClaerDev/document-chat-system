@@ -410,14 +410,46 @@ When creating git commits:
 
 This project is an open-source repository and commits should reflect the human developer's work without AI tool attribution in the commit history.
 
+## Public Repository Guidelines
+
+**CRITICAL: This is a PUBLIC open-source repository on GitHub**
+
+When working with this repository:
+
+1. **ALWAYS ask before committing strategic/business documents**:
+   - ❌ Do NOT commit: Business plans, revenue projections, competitive analysis
+   - ❌ Do NOT commit: Strategic roadmaps, feature pricing plans
+   - ❌ Do NOT commit: Internal documentation with business-sensitive information
+   - ❌ Do NOT commit: Customer data, usage statistics, financial information
+   - ✅ DO commit: Bug fixes, feature implementations, technical documentation
+   - ✅ DO commit: Code improvements, test files, configuration examples
+
+2. **Before pushing to GitHub, ask yourself**:
+   - Would I want competitors to see this?
+   - Does this contain business strategy or revenue information?
+   - Could this information hurt the business if public?
+   - Is this purely technical (code/docs) or business-related?
+
+3. **If uncertain, ALWAYS ASK the user before committing**
+
+4. **For business/strategic documents**:
+   - Save to a local private location outside the repo
+   - Use a separate private repository
+   - Keep in conversation context only
+   - Create a `.gitignore`d private folder
+
+**Remember: Once pushed to a public repo, it's permanently in git history even if deleted later!**
+
 ## Important Constraints
 
 ### Security
 - NEVER commit API keys or secrets
+- NEVER commit business plans or revenue projections to public repo
 - ALWAYS validate input with Zod schemas
 - ALWAYS filter by organizationId in multi-tenant queries
 - Use Clerk's `auth()` for authentication, not custom JWT
 - Sanitize user input before rendering (use DOMPurify)
+- ALWAYS ask before committing anything besides code fixes
 
 ### Performance
 - Use Redis caching for expensive operations
