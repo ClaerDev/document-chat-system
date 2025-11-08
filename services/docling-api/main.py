@@ -358,10 +358,15 @@ if __name__ == "__main__":
     port = int(os.getenv("PORT", "8001"))
     host = os.getenv("HOST", "0.0.0.0")
 
+    # Only enable reload in local development (not in Railway/production)
+    # Railway sets RAILWAY_ENVIRONMENT, other platforms may set NODE_ENV or similar
+    is_production = os.getenv("RAILWAY_ENVIRONMENT") or os.getenv("RAILWAY_STATIC_URL") or os.getenv("FLY_APP_NAME")
+    reload = not is_production  # False in production, True in local dev
+
     uvicorn.run(
         "main:app",
         host=host,
         port=port,
-        reload=True,
+        reload=reload,
         log_level="info"
     )
