@@ -19,9 +19,10 @@
     "url": "https://github.com/your-org/document-chat-system.git"
   },
   "scripts": {
-    "dev": "concurrently \"npm run dev:next\" \"npm run dev:inngest\" --names \"NEXT,INNGEST\" --prefix-colors \"cyan,magenta\"",
+    "dev": "concurrently \"npm run dev:next\" \"npm run dev:inngest\" \"npm run dev:docling\" --names \"NEXT,INNGEST,DOCLING\" --prefix-colors \"cyan,magenta,yellow\"",
     "dev:next": "next dev",
     "dev:inngest": "./scripts/start-inngest.sh",
+    "dev:docling": "./services/docling-api/start.sh",
     "build": "prisma generate && next build",
     "postinstall": "prisma generate",
     "start": "next start",

@@ -383,6 +383,27 @@ npx prisma generate         # Regenerate Prisma types
 
 ## Git Commit Guidelines
 
+**CRITICAL: This is a PUBLIC open-source repository - ALWAYS ask before committing/pushing**
+
+### Before Committing or Pushing:
+
+1. **ALWAYS ask the user for permission before**:
+   - Creating any git commits
+   - Pushing any commits to GitHub
+   - Making any changes to the git repository
+
+2. **When asking for permission**:
+   - Clearly list what files will be committed
+   - Explain what changes were made
+   - Wait for explicit user approval
+   - Example: "I've made the following changes: [list changes]. Should I commit and push these to GitHub?"
+
+3. **Exception**: Only commit/push without asking if the user explicitly instructs you to do so
+   - Example user request: "commit these changes and push to github"
+   - Example user request: "push this to the repo"
+
+### Commit Message Guidelines:
+
 **IMPORTANT: Do NOT add Claude Code or Anthropic attribution to git commits**
 
 When creating git commits:

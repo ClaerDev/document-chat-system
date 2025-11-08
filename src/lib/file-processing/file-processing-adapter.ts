@@ -4,6 +4,7 @@ import {
   FileProcessingResult,
   ProcessingMethod,
 } from './types'
+import { DoclingProcessor } from './processors/docling-processor'
 import { PDFProcessor } from './processors/pdf-processor'
 import { OfficeProcessor } from './processors/office-processor'
 import { OCRProcessor } from './processors/ocr-processor'
@@ -13,9 +14,14 @@ import { MediaProcessor } from './processors/media-processor'
 
 /**
  * Main file processing adapter that coordinates all processors
+ *
+ * Processing Priority:
+ * 1. DoclingProcessor (if enabled) - Advanced document understanding
+ * 2. Fallback processors - pdf-parse, mammoth, tesseract.js, etc.
  */
 export class FileProcessingAdapter {
   private processors: IFileProcessor[] = []
+  private doclingProcessor: DoclingProcessor | null = null
   private readonly defaultOptions: FileProcessingOptions = {
     maxFileSize: 100 * 1024 * 1024, // 100MB - increased for larger documents
     ocrLanguage: 'eng',
@@ -32,8 +38,13 @@ export class FileProcessingAdapter {
 
   /**
    * Initialize all file processors
+   * Docling is added first for priority, with fallback to existing processors
    */
   private initializeProcessors(): void {
+    // Initialize Docling processor (primary for supported formats)
+    this.doclingProcessor = new DoclingProcessor()
+
+    // Initialize fallback processors (used if Docling fails or is unavailable)
     this.processors = [
       new PDFProcessor(),
       new OfficeProcessor(),
@@ -68,6 +79,7 @@ export class FileProcessingAdapter {
 
   /**
    * Process a file and extract text
+   * Tries Docling first (if enabled), then falls back to traditional processors
    */
   async processFile(
     buffer: Buffer,
@@ -82,13 +94,26 @@ export class FileProcessingAdapter {
         throw new Error('Empty or invalid file buffer')
       }
 
-      // Find appropriate processor
+      // Try Docling first if it supports this file type
+      if (this.doclingProcessor && this.doclingProcessor.canProcess(mimeType)) {
+        console.log(`🚀 Attempting Docling processing for ${mimeType}`)
+        const doclingResult = await this.doclingProcessor.extractText(buffer, processingOptions)
+
+        if (doclingResult.success && doclingResult.text.trim().length > 0) {
+          console.log(`✅ Docling processing succeeded (${doclingResult.text.length} chars)`)
+          return doclingResult
+        } else {
+          console.warn(`⚠️ Docling processing failed, falling back to traditional processors`)
+        }
+      }
+
+      // Fallback to traditional processors
       const processor = this.findProcessor(mimeType)
       if (!processor) {
         throw new Error(`Unsupported file type: ${mimeType}`)
       }
 
-      // Process the file
+      console.log(`📄 Using fallback processor: ${processor.getName()}`)
       const result = await processor.extractText(buffer, processingOptions)
 
       // Add processor information to metadata

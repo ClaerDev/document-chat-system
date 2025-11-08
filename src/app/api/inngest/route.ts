@@ -20,9 +20,9 @@ const handler = serve({
   signingKey: process.env.NODE_ENV === 'production' ? process.env.INNGEST_SIGNING_KEY : undefined,
   // Disable landing page in production
   landingPage: process.env.NODE_ENV !== 'production',
-  // Use streaming to avoid body parsing issues
-  streaming: 'allow',
+  // Force streaming mode to prevent body parsing issues with PUT requests
+  streaming: 'force',
 });
 
-// Export handlers - no wrapping needed with streaming enabled
+// Export handlers - streaming mode handles all methods properly
 export const { GET, POST, PUT } = handler;

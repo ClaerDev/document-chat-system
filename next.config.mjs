@@ -82,6 +82,18 @@ const nextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        // Proxy Docling service requests through main domain in production
+        // This allows deploying Docling separately (e.g., Railway) while maintaining single domain
+        source: '/api/docling/:path*',
+        destination: process.env.DOCLING_SERVICE_URL
+          ? `${process.env.DOCLING_SERVICE_URL}/:path*`
+          : 'http://localhost:8001/:path*',
+      },
+    ];
+  },
 }
 
 export default nextConfig

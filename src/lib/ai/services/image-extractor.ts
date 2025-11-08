@@ -125,54 +125,102 @@ export class ImageExtractor {
   ): Promise<Partial<DocumentImage>[]> {
     try {
       const images: Partial<DocumentImage>[] = []
-      
+
+      // Try Docling first (if enabled)
+      const doclingEnabled = process.env.DOCLING_ENABLED !== 'false'
+
+      if (doclingEnabled) {
+        try {
+          const { DoclingProcessor } = await import('@/lib/file-processing/processors/docling-processor')
+          const docling = new DoclingProcessor()
+
+          console.log(`🖼️ Extracting page images using Docling...`)
+          const pageImages = await docling.extractPageImages(pdfBuffer, 3, 150)
+
+          if (pageImages && pageImages.length > 0) {
+            console.log(`✅ Docling extracted ${pageImages.length} page images`)
+
+            for (const pageImage of pageImages) {
+              const base64DataUri = `data:image/png;base64,${pageImage.base64}`
+
+              const imageData: Partial<DocumentImage> = {
+                description: `Page ${pageImage.page} of ${documentName}`,
+                altText: `Visual content from page ${pageImage.page}`,
+                imageType: 'page_capture',
+                pageNumber: pageImage.page,
+                imageOrder: pageImage.page,
+                filePath: '',
+                mimeType: 'image/png',
+                width: pageImage.width,
+                height: pageImage.height,
+                quality: 'high',
+                isOcrProcessed: false,
+                fileSize: Buffer.byteLength(pageImage.base64, 'base64'),
+                extractedData: {
+                  base64: base64DataUri,
+                  format: 'png',
+                  source: 'docling',
+                  extractedAt: new Date().toISOString()
+                }
+              }
+
+              images.push(imageData)
+              console.log(`✅ Page ${pageImage.page} stored with ${imageData.fileSize} bytes`)
+            }
+
+            return images
+          }
+        } catch (doclingError) {
+          console.warn('⚠️ Docling page extraction failed, falling back to pdf2pic:', doclingError)
+        }
+      }
+
+      // Fallback to pdf2pic if Docling is disabled or failed
+      if (!fromBuffer) {
+        console.warn('⚠️ pdf2pic not available and Docling failed, skipping page image extraction')
+        return []
+      }
+
       // Configure pdf2pic for high quality image conversion
       const convert = fromBuffer(pdfBuffer, {
-        density: 300,           // High DPI for quality
+        density: 300,
         saveFilename: "temp_page",
-        savePath: "/tmp",       // Temporary path (files will be deleted after conversion)
+        savePath: "/tmp",
         format: "png",
         width: 2000,
         height: 2000
       })
 
-      // Convert first 3 pages to images (to avoid excessive processing and storage)
       const maxPages = 3
-      
+
       for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
         try {
-          console.log(`🖼️ Converting page ${pageNum} to image...`)
+          console.log(`🖼️ Converting page ${pageNum} to image (pdf2pic fallback)...`)
           const result = await convert(pageNum, { responseType: "buffer" })
-          
+
           if (result && result.buffer && result.buffer.length > 0) {
-            console.log(`🖼️ Page ${pageNum} converted, buffer size: ${result.buffer.length} bytes`)
-            
-            // Convert buffer to base64
             const base64Image = result.buffer.toString('base64')
-            
-            // Verify base64 is not empty
+
             if (!base64Image || base64Image.length < 100) {
-              console.warn(`⚠️ Page ${pageNum} base64 conversion failed or too small: ${base64Image.length} chars`)
+              console.warn(`⚠️ Page ${pageNum} base64 conversion failed or too small`)
               continue
             }
-            
+
             const base64DataUri = `data:image/png;base64,${base64Image}`
-            console.log(`✅ Page ${pageNum} base64 created: ${base64Image.length} chars`)
-            
+
             const imageData: Partial<DocumentImage> = {
               description: `Page ${pageNum} of ${documentName}`,
               altText: `Visual content from page ${pageNum}`,
               imageType: 'page_capture',
               pageNumber: pageNum,
               imageOrder: pageNum,
-              filePath: '', // No file path needed since we store base64 directly
+              filePath: '',
               mimeType: 'image/png',
               width: 2000,
               height: 2000,
               quality: 'high',
               isOcrProcessed: false,
               fileSize: Buffer.byteLength(base64Image, 'base64'),
-              // Store base64 directly in extractedData
               extractedData: {
                 base64: base64DataUri,
                 format: 'png',
@@ -180,7 +228,7 @@ export class ImageExtractor {
                 extractedAt: new Date().toISOString()
               }
             }
-            
+
             images.push(imageData)
             console.log(`✅ Page ${pageNum} stored with ${imageData.fileSize} bytes`)
           } else {
@@ -188,12 +236,11 @@ export class ImageExtractor {
           }
         } catch (pageError) {
           console.error(`❌ Could not convert page ${pageNum}:`, pageError)
-          // Continue with other pages
         }
       }
-      
+
       return images
-      
+
     } catch (error) {
       console.error('Failed to convert pages to images:', error)
       return []

@@ -144,3 +144,17 @@ CLAUDE.md
 *SUMMARY*.md
 *ANALYSIS*.md
 *FIXES*.md
+
+# Python (Docling service)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/

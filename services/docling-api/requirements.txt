@@ -1,0 +1,15 @@
+# Docling Document Processing Service Dependencies
+
+# Docling - IBM's document processing library (install first to get correct dependencies)
+docling
+
+# Core Dependencies (let docling determine compatible versions)
+fastapi>=0.100.0
+uvicorn[standard]>=0.20.0
+python-multipart>=0.0.6
+
+# PDF to Image Conversion
+PyMuPDF>=1.23.0
+
+# Optional: For better performance
+aiofiles>=23.0.0
