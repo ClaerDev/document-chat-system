@@ -25,6 +25,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY main.py .
+COPY entrypoint.sh .
+
+# Make entrypoint executable
+RUN chmod +x entrypoint.sh
 
 # Expose port (Railway will override with $PORT env var)
 EXPOSE 8001
@@ -33,6 +37,5 @@ EXPOSE 8001
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "import os, requests; port=os.getenv('PORT', '8001'); requests.get(f'http://localhost:{port}/health')"
 
-# Run the application (Railway will set $PORT dynamically)
-# Use exec form with sh wrapper for environment variable substitution
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8001}"]
+# Run the application via entrypoint script (ensures no --reload flag)
+ENTRYPOINT ["/app/entrypoint.sh"]
