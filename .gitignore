@@ -137,3 +137,10 @@ backup-preservation.log
 
 # Internal documentation (keep local only)
 CLAUDE.md
+*IMPLEMENTATION*.md
+*SECURITY*.md
+*FEATURE*.md
+*ROADMAP*.md
+*SUMMARY*.md
+*ANALYSIS*.md
+*FIXES*.md
