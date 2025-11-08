@@ -26,12 +26,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY main.py .
 
-# Expose port
+# Expose port (Railway will override with $PORT env var)
 EXPOSE 8001
 
-# Health check
+# Health check (uses $PORT if set, defaults to 8001)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8001/health')"
+    CMD python -c "import os, requests; port=os.getenv('PORT', '8001'); requests.get(f'http://localhost:{port}/health')"
 
-# Run the application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
+# Run the application (Railway will set $PORT dynamically)
+# Use shell form to allow environment variable substitution
+CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8001}
