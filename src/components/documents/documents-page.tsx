@@ -3371,10 +3371,6 @@ const DocumentsPageContent = () => {
             <>
               {/* Folders Grid */}
               <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 mb-8">
-                {console.log('🔥 RENDER: About to render folders:', { 
-                  currentFoldersLength: currentFolders.length,
-                  currentFolders: currentFolders.map(f => ({ id: f.id, name: f.name }))
-                })}
                 {currentFolders.map(folder => {
                   const stats = getFolderStats(folder.id);
                   return (
@@ -3582,10 +3578,6 @@ const DocumentsPageContent = () => {
                   <>
                     {viewMode === 'grid' ? (
                       <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
-                        {console.log('🔥 RENDER: About to render documents:', { 
-                          currentDocumentsLength: currentDocuments.length,
-                          currentDocuments: currentDocuments.map(d => ({ id: d.id, name: d.name }))
-                        })}
                         {currentDocuments.map(document => (
                           <div 
                             key={document.id} 
