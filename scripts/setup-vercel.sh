@@ -18,6 +18,8 @@
 # - PINECONE_API_KEY: For vector search functionality
 # - INNGEST_EVENT_KEY: For background job processing
 # - INNGEST_SIGNING_KEY: For Inngest webhook security
+# - DOCLING_SERVICE_URL: URL to Docling service (optional - Railway deployment)
+# - DOCLING_ENABLED: Enable superior document processing with Docling (optional)
 # - Database connection strings (Supabase/PostgreSQL)
 # - Stripe API keys for payments
 #
