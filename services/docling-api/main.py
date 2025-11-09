@@ -358,10 +358,27 @@ if __name__ == "__main__":
     port = int(os.getenv("PORT", "8001"))
     host = os.getenv("HOST", "0.0.0.0")
 
-    # Only enable reload in local development (not in Railway/production)
-    # Railway sets RAILWAY_ENVIRONMENT, other platforms may set NODE_ENV or similar
-    is_production = os.getenv("RAILWAY_ENVIRONMENT") or os.getenv("RAILWAY_STATIC_URL") or os.getenv("FLY_APP_NAME")
+    # Disable reload in production - Railway always sets these env vars
+    # If any production indicator is present, disable reload
+    is_production = bool(
+        os.getenv("RAILWAY_ENVIRONMENT_NAME") or  # Railway primary indicator
+        os.getenv("RAILWAY_ENVIRONMENT") or       # Railway alternate
+        os.getenv("RAILWAY_STATIC_URL") or        # Railway
+        os.getenv("FLY_APP_NAME") or              # Fly.io
+        os.getenv("RENDER") or                     # Render.com
+        os.getenv("VERCEL")                        # Vercel
+    )
+
+    # If PORT was set externally (not default 8001), assume production
+    if port != 8001:
+        is_production = True
+
     reload = not is_production  # False in production, True in local dev
+
+    print(f"🚀 Starting Docling in {'PRODUCTION' if is_production else 'DEVELOPMENT'} mode")
+    print(f"   Reload: {reload}")
+    print(f"   Port: {port}")
+    print(f"   Host: {host}")
 
     uvicorn.run(
         "main:app",
