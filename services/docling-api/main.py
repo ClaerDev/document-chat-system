@@ -45,16 +45,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize Docling converter with optimal settings
-pipeline_options = PdfPipelineOptions()
-pipeline_options.do_ocr = True  # Enable OCR for scanned documents
-pipeline_options.do_table_structure = True  # Extract table structure
+# Lazy initialization of Docling converter to save memory
+# Only create converter when actually processing documents
+_converter = None
 
-converter = DocumentConverter(
-    format_options={
-        InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)
-    }
-)
+def get_converter():
+    """Get or create the Docling converter (lazy initialization)"""
+    global _converter
+    if _converter is None:
+        pipeline_options = PdfPipelineOptions()
+        pipeline_options.do_ocr = False  # Disable OCR to reduce memory usage
+        pipeline_options.do_table_structure = True  # Keep table extraction
+
+        _converter = DocumentConverter(
+            format_options={
+                InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)
+            }
+        )
+    return _converter
 
 
 class ProcessingOptions(BaseModel):
@@ -141,7 +149,7 @@ async def process_document(
 
         try:
             # Process document with Docling
-            result = converter.convert(tmp_file_path)
+            result = get_converter().convert(tmp_file_path)
 
             # Extract content based on format
             if export_format == "markdown":
@@ -238,7 +246,7 @@ async def process_document_url(url: str, export_format: str = "markdown"):
 
     try:
         # Docling can process URLs directly
-        result = converter.convert(url)
+        result = get_converter().convert(url)
 
         # Extract content based on format
         if export_format == "markdown":
