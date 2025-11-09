@@ -24,12 +24,10 @@ export class DoclingProcessor implements IFileProcessor {
   private timeout: number
 
   constructor() {
-    // In production, use proxied endpoint through main domain
-    // In development, call service directly
-    const isProduction = process.env.NODE_ENV === 'production'
-    this.serviceUrl = isProduction
-      ? '/api/docling'  // Proxied through Vercel rewrites
-      : (process.env.DOCLING_SERVICE_URL || 'http://localhost:8001')
+    // Always use the full URL from environment variable
+    // For production: Set to your Vercel domain + /api/docling or Railway URL
+    // For development: Use localhost
+    this.serviceUrl = process.env.DOCLING_SERVICE_URL || 'http://localhost:8001'
 
     this.enabled = process.env.DOCLING_ENABLED !== 'false'
     this.timeout = parseInt(process.env.DOCLING_TIMEOUT || '30000', 10)
