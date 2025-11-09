@@ -53,15 +53,21 @@ def get_converter():
     """Get or create the Docling converter (lazy initialization)"""
     global _converter
     if _converter is None:
+        # OCR disabled by default to stay within Railway's 512MB free tier limit
+        # Set DOCLING_ENABLE_OCR=true environment variable to enable (requires Hobby plan)
+        enable_ocr = os.getenv("DOCLING_ENABLE_OCR", "false").lower() == "true"
+
         pipeline_options = PdfPipelineOptions()
-        pipeline_options.do_ocr = True  # Enable OCR for scanned documents
-        pipeline_options.do_table_structure = True  # Extract table structure
+        pipeline_options.do_ocr = enable_ocr  # OCR adds ~200MB memory usage
+        pipeline_options.do_table_structure = True  # Table extraction (minimal memory impact)
 
         _converter = DocumentConverter(
             format_options={
                 InputFormat.PDF: PdfFormatOption(pipeline_options=pipeline_options)
             }
         )
+
+        print(f"📊 Docling initialized - OCR: {enable_ocr}, Tables: True")
     return _converter
 
 
