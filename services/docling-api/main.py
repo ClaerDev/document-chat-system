@@ -54,8 +54,8 @@ def get_converter():
     global _converter
     if _converter is None:
         pipeline_options = PdfPipelineOptions()
-        pipeline_options.do_ocr = False  # Disable OCR to reduce memory usage
-        pipeline_options.do_table_structure = True  # Keep table extraction
+        pipeline_options.do_ocr = True  # Enable OCR for scanned documents
+        pipeline_options.do_table_structure = True  # Extract table structure
 
         _converter = DocumentConverter(
             format_options={
