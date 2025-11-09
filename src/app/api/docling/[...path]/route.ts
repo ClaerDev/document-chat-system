@@ -15,6 +15,7 @@ export const dynamic = 'force-dynamic';
 
 const DOCLING_SERVICE_URL = process.env.DOCLING_SERVICE_URL || 'http://localhost:8001';
 const DOCLING_ENABLED = process.env.DOCLING_ENABLED !== 'false';
+const DOCLING_TIMEOUT = parseInt(process.env.DOCLING_TIMEOUT || '60000'); // 60 seconds for Railway cold starts
 
 export async function GET(
   request: NextRequest,
@@ -78,10 +79,15 @@ async function handleDoclingRequest(
       }
     });
 
-    // Prepare fetch options
+    // Create abort controller for timeout handling
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), DOCLING_TIMEOUT);
+
+    // Prepare fetch options with timeout
     const fetchOptions: RequestInit = {
       method,
       headers,
+      signal: controller.signal,
     };
 
     // Add body for POST/PUT requests
@@ -105,8 +111,37 @@ async function handleDoclingRequest(
       }
     }
 
-    // Make the request to Docling service
-    const response = await fetch(fullUrl, fetchOptions);
+    // Make the request to Docling service (with retry for Railway cold start)
+    let response;
+    try {
+      response = await fetch(fullUrl, fetchOptions);
+      clearTimeout(timeoutId);
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId);
+
+      // If timeout or connection refused, Railway might be waking up
+      if (fetchError.name === 'AbortError' || fetchError.code === 'ECONNREFUSED') {
+        console.log('⏰ Railway cold start detected, waiting 20s and retrying...');
+
+        // Wait 20 seconds for Railway to wake up
+        await new Promise(resolve => setTimeout(resolve, 20000));
+
+        // Retry once
+        const retryController = new AbortController();
+        const retryTimeoutId = setTimeout(() => retryController.abort(), DOCLING_TIMEOUT);
+
+        try {
+          response = await fetch(fullUrl, { ...fetchOptions, signal: retryController.signal });
+          clearTimeout(retryTimeoutId);
+          console.log('✅ Railway woke up successfully');
+        } catch (retryError) {
+          clearTimeout(retryTimeoutId);
+          throw retryError;
+        }
+      } else {
+        throw fetchError;
+      }
+    }
 
     // Get response body
     const contentType = response.headers.get('content-type');
